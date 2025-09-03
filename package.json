@@ -6,5 +6,8 @@
     "web:build": "pnpm --filter web build",
     "web:preview": "pnpm --filter web preview",
     "api:dev": "pnpm --filter api start:dev"
+  },
+  "dependencies": {
+    "vue-router": "^4.5.1"
   }
 }

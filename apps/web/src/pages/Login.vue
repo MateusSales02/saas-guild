@@ -3,7 +3,7 @@
     class="min-h-screen w-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
     :style="{ backgroundImage: `url(${bg})` }"
   >
-    <!-- Painel -->
+    <!-- Painel da arte -->
     <div
       class="relative bg-no-repeat bg-contain"
       :style="{
@@ -12,7 +12,6 @@
         height: panelH + 'px'
       }"
     >
-      <!-- 🔸 Hitboxes invisíveis (inputs + botão) -->
       <!-- Nome do aventureiro -->
       <input
         v-model="username"
@@ -64,30 +63,24 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import bg from '@/assets/castle-bg.png'
 import panel from '@/assets/login-panel.png'
 
-/**
- * ⚙️ Ajustes finos (em pixels) para casar exatamente com a arte.
- * Se o painel parecer maior/menor, ajuste panelW/panelH e os tops.
- */
-const panelW = 420   // largura do painel na tela
-const panelH = 640   // altura do painel na tela
+/** Medidas para casar com a arte */
+const panelW = 420
+const panelH = 640
+const inputW = 280
+const inputH = 30
+const input1Top = 341
+const input2Top = 426
+const btnW = 290
+const btnH = 52
+const btnTop = 485
 
-const inputW = 280   // largura das caixas de texto na arte
-const inputH = 30    // altura das caixas de texto na arte
-const input1Top = 341 // Y do 1º input (abaixo do "Nome do aventureiro")
-const input2Top = 426 // Y do 2º input ("Senha mágica")
-
-const btnW = 290     // largura do botão verde na arte
-const btnH = 52      // altura do botão
-const btnTop = 485   // Y do botão "Entrar na Guilda"
-
-/**
- * 🔍 Modo debug: true mostra contornos semitransparentes
- * para ajudar a alinhar. Em produção deixe false.
- */
+/** Debug: true mostra contornos das hitboxes para alinhar */
 const DEBUG = false
+
 
 const hitboxClass = computed(() =>
   [
@@ -95,11 +88,13 @@ const hitboxClass = computed(() =>
     'rounded',
     'outline-none',
     'px-0', 'py-0',
-    'bg-transparent', 'text-transparent',
-    'caret-white', // caret visível mesmo com texto transparente
-    DEBUG ? 'ring-2 ring-emerald-400/70 bg-emerald-400/10' : 'opacity-0 focus:opacity-0'
-  ].join(' ')
+    'bg-transparent',
+    'text-white',        // agora o texto aparece
+    'caret-white',
+    DEBUG ? 'ring-2 ring-emerald-400/70 bg-emerald-400/10' : ''
+  ].filter(Boolean).join(' ')
 )
+
 
 const buttonHitboxClass = computed(() =>
   [
@@ -113,13 +108,17 @@ const buttonHitboxClass = computed(() =>
 const username = ref('')
 const password = ref('')
 
+const router = useRouter()
+const route  = useRoute()
+
 function submit () {
   if (!username.value || !password.value) {
-    // você pode trocar por um toast
     alert('Preencha o nome do aventureiro e a senha mágica.')
     return
   }
-  // TODO: chamar sua API/Pinia aqui
-  alert(`Bem-vindo, ${username.value}!`)
+  // autenticação fake + redirect
+  localStorage.setItem('authUser', username.value)
+  const redirect = (route.query.redirect as string) || '/dashboard'
+  router.replace(redirect)
 }
 </script>
