@@ -1,24 +1,22 @@
-version: "3.8"
+version: "3.9"
 
 services:
-  web:
-    image: node:20-alpine
-    working_dir: /app
+  db:
+    image: postgres:15
+    container_name: saas_db
+    restart: always
     environment:
-      CHOKIDAR_USEPOLLING: "true"   # melhora hot reload no Windows
-    volumes:
-      - ./apps/web:/app
-      - pnpm-store:/root/.local/share/pnpm/store
+      POSTGRES_USER: saas_user
+      POSTGRES_PASSWORD: saas_pass
+      POSTGRES_DB: saas_guild
     ports:
-      - "5173:5173"
-    command: >
-      sh -c "
-        corepack enable &&
-        corepack prepare pnpm@latest --activate &&
-        pnpm install &&
-        pnpm dev --host 0.0.0.0
-      "
-    tty: true
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
 
-volumes:
-  pnpm-store:
+  redis:
+    image: redis:7
+    container_name: saas_redis
+    restart: always
+    ports:
+      - "6379:6379"
