@@ -1,24 +1,32 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { postJSON } from '@/lib/api';
-import { setSession } from '@/stores/auth';
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { AuthApi } from "@/lib/api";
 
 const router = useRouter();
-const email = ref(''); const password = ref('');
-const nickname = ref(''); const role = ref('membro');
-const loading = ref(false); const error = ref('');
+const email = ref("");
+const password = ref("");
+const nickname = ref("");
+const role = ref("membro");
+const loading = ref(false);
+const error = ref("");
 
 async function register() {
-  error.value = ''; loading.value = true;
+  error.value = "";
+  loading.value = true;
   try {
-    const { token, user } = await postJSON<{token:string; user:any}>('/auth/register', {
-      email: email.value, password: password.value, nickname: nickname.value, role: role.value
-    });
-    setSession(token, user);
-    router.push('/dashboard');
-  } catch (e:any) { error.value = e.message || 'Falha no registro'; }
-  finally { loading.value = false; }
+    await AuthApi.register(
+      email.value,
+      password.value,
+      nickname.value,
+      role.value
+    );
+    router.push("/dashboard"); // redireciona após criar conta
+  } catch (e: any) {
+    error.value = e.message || "Falha no registro";
+  } finally {
+    loading.value = false;
+  }
 }
 </script>
 
