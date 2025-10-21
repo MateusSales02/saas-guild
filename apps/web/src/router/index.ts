@@ -36,16 +36,18 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  const authed = !!localStorage.getItem('authUser')
+  const authed = !!localStorage.getItem('token');
 
   if (to.meta.requiresAuth && !authed && to.name !== 'login') {
-    return { name: 'login', query: { redirect: to.fullPath } }
-  }
-  if (authed && (to.name === 'login' || to.name === 'register')) {
-    return { name: 'dashboard.overview' }
+    return { name: 'login', query: { redirect: to.fullPath } };
   }
 
-  return true
-})
+  if (authed && (to.name === 'login' || to.name === 'register')) {
+    return { name: 'dashboard.overview' };
+  }
+
+  return true;
+});
+
 
 export default router

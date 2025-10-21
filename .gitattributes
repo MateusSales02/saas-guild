@@ -1,0 +1,7 @@
+# padroniza LF para tudo
+* text=auto eol=lf
+
+# scripts de Windows podem manter CRLF se quiser
+*.bat eol=crlf
+*.cmd eol=crlf
+*.ps1 eol=crlf
