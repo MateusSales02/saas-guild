@@ -8,7 +8,7 @@
   </section>
 
   <!-- Charts & Lists -->
-  <section class="grid lg:grid-cols-3 gap-6">
+  <section class="grid lg:grid-cols-3 gap-6 mt-6">
     <!-- Activity Chart -->
     <div class="lg:col-span-2 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60">
       <div class="flex items-center justify-between mb-3">
@@ -43,19 +43,27 @@
       <h2 class="font-semibold mb-3">Próximos eventos</h2>
       <ul class="space-y-3">
         <li v-for="ev in upcoming" :key="ev.id" class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
-          <div class="w-10 h-10 rounded-xl bg-[#C6A95D]/15 grid place-items-center text-[#C6A95D] font-bold">{{ ev.date.split('-')[2] }}</div>
-          <div class="flex-1">
-            <div class="text-sm font-medium">{{ ev.title }}</div>
-            <div class="text-xs opacity-70">{{ ev.date }} · {{ ev.time }} · Líder: {{ ev.lead }}</div>
+          <div class="w-10 h-10 rounded-xl bg-[#C6A95D]/15 grid place-items-center text-[#C6A95D] font-bold">
+            {{ dayOfMonth(ev.event_date) }}
           </div>
-          <button class="text-xs px-3 py-1 rounded-lg bg-[#C6A95D] text-slate-900">Inscrever</button>
+          <div class="flex-1">
+            <div class="text-sm font-medium">{{ ev.name }}</div>
+            <div class="text-xs opacity-70">
+              {{ shortDate(ev.event_date) }} · {{ shortTime(ev.event_date) }}
+              <span v-if="ev.lead"> · Líder: {{ ev.lead }}</span>
+            </div>
+          </div>
+          <button class="text-xs px-3 py-1 rounded-lg bg-[#C6A95D] text-slate-900">
+            Inscrever
+          </button>
         </li>
+        <li v-if="upcoming.length === 0" class="opacity-70 text-sm">Nenhum evento futuro.</li>
       </ul>
     </div>
   </section>
 
   <!-- Members Table -->
-  <section class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60">
+  <section class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 mt-6">
     <div class="flex items-center justify-between mb-3">
       <h2 class="font-semibold">Membros recentes</h2>
       <button class="text-sm px-3 py-1 rounded-lg border border-slate-700 hover:bg-slate-800">Ver todos</button>
@@ -64,22 +72,22 @@
       <table class="min-w-full text-sm">
         <thead class="text-left text-xs uppercase opacity-60">
           <tr>
-            <th class="py-2">Jogador</th><th class="py-2">Classe</th><th class="py-2">Nível</th><th class="py-2">Cargo</th><th class="py-2">Status</th>
+            <th class="py-2">Jogador</th><th class="py-2">E-mail</th><th class="py-2">Cargo</th><th class="py-2">Status</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="m in members" :key="m.id" class="border-t border-slate-800/30">
-            <td class="py-2 flex items-center gap-2">
-              <img :src="m.avatar" class="w-8 h-8 rounded-xl object-cover"/><span class="font-medium">{{ m.name }}</span>
-            </td>
-            <td class="py-2">{{ m.class }}</td>
-            <td class="py-2">{{ m.level }}</td>
+            <td class="py-2 font-medium">{{ m.user?.nickname || m.user?.email }}</td>
+            <td class="py-2">{{ m.user?.email }}</td>
             <td class="py-2">{{ m.role }}</td>
             <td class="py-2">
-              <span :class="['px-2 py-0.5 rounded-lg text-xs', m.online ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-300']">
-                {{ m.online ? 'Online' : 'Offline' }}
+              <span class="px-2 py-0.5 rounded-lg text-xs bg-slate-700 text-slate-300">
+                Offline
               </span>
             </td>
+          </tr>
+          <tr v-if="members.length === 0">
+            <td class="py-4 text-center opacity-70" colspan="4">Nenhum membro.</td>
           </tr>
         </tbody>
       </table>
@@ -88,39 +96,111 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { onMounted, ref, computed } from 'vue'
+import { GuildsApi, MembersApi, EventsApi, FinanceApi } from '@/lib/api'
 
-const range = ref<'7d'|'30d'>('7d')
-const kpis = ref({ members: 128, online: 17, events: 6, treasury: 152340 })
-const upcoming = ref([
-  { id: 1, title: 'Raid: Fortaleza de Aço', date: '2025-09-02', time: '20:00', lead: 'Aeryn' },
-  { id: 2, title: 'Treino PVP na Arena', date: '2025-09-03', time: '21:00', lead: 'Thorgal' },
-  { id: 3, title: 'Missão de Recurso', date: '2025-09-05', time: '19:30', lead: 'Lyra' },
-])
-const members = ref([
-  { id: 1, name: 'Kael', class: 'Guerreiro', level: 62, role: 'Oficial', online: true, avatar: 'https://i.pravatar.cc/100?img=11' },
-  { id: 2, name: 'Seraph', class: 'Mago', level: 59, role: 'Membro', online: false, avatar: 'https://i.pravatar.cc/100?img=12' },
-  { id: 3, name: 'Nyx', class: 'Arqueira', level: 61, role: 'Raid Leader', online: true, avatar: 'https://i.pravatar.cc/100?img=13' },
-  { id: 4, name: 'Bryn', class: 'Clérigo', level: 58, role: 'Membro', online: false, avatar: 'https://i.pravatar.cc/100?img=14' },
-])
+type Member = { id:number; role:string; user:{ id:number; email:string; nickname?:string } }
+type EventItem = { id:number; name:string; event_date:string; recurring:boolean; description?:string; lead?:string }
 
+const range   = ref<'7d'|'30d'>('7d')
+const kpis    = ref({ members: 0, online: 0, events: 0, treasury: 0 })
+const members = ref<Member[]>([])
+const events  = ref<EventItem[]>([])
+const guild   = ref<any>(null)
+const loading = ref(true)
+const err     = ref('')
+
+onMounted(load)
+
+async function load() {
+  loading.value = true
+  err.value = ''
+  try {
+    const guilds = await GuildsApi.list()
+    guild.value = guilds?.[0] ?? null
+    if (!guild.value) {
+      members.value = []
+      events.value = []
+      kpis.value = { members: 0, online: 0, events: 0, treasury: 0 }
+      return
+    }
+    const [memb, evs, fin] = await Promise.all([
+      MembersApi.listByGuild(guild.value.id),
+      EventsApi.listByGuild(guild.value.id),
+      FinanceApi.summary(guild.value.id),
+    ])
+    members.value = memb
+    events.value  = evs
+
+    // KPIs
+    kpis.value.members  = memb.length
+    kpis.value.online   = 0                      // sem presença online no MVP
+    kpis.value.events   = countEventsInLastDays(evs, 7)
+    kpis.value.treasury = fin?.balance ?? 0      // saldo real da API
+  } catch (e:any) {
+    err.value = e.message || 'Falha ao carregar overview'
+  } finally {
+    loading.value = false
+  }
+}
+
+// ---- Helpers de formatação/data ----
 function toGold(n: number) { return new Intl.NumberFormat('pt-BR').format(n) + 'g' }
+function dayOfMonth(iso:string) { return new Date(iso).getDate().toString().padStart(2,'0') }
+function shortDate(iso:string)  { const d = new Date(iso); return d.toLocaleDateString() }
+function shortTime(iso:string)  { const d = new Date(iso); return d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }
 
+function countEventsInLastDays(list: EventItem[], days: number) {
+  const now = Date.now()
+  const cutoff = now - days*24*3600*1000
+  return list.filter(e => new Date(e.event_date).getTime() >= cutoff).length
+}
+
+// Próximos eventos (futuros)
+const upcoming = computed(() => {
+  const now = Date.now()
+  return [...events.value]
+    .filter(e => new Date(e.event_date).getTime() >= now)
+    .sort((a,b) => +new Date(a.event_date) - +new Date(b.event_date))
+    .slice(0, 5)
+})
+
+// Série do gráfico a partir dos eventos
 const points = computed(() => {
-  const data7 = [8,12,9,14,11,16,13]
-  const data30 = [5,6,7,9,8,10,8,12,9,11,10,12,9,8,11,13,12,14,12,15,14,13,16,15,14,17,16,18,16,17]
-  const data = range.value === '7d' ? data7 : data30
-  const maxY = Math.max(...data) * 1.2
-  const stepX = 400 / (data.length - 1)
-  return data.map((v, i) => ({ x: i * stepX, y: 160 - (v / maxY) * 140 - 10 }))
+  const days = range.value === '7d' ? 7 : 30
+  const series = buildDailySeries(events.value, days)
+  const maxY = Math.max(1, ...series) * 1.2
+  const stepX = 400 / (series.length - 1 || 1)
+  return series.map((v, i) => ({ x: i * stepX, y: 160 - (v / maxY) * 140 - 10 }))
 })
 const linePath = computed(() => points.value.map((p,i)=> (i?`L ${p.x} ${p.y}`:`M ${p.x} ${p.y}`)).join(' '))
 const areaPath = computed(() => {
-  const start = `M 0 160 L 0 ${points.value[0]?.y ?? 160}`
-  const line = points.value.map((p) => `L ${p.x} ${p.y}`).join(' ')
-  const end = 'L 400 160 Z'
+  if (points.value.length === 0) return 'M 0 160 L 400 160 Z'
+  const start = `M 0 160 L 0 ${points.value[0].y}`
+  const line  = points.value.map((p) => `L ${p.x} ${p.y}`).join(' ')
+  const end   = 'L 400 160 Z'
   return `${start} ${line} ${end}`
 })
+
+function buildDailySeries(list: EventItem[], days: number) {
+  const now = new Date()
+  const start = new Date(now)
+  start.setDate(now.getDate() - (days - 1))
+  start.setHours(0,0,0,0)
+
+  const buckets: Record<string, number> = {}
+  for (let i=0;i<days;i++) {
+    const d = new Date(start)
+    d.setDate(start.getDate()+i)
+    const key = d.toISOString().slice(0,10) // yyyy-mm-dd
+    buckets[key] = 0
+  }
+  for (const ev of list) {
+    const key = new Date(ev.event_date).toISOString().slice(0,10)
+    if (key in buckets) buckets[key]++
+  }
+  return Object.values(buckets)
+}
 </script>
 
 <script lang="ts">

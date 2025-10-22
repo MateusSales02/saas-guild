@@ -1,5 +1,6 @@
 # padroniza LF para tudo
 * text=auto eol=lf
+* text eol=lf
 
 # scripts de Windows podem manter CRLF se quiser
 *.bat eol=crlf
