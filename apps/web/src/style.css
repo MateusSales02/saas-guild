@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* sane defaults */
 *,*::before,*::after{ box-sizing:border-box; }
 html,body,#app{ height:100%; margin:0; }
 
@@ -22,17 +21,15 @@ body, html, #app {
   padding: 0;
   width: 100%;
   height: 100%;
-  background: #000; /* fallback se bg não carregar */
+  background: #000; 
 }
 
-/* Links (se usar no futuro) */
 a {
   font-weight: 500;
   color: inherit;
   text-decoration: none;
 }
 
-/* Botões resetados (mas você controla estilo via Tailwind) */
 button {
   border: none;
   outline: none;
