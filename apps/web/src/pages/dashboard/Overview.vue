@@ -1,16 +1,18 @@
 <template>
   <!-- KPI Cards -->
   <section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    <KpiCard title="Membros" :value="kpis.members" sub="Total na guilda"/>
-    <KpiCard title="Online agora" :value="kpis.online" sub="Tempo real" accent/>
-    <KpiCard title="Eventos (7d)" :value="kpis.events" sub="Criados na semana"/>
-    <KpiCard title="Tesouro" :value="toGold(kpis.treasury)" sub="Moedas em caixa"/>
+    <KpiCard title="Membros" :value="kpis.members" sub="Total na guilda" />
+    <KpiCard title="Online agora" :value="kpis.online" sub="Tempo real" accent />
+    <KpiCard title="Eventos (7d)" :value="kpis.events" sub="Criados na semana" />
+    <KpiCard title="Tesouro" :value="toGold(kpis.treasury)" sub="Moedas em caixa" />
   </section>
 
   <!-- Charts & Lists -->
   <section class="grid lg:grid-cols-3 gap-6 mt-6">
     <!-- Activity Chart -->
-    <div class="lg:col-span-2 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60">
+    <div
+      class="lg:col-span-2 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60"
+    >
       <div class="flex items-center justify-between mb-3">
         <h2 class="font-semibold">Atividade semanal</h2>
         <select v-model="range" class="text-sm rounded-lg bg-slate-800 px-2 py-1">
@@ -27,23 +29,37 @@
             </linearGradient>
           </defs>
           <g stroke="currentColor" opacity="0.1">
-            <path v-for="y in 4" :key="y" :d="`M0 ${y*32} H400`" />
+            <path v-for="y in 4" :key="y" :d="`M0 ${y * 32} H400`" />
           </g>
           <path :d="areaPath" fill="url(#goldFill)" />
-          <path :d="linePath" fill="none" stroke="#C6A95D" stroke-width="2.5" stroke-linecap="round" />
+          <path
+            :d="linePath"
+            fill="none"
+            stroke="#C6A95D"
+            stroke-width="2.5"
+            stroke-linecap="round"
+          />
           <g>
-            <circle v-for="(p,i) in points" :key="i" :cx="p.x" :cy="p.y" r="3" fill="#C6A95D" />
+            <circle v-for="(p, i) in points" :key="i" :cx="p.x" :cy="p.y" r="3" fill="#C6A95D" />
           </g>
         </svg>
       </div>
     </div>
 
     <!-- Upcoming Events -->
-    <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60">
+    <div
+      class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60"
+    >
       <h2 class="font-semibold mb-3">Próximos eventos</h2>
       <ul class="space-y-3">
-        <li v-for="ev in upcoming" :key="ev.id" class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
-          <div class="w-10 h-10 rounded-xl bg-[#C6A95D]/15 grid place-items-center text-[#C6A95D] font-bold">
+        <li
+          v-for="ev in upcoming"
+          :key="ev.id"
+          class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-800"
+        >
+          <div
+            class="w-10 h-10 rounded-xl bg-[#C6A95D]/15 grid place-items-center text-[#C6A95D] font-bold"
+          >
             {{ dayOfMonth(ev.event_date) }}
           </div>
           <div class="flex-1">
@@ -63,16 +79,23 @@
   </section>
 
   <!-- Members Table -->
-  <section class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 mt-6">
+  <section
+    class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 mt-6"
+  >
     <div class="flex items-center justify-between mb-3">
       <h2 class="font-semibold">Membros recentes</h2>
-      <button class="text-sm px-3 py-1 rounded-lg border border-slate-700 hover:bg-slate-800">Ver todos</button>
+      <button class="text-sm px-3 py-1 rounded-lg border border-slate-700 hover:bg-slate-800">
+        Ver todos
+      </button>
     </div>
     <div class="overflow-x-auto">
       <table class="min-w-full text-sm">
         <thead class="text-left text-xs uppercase opacity-60">
           <tr>
-            <th class="py-2">Jogador</th><th class="py-2">E-mail</th><th class="py-2">Cargo</th><th class="py-2">Status</th>
+            <th class="py-2">Jogador</th>
+            <th class="py-2">E-mail</th>
+            <th class="py-2">Cargo</th>
+            <th class="py-2">Status</th>
           </tr>
         </thead>
         <tbody>
@@ -99,16 +122,23 @@
 import { onMounted, ref, computed } from 'vue'
 import { GuildsApi, MembersApi, EventsApi, FinanceApi } from '@/lib/api'
 
-type Member = { id:number; role:string; user:{ id:number; email:string; nickname?:string } }
-type EventItem = { id:number; name:string; event_date:string; recurring:boolean; description?:string; lead?:string }
+type Member = { id: number; role: string; user: { id: number; email: string; nickname?: string } }
+type EventItem = {
+  id: number
+  name: string
+  event_date: string
+  recurring: boolean
+  description?: string
+  lead?: string
+}
 
-const range   = ref<'7d'|'30d'>('7d')
-const kpis    = ref({ members: 0, online: 0, events: 0, treasury: 0 })
+const range = ref<'7d' | '30d'>('7d')
+const kpis = ref({ members: 0, online: 0, events: 0, treasury: 0 })
 const members = ref<Member[]>([])
-const events  = ref<EventItem[]>([])
-const guild   = ref<any>(null)
+const events = ref<EventItem[]>([])
+const guild = ref<any>(null)
 const loading = ref(true)
-const err     = ref('')
+const err = ref('')
 
 onMounted(load)
 
@@ -130,14 +160,14 @@ async function load() {
       FinanceApi.summary(guild.value.id),
     ])
     members.value = memb
-    events.value  = evs
+    events.value = evs
 
     // KPIs
-    kpis.value.members  = memb.length
-    kpis.value.online   = 0                      // sem presença online no MVP
-    kpis.value.events   = countEventsInLastDays(evs, 7)
-    kpis.value.treasury = fin?.balance ?? 0      // saldo real da API
-  } catch (e:any) {
+    kpis.value.members = memb.length
+    kpis.value.online = 0 // sem presença online no MVP
+    kpis.value.events = countEventsInLastDays(evs, 7)
+    kpis.value.treasury = fin?.balance ?? 0 // saldo real da API
+  } catch (e: any) {
     err.value = e.message || 'Falha ao carregar overview'
   } finally {
     loading.value = false
@@ -145,23 +175,33 @@ async function load() {
 }
 
 // ---- Helpers de formatação/data ----
-function toGold(n: number) { return new Intl.NumberFormat('pt-BR').format(n) + 'g' }
-function dayOfMonth(iso:string) { return new Date(iso).getDate().toString().padStart(2,'0') }
-function shortDate(iso:string)  { const d = new Date(iso); return d.toLocaleDateString() }
-function shortTime(iso:string)  { const d = new Date(iso); return d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }
+function toGold(n: number) {
+  return new Intl.NumberFormat('pt-BR').format(n) + 'g'
+}
+function dayOfMonth(iso: string) {
+  return new Date(iso).getDate().toString().padStart(2, '0')
+}
+function shortDate(iso: string) {
+  const d = new Date(iso)
+  return d.toLocaleDateString()
+}
+function shortTime(iso: string) {
+  const d = new Date(iso)
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
 
 function countEventsInLastDays(list: EventItem[], days: number) {
   const now = Date.now()
-  const cutoff = now - days*24*3600*1000
-  return list.filter(e => new Date(e.event_date).getTime() >= cutoff).length
+  const cutoff = now - days * 24 * 3600 * 1000
+  return list.filter((e) => new Date(e.event_date).getTime() >= cutoff).length
 }
 
 // Próximos eventos (futuros)
 const upcoming = computed(() => {
   const now = Date.now()
   return [...events.value]
-    .filter(e => new Date(e.event_date).getTime() >= now)
-    .sort((a,b) => +new Date(a.event_date) - +new Date(b.event_date))
+    .filter((e) => new Date(e.event_date).getTime() >= now)
+    .sort((a, b) => +new Date(a.event_date) - +new Date(b.event_date))
     .slice(0, 5)
 })
 
@@ -173,12 +213,14 @@ const points = computed(() => {
   const stepX = 400 / (series.length - 1 || 1)
   return series.map((v, i) => ({ x: i * stepX, y: 160 - (v / maxY) * 140 - 10 }))
 })
-const linePath = computed(() => points.value.map((p,i)=> (i?`L ${p.x} ${p.y}`:`M ${p.x} ${p.y}`)).join(' '))
+const linePath = computed(() =>
+  points.value.map((p, i) => (i ? `L ${p.x} ${p.y}` : `M ${p.x} ${p.y}`)).join(' '),
+)
 const areaPath = computed(() => {
   if (points.value.length === 0) return 'M 0 160 L 400 160 Z'
   const start = `M 0 160 L 0 ${points.value[0].y}`
-  const line  = points.value.map((p) => `L ${p.x} ${p.y}`).join(' ')
-  const end   = 'L 400 160 Z'
+  const line = points.value.map((p) => `L ${p.x} ${p.y}`).join(' ')
+  const end = 'L 400 160 Z'
   return `${start} ${line} ${end}`
 })
 
@@ -186,17 +228,17 @@ function buildDailySeries(list: EventItem[], days: number) {
   const now = new Date()
   const start = new Date(now)
   start.setDate(now.getDate() - (days - 1))
-  start.setHours(0,0,0,0)
+  start.setHours(0, 0, 0, 0)
 
   const buckets: Record<string, number> = {}
-  for (let i=0;i<days;i++) {
+  for (let i = 0; i < days; i++) {
     const d = new Date(start)
-    d.setDate(start.getDate()+i)
-    const key = d.toISOString().slice(0,10) // yyyy-mm-dd
+    d.setDate(start.getDate() + i)
+    const key = d.toISOString().slice(0, 10) // yyyy-mm-dd
     buckets[key] = 0
   }
   for (const ev of list) {
-    const key = new Date(ev.event_date).toISOString().slice(0,10)
+    const key = new Date(ev.event_date).toISOString().slice(0, 10)
     if (key in buckets) buckets[key]++
   }
   return Object.values(buckets)

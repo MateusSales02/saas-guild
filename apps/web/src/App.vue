@@ -1,7 +1,10 @@
 <template>
   <div class="min-h-screen bg-[#0a0f1a] text-slate-100">
     <!-- some o header nas rotas com hideHeader -->
-    <header v-if="!hideHeader" class="sticky top-0 z-50 bg-slate-950/90 backdrop-blur border-b border-[#8a7741]/60">
+    <header
+      v-if="!hideHeader"
+      class="sticky top-0 z-50 bg-slate-950/90 backdrop-blur border-b border-[#8a7741]/60"
+    >
       <div class="max-w-7xl mx-auto h-14 px-4 flex items-center gap-4">
         <RouterLink to="/" class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-lg bg-[#C6A95D] ring-1 ring-[#8a7741]/50" />
@@ -15,11 +18,23 @@
 
         <div class="ml-auto flex items-center gap-2">
           <template v-if="!authed">
-            <RouterLink to="/registrar" class="px-3 py-1.5 rounded-xl bg-[#C6A95D] text-slate-900 font-semibold">Registrar-se</RouterLink>
-            <RouterLink to="/login" class="px-3 py-1.5 rounded-xl border border-[#C6A95D]/40 bg-slate-900/40 hover:bg-slate-900/60">Entrar</RouterLink>
+            <RouterLink
+              to="/registrar"
+              class="px-3 py-1.5 rounded-xl bg-[#C6A95D] text-slate-900 font-semibold"
+              >Registrar-se</RouterLink
+            >
+            <RouterLink
+              to="/login"
+              class="px-3 py-1.5 rounded-xl border border-[#C6A95D]/40 bg-slate-900/40 hover:bg-slate-900/60"
+              >Entrar</RouterLink
+            >
           </template>
           <template v-else>
-            <RouterLink to="/logout" class="px-3 py-1.5 rounded-xl border border-slate-700 hover:bg-slate-800">Sair</RouterLink>
+            <RouterLink
+              to="/logout"
+              class="px-3 py-1.5 rounded-xl border border-slate-700 hover:bg-slate-800"
+              >Sair</RouterLink
+            >
           </template>
         </div>
       </div>
@@ -51,6 +66,6 @@ const AppLink = {
       ]">{{ label }}</span>
     </RouterLink>
   `,
-  components: { RouterLink }
+  components: { RouterLink },
 }
 </script>
