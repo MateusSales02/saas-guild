@@ -1,18 +1,24 @@
 <template>
-  <section class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60">
+  <section
+    class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60"
+  >
     <header class="flex items-center justify-between mb-4">
       <h2 class="text-lg font-semibold">Membros</h2>
 
       <div class="flex items-center gap-2">
-        <select v-model="quickRole"
-                class="text-sm px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700 outline-none">
+        <select
+          v-model="quickRole"
+          class="text-sm px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700 outline-none"
+        >
           <option value="membro">Membro</option>
           <option value="líder">Líder</option>
           <option value="oficial">Oficial</option>
         </select>
-        <button @click="addMe"
-                :disabled="!guild || adding"
-                class="text-sm px-3 py-2 rounded-lg border border-slate-700 hover:bg-slate-800 disabled:opacity-50">
+        <button
+          @click="addMe"
+          :disabled="!guild || adding"
+          class="text-sm px-3 py-2 rounded-lg border border-slate-700 hover:bg-slate-800 disabled:opacity-50"
+        >
           {{ adding ? 'Adicionando...' : 'Adicionar-me' }}
         </button>
       </div>
@@ -40,7 +46,7 @@
             <td class="p-3">
               <select
                 :value="m.role"
-                @change="(e:any) => updateRole(m.id, e.target.value)"
+                @change="(e: any) => updateRole(m.id, e.target.value)"
                 class="px-2 py-1 rounded bg-slate-800/40 border border-slate-700 outline-none"
               >
                 <option value="membro">Membro</option>
@@ -71,14 +77,14 @@ import { onMounted, ref } from 'vue'
 import { GuildsApi, MembersApi } from '@/lib/api'
 import { auth } from '@/stores/auth'
 
-type Member = { id:number; role:string; user:{ id:number; email:string; nickname?:string } }
+type Member = { id: number; role: string; user: { id: number; email: string; nickname?: string } }
 
-const guild   = ref<any>(null)
+const guild = ref<any>(null)
 const members = ref<Member[]>([])
 const loading = ref(true)
-const adding  = ref(false)
-const error   = ref('')
-const quickRole = ref<'membro'|'líder'|'oficial'>('membro')
+const adding = ref(false)
+const error = ref('')
+const quickRole = ref<'membro' | 'líder' | 'oficial'>('membro')
 
 onMounted(load)
 
@@ -89,7 +95,7 @@ async function load() {
     const guilds = await GuildsApi.list()
     guild.value = guilds?.[0] ?? null
     members.value = guild.value ? await MembersApi.listByGuild(guild.value.id) : []
-  } catch (e:any) {
+  } catch (e: any) {
     error.value = e.message || 'Falha ao carregar membros'
   } finally {
     loading.value = false
@@ -103,28 +109,28 @@ async function addMe() {
   try {
     await MembersApi.add(auth.user.id, guild.value.id, quickRole.value)
     await load()
-  } catch (e:any) {
+  } catch (e: any) {
     error.value = e.message || 'Falha ao adicionar'
   } finally {
     adding.value = false
   }
 }
 
-async function updateRole(id:number, role:string) {
+async function updateRole(id: number, role: string) {
   try {
     await MembersApi.update(id, role as any)
     // opcional: feedback visual
-  } catch (e:any) {
+  } catch (e: any) {
     error.value = e.message || 'Falha ao atualizar cargo'
     await load() // volta ao estado do servidor
   }
 }
 
-async function removeMember(id:number) {
+async function removeMember(id: number) {
   try {
     await MembersApi.remove(id)
-    members.value = members.value.filter(m => m.id !== id)
-  } catch (e:any) {
+    members.value = members.value.filter((m) => m.id !== id)
+  } catch (e: any) {
     error.value = e.message || 'Falha ao remover membro'
   }
 }

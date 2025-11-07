@@ -1,5 +1,5 @@
-import { loadSession } from '@/stores/auth';
-loadSession();
+import { loadSession } from '@/stores/auth'
+loadSession()
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
