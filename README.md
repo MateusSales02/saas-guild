@@ -88,7 +88,7 @@ O projeto adota **Arquitetura de Microserviços**, com documentação em **model
 
 ## 📚 Referências
 
-- Fowler, M. *Patterns of Enterprise Application Architecture*
+- Fowler, M. _Patterns of Enterprise Application Architecture_
 - [PostgreSQL Docs](https://www.postgresql.org/docs/)
 - [Node.js Docs](https://nodejs.org/en/docs/)
 - [Vue.js Guide](https://vuejs.org/guide/)
