@@ -8,7 +8,9 @@
     "api:dev": "pnpm --filter api start:dev",
     "format": "prettier \"**/*.{ts,tsx,vue,js,json,md,css,scss,html}\" --write",
     "lint": "eslint \"apps/**/*.{ts,tsx,vue,js}\"",
-    "lint:fix": "eslint \"apps/**/*.{ts,tsx,vue,js}\" --fix"
+    "build": "nest build",
+    "lint:fix": "eslint \"apps/**/*.{ts,tsx,vue,js}\" --fix",
+    "start:prod": "node dist/main"
   },
   "dependencies": {
     "vue-router": "^4.5.1"
