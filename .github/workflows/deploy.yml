@@ -18,6 +18,15 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script_stop: true
+
           script: |
+            echo "== [CI] Indo para pasta do projeto =="
             cd ~/saas-guild
+
+            echo "== [CI] Garantindo permissão no deploy.sh =="
+            chmod +x deploy.sh
+
+            echo "== [CI] Rodando deploy.sh =="
             ./deploy.sh
