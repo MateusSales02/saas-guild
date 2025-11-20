@@ -1,3 +1,4 @@
+// apps/api/src/events/participants.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -5,7 +6,7 @@ import { EventParticipant } from './event-participant.entity';
 import { Event } from './event.entity';
 import { User } from '../users/user.entity';
 import { CreateParticipantDto } from './dto/create-participant.dto';
-import { UpdateParticipantDto } from './dto/update-participant.dto';
+import { UpdateParticipantStatusDto } from './dto/update-participant.dto';
 
 @Injectable()
 export class ParticipantsService {
@@ -47,7 +48,11 @@ export class ParticipantsService {
     });
   }
 
-  async update(eventId: number, userId: number, dto: UpdateParticipantDto) {
+  async update(
+    eventId: number,
+    userId: number,
+    dto: UpdateParticipantStatusDto,
+  ): Promise<EventParticipant> {
     const participant = await this.participantsRepo.findOne({
       where: { event: { id: eventId }, user: { id: userId } },
       relations: ['event', 'user'],

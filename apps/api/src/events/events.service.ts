@@ -2,114 +2,60 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-
 import { Event } from './event.entity';
-import { Guild } from '../guilds/guild.entity';
-import { EventParticipant } from './event-participant.entity';
-import { User } from '../users/user.entity';
+import { CreateEventDto } from './dto/create-event.dto';
+import { UpdateEventDto } from './dto/update-event.dto';
+import { UpdateParticipantStatusDto } from './dto/update-participant.dto';
+import { ParticipantsService } from './participants.service';
 
 @Injectable()
 export class EventsService {
   constructor(
     @InjectRepository(Event)
-    private readonly eventsRepo: Repository<Event>,
-    @InjectRepository(Guild)
-    private readonly guildsRepo: Repository<Guild>,
-    @InjectRepository(EventParticipant)
-    private readonly partsRepo: Repository<EventParticipant>,
-    @InjectRepository(User)
-    private readonly usersRepo: Repository<User>,
+    private readonly eventRepo: Repository<Event>,
+    private readonly participantsService: ParticipantsService,
   ) {}
 
-  // ===== LISTAGENS =====
-
-  // usado pelo controller: GET /events
-  async findAll(): Promise<Event[]> {
-    return this.eventsRepo.find({
-      order: { event_date: 'ASC' },
-      relations: ['guild', 'participants', 'participants.user'],
+  async findAll() {
+    return this.eventRepo.find({
+      relations: ['participants', 'participants.member'],
+      order: { event_date: 'ASC' as const },
     });
   }
 
-  // usado se quiser listar por guild específica
-  async listByGuild(guildId: number): Promise<Event[]> {
-    return this.eventsRepo.find({
-      where: { guild: { id: guildId } },
-      order: { event_date: 'ASC' },
-      relations: ['guild', 'participants', 'participants.user'],
-    });
-  }
-
-  async findOne(id: number): Promise<Event | null> {
-    const ev = await this.eventsRepo.findOne({
+  async findOne(id: number) {
+    const event = await this.eventRepo.findOne({
       where: { id },
-      relations: ['guild', 'participants', 'participants.user'],
-    });
-    return ev ?? null;
-  }
-
-  async create(data: {
-    guildId: number;
-    name: string;
-    description?: string;
-    event_date: string;
-    recurring?: boolean;
-  }): Promise<Event> {
-    const guild = await this.guildsRepo.findOne({
-      where: { id: data.guildId },
-    });
-    if (!guild) {
-      throw new NotFoundException('Guild não encontrada');
-    }
-
-    const event = this.eventsRepo.create({
-      guild,
-      name: data.name,
-      description: data.description,
-      event_date: new Date(data.event_date),
-      recurring: !!data.recurring,
+      relations: ['participants', 'participants.member'],
     });
 
-    return this.eventsRepo.save(event);
-  }
-
-  async update(id: number, data: Partial<Event>): Promise<Event | null> {
-    await this.eventsRepo.update(id, data);
-    return this.findOne(id);
-  }
-
-  async remove(id: number): Promise<void> {
-    await this.eventsRepo.delete(id);
-  }
-
-  async rsvp(
-    eventId: number,
-    userId: number,
-    status: 'confirmed' | 'declined' | 'pending',
-  ): Promise<Event | null> {
-    const ev = await this.eventsRepo.findOne({ where: { id: eventId } });
-    if (!ev) {
+    if (!event) {
       throw new NotFoundException('Evento não encontrado');
     }
 
-    const user = await this.usersRepo.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException('Usuário não encontrado');
-    }
+    return event;
+  }
 
-    let part = await this.partsRepo.findOne({
-      where: { event: { id: eventId }, user: { id: userId } },
-      relations: ['event', 'user'],
-    });
+  async create(dto: CreateEventDto) {
+    const event = this.eventRepo.create(dto);
+    return this.eventRepo.save(event);
+  }
 
-    if (!part) {
-      part = this.partsRepo.create({ event: ev, user, status });
-    } else {
-      part.status = status;
-    }
+  async update(id: number, dto: UpdateEventDto) {
+    await this.eventRepo.update(id, dto);
+    return this.findOne(id);
+  }
 
-    await this.partsRepo.save(part);
+  async remove(id: number) {
+    const exists = await this.findOne(id);
+    return this.eventRepo.remove(exists);
+  }
 
-    return this.findOne(eventId);
+  async updateParticipantStatus(
+    eventId: number,
+    memberId: number,
+    dto: UpdateParticipantStatusDto,
+  ) {
+    return this.participantsService.update(eventId, memberId, dto);
   }
 }
