@@ -2,13 +2,9 @@
   <main class="not-found">
     <h1>404</h1>
     <h2>Página não encontrada</h2>
-    <p>
-      A página que você tentou acessar não existe ou foi movida.
-    </p>
+    <p>A página que você tentou acessar não existe ou foi movida.</p>
 
-    <a href="/" class="not-found__link">
-      Voltar para a página inicial
-    </a>
+    <a href="/" class="not-found__link"> Voltar para a página inicial </a>
   </main>
 </template>
 

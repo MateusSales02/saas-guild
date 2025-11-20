@@ -1,7 +1,12 @@
 import { IsEnum } from 'class-validator';
-import { ParticipantStatus } from './participant-status.enum';
 
-export class UpdateParticipantDto {
+export enum ParticipantStatus {
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  DECLINED = 'DECLINED',
+}
+
+export class UpdateParticipantStatusDto {
   @IsEnum(ParticipantStatus)
   status: ParticipantStatus;
 }
