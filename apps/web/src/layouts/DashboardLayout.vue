@@ -35,6 +35,7 @@
           <SidebarLink icon="swords" label="Raids" :to="{ name: 'raids' }" />
           <SidebarLink icon="calendar" label="Eventos" :to="{ name: 'events' }" />
           <SidebarLink icon="treasure" label="Tesouraria" :to="{ name: 'treasury' }" />
+          <SidebarLink icon="hammer" label="Builds" :to="{ name: 'builds' }" />
           <SidebarLink icon="settings" label="Visão geral" :to="{ name: 'dashboard.overview' }" />
         </nav>
       </aside>
