@@ -29,17 +29,13 @@ export class ParticipantsController {
     return this.participantsService.findAll(eventId);
   }
 
-  // PATCH /events/:eventId/participants/:memberId
   @Patch(':memberId')
   updateParticipant(
     @Param('eventId', ParseIntPipe) eventId: number,
     @Param('memberId', ParseIntPipe) memberId: number,
     @Body() dto: UpdateParticipantStatusDto,
   ) {
-    // Se no service o método se chama "update":
     return this.participantsService.update(eventId, memberId, dto);
-    // ou, se você criou "updateParticipantStatus":
-    // return this.participantsService.updateParticipantStatus(eventId, memberId, dto);
   }
 
   @Delete(':userId')

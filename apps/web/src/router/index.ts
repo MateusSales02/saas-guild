@@ -44,6 +44,11 @@ const router = createRouter({
         },
         { path: 'raids', name: 'raids', component: () => import('@/pages/dashboard/Raids.vue') },
         {
+          path: 'builds',
+          name: 'builds',
+          component: () => import('@/pages/dashboard/Builds.vue'),
+        },
+        {
           path: 'eventos',
           name: 'events',
           component: () => import('@/pages/dashboard/Events.vue'),

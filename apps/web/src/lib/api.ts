@@ -117,3 +117,81 @@ export const FinanceApi = {
     return api.get('/finance-transactions/summary', { params: { guildId } }).then((r) => r.data)
   },
 }
+<<<<<<< ours
+<<<<<<< ours
+
+<<<<<<< ours
+export const BuildClassesApi = {
+  list() {
+    return api.get('/build-classes').then((r) => r.data)
+  },
+}
+
+export const BuildSpecsApi = {
+  list(classId?: number) {
+    return api.get('/build-specs', { params: classId ? { classId } : {} }).then((r) => r.data)
+  },
+}
+
+export const BuildItemsApi = {
+  list() {
+    return api.get('/build-items').then((r) => r.data)
+  },
+}
+
+export type BuildPayload = {
+  name: string
+  description?: string
+  role?: string
+  classId: number
+  specId?: number
+  itemIds?: number[]
+  guildId?: number
+  authorId?: number
+  is_public?: boolean
+}
+
+export const BuildsApi = {
+  list(params?: Partial<BuildPayload> & { search?: string }) {
+    return api.get('/builds', { params }).then((r) => r.data)
+  },
+  get(id: number) {
+    return api.get(`/builds/${id}`).then((r) => r.data)
+  },
+  create(payload: BuildPayload) {
+    return api.post('/builds', payload).then((r) => r.data)
+  },
+  update(id: number, payload: Partial<BuildPayload>) {
+    return api.put(`/builds/${id}`, payload).then((r) => r.data)
+  },
+  remove(id: number) {
+    return api.delete(`/builds/${id}`).then((r) => r.data)
+=======
+=======
+
+>>>>>>> theirs
+export const IntegrationsApi = {
+  albionStatus() {
+    return api.get('/integrations/albion').then((r) => r.data)
+  },
+
+  refreshAlbion() {
+    return api.post('/integrations/albion/refresh').then((r) => r.data)
+  },
+
+  sendDiscord(message: string) {
+    return api.post('/integrations/notify', { message }).then((r) => r.data)
+  },
+
+  lastNotification() {
+    return api.get('/integrations/notify/last').then((r) => r.data)
+<<<<<<< ours
+>>>>>>> theirs
+  },
+}
+=======
+>>>>>>> theirs
+=======
+  },
+}
+>>>>>>> theirs
