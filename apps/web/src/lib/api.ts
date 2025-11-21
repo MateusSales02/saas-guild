@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment,
+                  @typescript-eslint/no-unsafe-return,
+                  @typescript-eslint/no-unsafe-argument */
+
 import axios from 'axios'
 import { auth, setSession } from '@/stores/auth'
 
@@ -72,6 +76,7 @@ export const MembersApi = {
     return api.delete(`/guild-members/${id}`).then((r) => r.data)
   },
 }
+
 export const EventsApi = {
   listByGuild(guildId: number) {
     return api.get('/events', { params: { guildId } }).then((r) => r.data)
@@ -92,6 +97,7 @@ export const EventsApi = {
     return api.delete(`/events/${id}`).then((r) => r.data)
   },
 }
+
 export type FinanceTxPayload = {
   guildId: number
   type: 'in' | 'out'
@@ -112,15 +118,11 @@ export const FinanceApi = {
     return api.delete(`/finance-transactions/${id}`).then((r) => r.data)
   },
 
-  // se existir no back
   summary(guildId: number) {
     return api.get('/finance-transactions/summary', { params: { guildId } }).then((r) => r.data)
   },
 }
-<<<<<<< ours
-<<<<<<< ours
 
-<<<<<<< ours
 export const BuildClassesApi = {
   list() {
     return api.get('/build-classes').then((r) => r.data)
@@ -129,7 +131,8 @@ export const BuildClassesApi = {
 
 export const BuildSpecsApi = {
   list(classId?: number) {
-    return api.get('/build-specs', { params: classId ? { classId } : {} }).then((r) => r.data)
+    const params = classId ? { classId } : undefined
+    return api.get('/build-specs', { params }).then((r) => r.data)
   },
 }
 
@@ -166,10 +169,9 @@ export const BuildsApi = {
   },
   remove(id: number) {
     return api.delete(`/builds/${id}`).then((r) => r.data)
-=======
-=======
+  },
+}
 
->>>>>>> theirs
 export const IntegrationsApi = {
   albionStatus() {
     return api.get('/integrations/albion').then((r) => r.data)
@@ -185,13 +187,5 @@ export const IntegrationsApi = {
 
   lastNotification() {
     return api.get('/integrations/notify/last').then((r) => r.data)
-<<<<<<< ours
->>>>>>> theirs
   },
 }
-=======
->>>>>>> theirs
-=======
-  },
-}
->>>>>>> theirs
