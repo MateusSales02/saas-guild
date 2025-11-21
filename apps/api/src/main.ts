@@ -6,9 +6,15 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
 
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://54.161.67.120'],
+    origin: [
+      'http://localhost:5173',
+      'http://54.161.67.120',
+      'http://54.161.67.120:3000',
+    ],
     credentials: true,
   });
-  await app.listen(port);
+
+  // 👇 ESSA É A MUDANÇA IMPORTANTE
+  await app.listen(port, '0.0.0.0');
 }
 bootstrap();
