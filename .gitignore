@@ -26,3 +26,5 @@ pnpm-debug.log*
 
 data/
 
+# arquivos de build do TypeScript
+*.tsbuildinfo
