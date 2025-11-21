@@ -7,19 +7,10 @@ import { GuildMembersModule } from './guilds/guild-members.module';
 import { EventsModule } from './events/events.module';
 import { AuthModule } from './auth/auth.module';
 import { FinanceModule } from './finance/finance.module';
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-import { BuildsModule } from './builds/builds.module';
-=======
-import { IntegrationsModule } from './integrations/integrations.module';
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
-import { IntegrationsModule } from './integrations/integrations.module';
->>>>>>> theirs
 
+import { BuildsModule } from './builds/builds.module';
+
+import { IntegrationsModule } from './integrations/integrations.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -32,6 +23,7 @@ import { IntegrationsModule } from './integrations/integrations.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     ScheduleModule.forRoot(),
     // módulos da aplicação
     UsersModule,

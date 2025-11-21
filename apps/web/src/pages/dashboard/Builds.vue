@@ -1,11 +1,15 @@
 <template>
   <section class="grid lg:grid-cols-[2fr_1fr] gap-6">
-    <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60">
+    <!-- LISTA DE BUILDS -->
+    <div
+      class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60"
+    >
       <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div>
           <h2 class="text-lg font-semibold">Builds</h2>
           <p class="text-sm opacity-70">Filtre por classe, spec ou palavra-chave</p>
         </div>
+
         <div class="flex flex-wrap gap-2 items-center">
           <input
             v-model="filters.search"
@@ -14,83 +18,114 @@
             placeholder="Buscar"
             class="px-3 py-2 rounded-lg bg-slate-800/30 border border-slate-700 outline-none text-sm"
           />
+
           <select
             v-model.number="filters.classId"
             @change="onClassFilterChange"
-            class="px-3 py-2 rounded-lg bg-slate-800/30 border border-slate-700 outline-none text-sm"
+            class="px-3 py-2 rounded-lg bg-slate-800/30 border border-slate-700 text-sm"
           >
-            <option :value="undefined">Todas as classes</option>
-            <option v-for="cls in classes" :key="cls.id" :value="cls.id">{{ cls.name }}</option>
+            <option :value="undefined">Todas classes</option>
+            <option v-for="c in classes" :key="c.id" :value="c.id">
+              {{ c.name }}
+            </option>
           </select>
+
           <select
             v-model.number="filters.specId"
             @change="fetchBuilds"
-            class="px-3 py-2 rounded-lg bg-slate-800/30 border border-slate-700 outline-none text-sm"
+            class="px-3 py-2 rounded-lg bg-slate-800/30 border border-slate-700 text-sm"
           >
-            <option :value="undefined">Todas as specs</option>
-            <option v-for="spec in filteredSpecs" :key="spec.id" :value="spec.id">{{ spec.name }}</option>
+            <option :value="undefined">Todas specs</option>
+            <option v-for="s in specs" :key="s.id" :value="s.id">
+              {{ s.name }}
+            </option>
           </select>
+
+          <label class="flex items-center gap-1 text-xs cursor-pointer">
+            <input v-model="filters.onlyMine" type="checkbox" class="accent-[#C6A95D]" />
+            Só minhas
+          </label>
         </div>
       </header>
 
-      <p v-if="error" class="text-sm text-red-400 mb-2">{{ error }}</p>
-      <div v-if="loading" class="text-sm opacity-80">Carregando builds…</div>
+      <div v-if="loading" class="text-sm opacity-70">Carregando builds...</div>
+      <div v-if="error" class="text-sm text-red-400">{{ error }}</div>
 
-      <div v-else class="space-y-3">
+      <div v-if="!loading && !error" class="grid md:grid-cols-2 gap-4">
         <article
           v-for="build in builds"
           :key="build.id"
-          class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-900/40"
+          class="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-900/40 flex flex-col justify-between"
         >
-          <header class="flex items-start justify-between gap-3">
+          <header class="flex items-start justify-between gap-2">
             <div>
-              <div class="flex items-center gap-2">
-                <h3 class="text-lg font-semibold">{{ build.name }}</h3>
-                <span v-if="!build.is_public" class="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300">Privada</span>
-              </div>
-              <p class="text-sm opacity-80">{{ build.description || 'Sem descrição' }}</p>
+              <h3 class="font-semibold text-sm">{{ build.name }}</h3>
+              <p class="text-xs opacity-70">
+                {{ build.role || 'Sem função' }} ·
+                {{ build.class?.name || 'Classe indefinida' }}
+                <span v-if="build.spec"> · {{ build.spec.name }}</span>
+              </p>
             </div>
-            <div class="flex items-center gap-2">
-              <button
-                class="px-3 py-1 rounded-lg border border-slate-600 hover:bg-slate-800 text-sm"
-                @click="startEdit(build)"
-              >
-                Editar
-              </button>
-              <button
-                class="px-3 py-1 rounded-lg border border-red-600 hover:bg-red-700 text-sm text-red-200"
-                @click="removeBuild(build.id)"
-              >
-                Excluir
-              </button>
-            </div>
+            <span
+              class="px-2 py-0.5 rounded-lg text-[10px]"
+              :class="build.is_public ? 'bg-emerald-900/40 text-emerald-200' : 'bg-slate-800 text-slate-200'"
+            >
+              {{ build.is_public ? 'Pública' : 'Privada' }}
+            </span>
           </header>
-          <dl class="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm mt-3">
+
+          <p v-if="build.description" class="mt-2 text-xs opacity-80 line-clamp-3">
+            {{ build.description }}
+          </p>
+
+          <dl class="mt-3 grid grid-cols-2 gap-2 text-[11px]">
             <div>
-              <dt class="opacity-60 text-xs">Classe</dt>
-              <dd class="font-medium">{{ build.class?.name || 'N/A' }}</dd>
+              <dt class="opacity-60">Autor</dt>
+              <dd class="font-medium">
+                {{ build.author?.nickname || build.author?.email || 'Desconhecido' }}
+              </dd>
             </div>
             <div>
-              <dt class="opacity-60 text-xs">Especialização</dt>
-              <dd class="font-medium">{{ build.spec?.name || 'N/A' }}</dd>
-            </div>
-            <div>
-              <dt class="opacity-60 text-xs">Guilda</dt>
+              <dt class="opacity-60">Guilda</dt>
               <dd class="font-medium">{{ build.guild?.name || 'Livre' }}</dd>
             </div>
           </dl>
-          <div class="mt-3 text-xs opacity-70">
-            Itens: {{ (build.items || []).map((i) => i.name).join(', ') || 'Nenhum' }}
-          </div>
+
+          <p class="mt-2 text-[11px] opacity-70">
+            Itens:
+            {{ (build.items || []).map((i: any) => i.name).join(', ') || 'Nenhum' }}
+          </p>
+
+          <footer class="mt-3 flex items-center justify-between gap-2 text-xs">
+            <button
+              class="px-3 py-1 rounded-lg border border-slate-700 hover:bg-slate-800"
+              @click="editBuild(build)"
+            >
+              Editar
+            </button>
+            <button
+              class="px-3 py-1 rounded-lg border border-red-700 hover:bg-red-800 text-red-100"
+              @click="removeBuild(build.id)"
+            >
+              Remover
+            </button>
+          </footer>
         </article>
 
-        <p v-if="builds.length === 0" class="text-sm opacity-70">Nenhuma build encontrada.</p>
+        <p v-if="builds.length === 0" class="text-sm opacity-70">
+          Nenhuma build encontrada.
+        </p>
       </div>
     </div>
 
-    <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60">
+    <!-- FORMULÁRIO -->
+    <div
+      class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60"
+    >
       <header class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold">{{ editingId ? 'Editar build' : 'Nova build' }}</h2>
+        <h2 class="text-lg font-semibold">
+          {{ editingId ? 'Editar build' : 'Nova build' }}
+        </h2>
         <button
           v-if="editingId"
           class="text-sm text-slate-300 underline"
@@ -103,7 +138,20 @@
       <form class="space-y-3" @submit.prevent="submit">
         <label class="flex flex-col gap-1 text-sm">
           <span>Nome</span>
-          <input v-model="form.name" required class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700" />
+          <input
+            v-model="form.name"
+            required
+            class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700"
+          />
+        </label>
+
+        <label class="flex flex-col gap-1 text-sm">
+          <span>Função / Papel</span>
+          <input
+            v-model="form.role"
+            placeholder="Tank, healer, DPS..."
+            class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700"
+          />
         </label>
 
         <label class="flex flex-col gap-1 text-sm">
@@ -115,28 +163,36 @@
           ></textarea>
         </label>
 
-        <div class="grid sm:grid-cols-2 gap-3">
-          <label class="flex flex-col gap-1 text-sm">
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <label class="flex flex-col gap-1">
             <span>Classe</span>
             <select
               v-model.number="form.classId"
+              @change="onFormClassChange"
               required
-              @change="loadSpecs(form.classId)"
               class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700"
             >
-              <option :value="undefined">Selecione</option>
-              <option v-for="cls in classes" :key="cls.id" :value="cls.id">{{ cls.name }}</option>
+              <option :value="undefined" disabled>Selecione</option>
+              <option v-for="c in classes" :key="c.id" :value="c.id">
+                {{ c.name }}
+              </option>
             </select>
           </label>
 
-          <label class="flex flex-col gap-1 text-sm">
-            <span>Especialização</span>
+          <label class="flex flex-col gap-1">
+            <span>Spec</span>
             <select
               v-model.number="form.specId"
               class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700"
             >
-              <option :value="undefined">Opcional</option>
-              <option v-for="spec in filteredSpecs" :key="spec.id" :value="spec.id">{{ spec.name }}</option>
+              <option :value="undefined">Nenhuma</option>
+              <option
+                v-for="s in specsForForm"
+                :key="s.id"
+                :value="s.id"
+              >
+                {{ s.name }}
+              </option>
             </select>
           </label>
         </div>
@@ -144,29 +200,36 @@
         <label class="flex flex-col gap-1 text-sm">
           <span>Itens</span>
           <select
-            v-model="form.itemIds"
             multiple
+            v-model="form.itemIds"
             class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700 h-28"
           >
-            <option v-for="it in items" :key="it.id" :value="it.id">{{ it.name }} ({{ it.slot || 'slot livre' }})</option>
+            <option v-for="item in items" :key="item.id" :value="item.id">
+              {{ item.name }}
+              <span v-if="item.slot"> ({{ item.slot }})</span>
+            </option>
           </select>
+          <span class="text-[11px] opacity-60">
+            Use Ctrl/Cmd + clique para selecionar vários.
+          </span>
         </label>
 
         <label class="flex items-center gap-2 text-sm">
-          <input type="checkbox" v-model="form.is_public" />
-          Build pública (visível para todos)
+          <input v-model="form.is_public" type="checkbox" class="accent-[#C6A95D]" />
+          Build pública (visível para outros)
         </label>
 
-        <p v-if="message" class="text-green-400 text-sm">{{ message }}</p>
-        <p v-if="formError" class="text-red-400 text-sm">{{ formError }}</p>
-
-        <button
-          type="submit"
-          class="w-full py-2 rounded-lg bg-[#C6A95D] text-slate-900 font-semibold shadow-md disabled:opacity-60"
-          :disabled="saving"
-        >
-          {{ saving ? 'Salvando...' : editingId ? 'Atualizar build' : 'Criar build' }}
-        </button>
+        <div class="flex items-center gap-3 mt-2">
+          <button
+            type="submit"
+            :disabled="saving || !form.name || !form.classId"
+            class="px-4 py-2 rounded-lg bg-[#C6A95D] text-slate-900 text-sm disabled:opacity-50"
+          >
+            {{ saving ? 'Salvando...' : editingId ? 'Salvar alterações' : 'Criar build' }}
+          </button>
+          <p v-if="formError" class="text-sm text-red-400">{{ formError }}</p>
+          <p v-if="message" class="text-sm text-emerald-400">{{ message }}</p>
+        </div>
       </form>
     </div>
   </section>
@@ -184,38 +247,43 @@ import {
   GuildsApi,
 } from '@/lib/api'
 
+// Tipos simples usados no front
 type Option = { id: number; name: string; description?: string }
-type SpecOption = Option & { class?: Option; classId?: number }
 type BuildItem = { id: number; name: string; slot?: string }
-type Build = {
-  id: number
-  name: string
-  description?: string
-  class?: Option
-  spec?: SpecOption
-  guild?: { id: number; name: string } | null
-  author?: { id: number; email: string } | null
-  items?: BuildItem[]
-  is_public: boolean
-}
 
+// Filtros da lista
+const filters = reactive<{
+  search?: string
+  classId?: number
+  specId?: number
+  onlyMine?: boolean
+}>({
+  search: '',
+  classId: undefined,
+  specId: undefined,
+  onlyMine: false,
+})
+
+// Estado geral
 const classes = ref<Option[]>([])
-const specs = ref<SpecOption[]>([])
+const specs = ref<Option[]>([])
 const items = ref<BuildItem[]>([])
-const builds = ref<Build[]>([])
+const builds = ref<any[]>([])
 const guild = ref<any>(null)
-const loading = ref(true)
+
+const loading = ref(false)
 const saving = ref(false)
 const error = ref('')
 const message = ref('')
 const formError = ref('')
 const editingId = ref<number | null>(null)
-const filters = reactive<{ search?: string; classId?: number; specId?: number }>({})
 
-const form = reactive<BuildPayload>({
+// Formulário
+const form = reactive<BuildPayload & { itemIds: number[] }>({
   name: '',
   description: '',
-  classId: undefined as any,
+  role: '',
+  classId: undefined as unknown as number,
   specId: undefined,
   itemIds: [],
   guildId: undefined,
@@ -223,9 +291,10 @@ const form = reactive<BuildPayload>({
   is_public: true,
 })
 
-const filteredSpecs = computed(() => {
+// Specs filtradas para o formulário (baseado no classId escolhido)
+const specsForForm = computed(() => {
   if (!form.classId) return specs.value
-  return specs.value.filter((s) => s.class?.id === form.classId || (s as any).classId === form.classId)
+  return specs.value.filter((s: any) => s.classId === form.classId || s.class?.id === form.classId)
 })
 
 onMounted(async () => {
@@ -258,8 +327,13 @@ async function fetchBuilds() {
   error.value = ''
   try {
     const params: any = { ...filters }
-    if (guild.value?.id) params.guildId = guild.value.id
-    Object.keys(params).forEach((key) => params[key] === undefined && delete params[key])
+    if (filters.onlyMine && auth.user?.id) {
+      params.authorId = auth.user.id
+    }
+    if (guild.value?.id) {
+      params.guildId = guild.value.id
+    }
+    Object.keys(params).forEach((k) => params[k] === undefined && delete params[k])
     builds.value = await BuildsApi.list(params)
   } catch (e: any) {
     error.value = e.message || 'Falha ao carregar builds'
@@ -268,53 +342,74 @@ async function fetchBuilds() {
   }
 }
 
-function onClassFilterChange() {
+// Quando mudar filtro de classe
+async function onClassFilterChange() {
   filters.specId = undefined
-  fetchBuilds()
+  await loadSpecs(filters.classId)
+  await fetchBuilds()
 }
 
-function startEdit(build: Build) {
-  editingId.value = build.id
-  form.name = build.name
-  form.description = build.description || ''
-  form.classId = build.class?.id as any
-  form.specId = build.spec?.id
-  form.itemIds = (build.items || []).map((i) => i.id)
-  form.is_public = build.is_public
-  form.guildId = build.guild?.id || guild.value?.id
-  form.authorId = build.author?.id || auth.user?.id
-  if (build.class?.id) loadSpecs(build.class.id)
-  window.scrollTo({ top: 0, behavior: 'smooth' })
+// Quando mudar classe do formulário
+async function onFormClassChange() {
+  form.specId = undefined
+  await loadSpecs(form.classId)
 }
 
+// Resetar formulário
 function resetForm() {
   editingId.value = null
   form.name = ''
   form.description = ''
-  form.classId = undefined as any
+  form.role = ''
+  form.classId = undefined as unknown as number
   form.specId = undefined
   form.itemIds = []
   form.is_public = true
-  form.guildId = guild.value?.id
-  form.authorId = auth.user?.id
   message.value = ''
   formError.value = ''
 }
 
+// Carregar dados no formulário para edição
+function editBuild(build: any) {
+  editingId.value = build.id
+  form.name = build.name
+  form.description = build.description || ''
+  form.role = build.role || ''
+  form.classId = build.class?.id ?? build.classId
+  form.specId = build.spec?.id ?? build.specId
+  form.itemIds = (build.items || []).map((i: any) => i.id)
+  form.is_public = build.is_public ?? true
+  form.guildId = build.guild?.id ?? guild.value?.id
+  form.authorId = build.author?.id ?? auth.user?.id
+}
+
+// Criar / atualizar
 async function submit() {
   saving.value = true
   formError.value = ''
   message.value = ''
+
   try {
-    if (!form.classId) throw new Error('Selecione uma classe')
+    const payload: BuildPayload = {
+      name: form.name,
+      description: form.description,
+      role: form.role,
+      classId: form.classId,
+      specId: form.specId,
+      itemIds: form.itemIds,
+      guildId: guild.value?.id,
+      authorId: auth.user?.id,
+      is_public: form.is_public,
+    }
 
     if (editingId.value) {
-      await BuildsApi.update(editingId.value, form)
+      await BuildsApi.update(editingId.value, payload)
       message.value = 'Build atualizada com sucesso'
     } else {
-      await BuildsApi.create(form as BuildPayload)
+      await BuildsApi.create(payload)
       message.value = 'Build criada com sucesso'
     }
+
     await fetchBuilds()
     resetForm()
   } catch (e: any) {
