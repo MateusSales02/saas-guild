@@ -9,9 +9,8 @@ git fetch origin
 git reset --hard origin/main
 
 echo "== [DEPLOY] Subindo containers com Docker Compose =="
-=
 if command -v docker &> /dev/null && docker compose version &> /dev/null; then
-  docker compose up -d --build=
+  docker compose up -d --build
 elif command -v docker-compose &> /dev/null; then
   docker-compose up -d --build
 else
