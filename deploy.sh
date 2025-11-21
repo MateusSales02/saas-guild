@@ -9,7 +9,15 @@ git fetch origin
 git reset --hard origin/main
 
 echo "== [DEPLOY] Subindo containers com Docker Compose =="
-docker-compose up -d --build
+=
+if command -v docker &> /dev/null && docker compose version &> /dev/null; then
+  docker compose up -d --build=
+elif command -v docker-compose &> /dev/null; then
+  docker-compose up -d --build
+else
+  echo "ERRO: nem 'docker compose' nem 'docker-compose' encontrados no servidor."
+  exit 1
+fi
 
 echo "== [DEPLOY] Limpando imagens antigas =="
 docker image prune -f
