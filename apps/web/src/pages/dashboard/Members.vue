@@ -107,7 +107,7 @@ async function addMe() {
   adding.value = true
   error.value = ''
   try {
-    await MembersApi.add(auth.user.id, guild.value.id, quickRole.value)
+    await MembersApi.add(Number(auth.user.id), guild.value.id, quickRole.value)
     await load()
   } catch (e: any) {
     error.value = e.message || 'Falha ao adicionar'
