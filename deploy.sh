@@ -11,10 +11,10 @@ git reset --hard origin/main
 echo "== [DEPLOY] Subindo containers com Docker Compose =="
 
 # Usa APENAS o docker-compose clássico neste servidor
-if command -v docker-compose &>/dev/null; then
-  docker-compose up -d --build
+if command -v docker compose &>/dev/null; then
+  docker compose up -d --build
 else
-  echo "ERRO: 'docker-compose' não encontrado no servidor."
+  echo "ERRO: 'docker compose' não encontrado no servidor."
   exit 1
 fi
 
