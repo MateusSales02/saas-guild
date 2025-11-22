@@ -201,7 +201,7 @@ async function rsvp(eventId: number, status: 'confirmed' | 'declined' | 'pending
   }
   try {
     rsvping.value = eventId
-    await EventsApi.rsvp(eventId, auth.user.id, status)
+    await EventsApi.rsvp(eventId, Number(auth.user.id), status)
     await load()
   } catch (e: any) {
     error.value = e.message || 'Falha ao registrar presença'

@@ -319,7 +319,7 @@ async function loadGuild() {
   const guilds = await GuildsApi.list()
   guild.value = guilds?.[0] ?? null
   if (guild.value) form.guildId = guild.value.id
-  if (auth.user?.id) form.authorId = auth.user.id
+  if (auth.user?.id) form.authorId = Number(auth.user.id)
 }
 
 async function fetchBuilds() {
@@ -398,7 +398,7 @@ async function submit() {
       specId: form.specId,
       itemIds: form.itemIds,
       guildId: guild.value?.id,
-      authorId: auth.user?.id,
+      authorId: Number(auth.user?.id),
       is_public: form.is_public,
     }
 
