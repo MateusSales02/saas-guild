@@ -26,11 +26,7 @@ export const auth = reactive<AuthState>({
   user: null,
 })
 
-const env = import.meta.env as {
-  VITE_API_URL?: string
-}
-
-const API_BASE_URL: string = env.VITE_API_URL ?? 'http://localhost:3000'
+const API_BASE_URL = 'http://54.161.67.120:3000'
 
 export const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
