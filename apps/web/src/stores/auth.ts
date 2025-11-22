@@ -27,7 +27,7 @@ export const auth = reactive<AuthState>({
 })
 
 const API_BASE_URL = import.meta.env.PROD
-  ? 'http://54.161.67.120:3000' // produção (nginx servindo o front)
+  ? 'http://54.161.67.120' // produção (nginx servindo o front)
   : 'http://localhost:3000'
 
 export const api: AxiosInstance = axios.create({
