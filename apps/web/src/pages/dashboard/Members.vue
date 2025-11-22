@@ -32,11 +32,12 @@
         <div class="flex items-center gap-2">
           <select
             v-model="quickRole"
-            class="text-xs sm:text-sm px-3 py-2 rounded-lg bg-slate-900/70 border border-slate-700/80 text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40 transition"
+            class="text-sm px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700 outline-none"
           >
-            <option value="membro">Membro</option>
-            <option value="líder">Líder</option>
-            <option value="oficial">Oficial</option>
+            <!-- label em PT-BR, value em inglês -->
+            <option value="member">Membro</option>
+            <option value="leader">Líder</option>
+            <option value="officer">Oficial</option>
           </select>
 
           <button
@@ -135,11 +136,11 @@
               <select
                 :value="m.role"
                 @change="(e: any) => updateRole(m.id, e.target.value)"
-                class="px-3 py-1.5 rounded-lg bg-slate-900/80 border border-slate-700/80 text-xs sm:text-sm text-slate-100 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/40 transition"
+                class="px-2 py-1 rounded bg-slate-800/40 border border-slate-700 outline-none"
               >
-                <option value="membro">Membro</option>
-                <option value="líder">Líder</option>
-                <option value="oficial">Oficial</option>
+                <option value="member">Membro</option>
+                <option value="leader">Líder</option>
+                <option value="officer">Oficial</option>
               </select>
             </td>
 
@@ -176,7 +177,13 @@ import { onMounted, ref } from 'vue'
 import { GuildsApi, MembersApi } from '@/lib/api'
 import { auth } from '@/stores/auth'
 
-type Member = { id: number; role: string; user: { id: number; email: string; nickname?: string } }
+type GuildMemberRole = 'member' | 'leader' | 'officer'
+
+type Member = {
+  id: number
+  role: GuildMemberRole
+  user: { id: number; email: string; nickname?: string }
+}
 
 const guild = ref<any>(null)
 const members = ref<Member[]>([])
