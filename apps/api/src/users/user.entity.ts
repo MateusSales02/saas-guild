@@ -6,6 +6,9 @@ import {
   Index,
 } from 'typeorm';
 
+// papéis possíveis dentro do SISTEMA (não confundir com member/leader/officer da guild)
+export type UserRole = 'leader' | 'player';
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
@@ -19,13 +22,14 @@ export class User {
   password_hash: string;
 
   @Column({ type: 'varchar', unique: true, nullable: true })
-  uid: string | null; // pode deixar opcional se for usar Firebase depois
+  uid: string | null;
 
   @Column({ type: 'varchar' })
   nickname: string;
 
-  @Column({ type: 'varchar' })
-  role: string;
+  // agora tipado e com default "leader"
+  @Column({ type: 'varchar', default: 'leader' })
+  role: UserRole;
 
   @CreateDateColumn()
   created_at: Date;

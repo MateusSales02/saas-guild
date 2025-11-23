@@ -2,12 +2,6 @@
   <section
     class="rounded-2xl border border-slate-800/70 bg-slate-950/70 px-4 py-5 sm:px-6 sm:py-6 shadow-[0_18px_60px_rgba(15,23,42,0.9)]"
   >
-    <!-- DEBUG VISUAL -->
-    <p class="mb-3 text-[10px] text-emerald-400">
-      DEBUG: Members.vue carregado — showAddMemberModal =
-      <strong>{{ showAddMemberModal ? 'true' : 'false' }}</strong>
-    </p>
-
     <!-- HEADER -->
     <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
       <div>
@@ -48,14 +42,13 @@
             <option value="officer">Oficial</option>
           </select>
 
-          <!-- BOTÃO: SEM QUALQUER LÓGICA DE DISABLED -->
+          <!-- BOTÃO: sempre clicável -->
           <button
             type="button"
             @click="openModal"
             class="inline-flex items-center gap-2 text-xs sm:text-sm px-3.5 py-2 rounded-lg
                    border border-indigo-500/80 bg-indigo-600/90 text-white font-medium
-                   shadow-md shadow-indigo-900/40 hover:bg-indigo-500
-                   transition"
+                   shadow-md shadow-indigo-900/40 hover:bg-indigo-500 transition"
           >
             Adicionar-me
           </button>
@@ -281,9 +274,10 @@ type Member = {
   user: { id: number; email: string; nickname?: string }
 }
 
-type RegisterResponse = {
-  token: string
-  user: { id: number }
+type PlayerUser = {
+  id: number
+  email: string
+  nickname?: string
 }
 
 const guild = ref<any>(null)
@@ -362,24 +356,12 @@ async function submitNewMember() {
   error.value = ''
 
   try {
-    const safeName = newMemberName.value
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, '.')
-      .replace(/[^a-z0-9.]/g, '')
-
-    const email = `${safeName || 'user'}.${Date.now()}@guild.local`
-    const password = Math.random().toString(36).slice(-10)
-
-    const res = await postJSON<RegisterResponse>('/auth/register', {
-      email,
-      password,
+    // chama o endpoint /auth/create-player (apenas nickname, resto o back gera)
+    const created = await postJSON<PlayerUser>('/auth/create-player', {
       nickname: newMemberName.value.trim(),
-      role: 'user',
     })
 
-    const userId = res.user.id
-    await MembersApi.add(userId, guild.value.id, newMemberRole.value)
+    await MembersApi.add(created.id, guild.value.id, newMemberRole.value)
 
     showAddMemberModal.value = false
     await load()
