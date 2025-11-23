@@ -24,7 +24,9 @@
           <span class="text-[10px] uppercase tracking-wide text-slate-500">Total</span>
           <span class="text-base font-semibold text-slate-50">
             {{ members.length }}
-            <span class="ml-1 text-xs font-normal text-slate-400">membros</span>
+            <span class="ml-1 text-xs font-normal text-slate-400">
+              {{ members.length === 1 ? 'membro' : 'membros' }}
+            </span>
           </span>
         </div>
 
@@ -35,18 +37,25 @@
             class="text-sm px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700 outline-none"
           >
             <!-- label em PT-BR, value em inglês -->
-            <option value="member">Membro</option>
-            <option value="leader">Líder</option>
-            <option value="officer">Oficial</option>
+            <option value="membro">Membro</option>
+            <option value="líder">Líder</option>
+            <option value="oficial">Oficial</option>
           </select>
 
           <button
             @click="addMe"
-            :disabled="!guild || adding"
-            class="inline-flex items-center gap-2 text-xs sm:text-sm px-3.5 py-2 rounded-lg border border-indigo-500/80 bg-indigo-600/90 text-white font-medium shadow-md shadow-indigo-900/40 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            :disabled="!guild || adding || alreadyMember"
+            class="inline-flex items-center gap-2 text-xs sm:text-sm px-3.5 py-2 rounded-lg
+                   border border-indigo-500/80 bg-indigo-600/90 text-white font-medium
+                   shadow-md shadow-indigo-900/40 hover:bg-indigo-500
+                   disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
-            <span v-if="adding" class="h-3 w-3 rounded-full border-2 border-white/60 border-t-transparent animate-spin" />
-            <span>{{ adding ? 'Adicionando...' : 'Adicionar-me' }}</span>
+            <span
+              v-if="adding"
+              class="h-3 w-3 rounded-full border-2 border-white/60 border-t-transparent animate-spin"
+            />
+            <span v-else-if="alreadyMember">Você já está na guilda</span>
+            <span v-else>Adicionar-me</span>
           </button>
         </div>
       </div>
@@ -59,7 +68,7 @@
     >
       <span class="mt-0.5">⚠️</span>
       <div>
-        <p class="font-medium">Não foi possível carregar os membros.</p>
+        <p class="font-medium">Ocorreu um erro.</p>
         <p class="text-rose-200/90">{{ error }}</p>
       </div>
     </div>
@@ -112,6 +121,9 @@
             v-for="m in members"
             :key="m.id"
             class="border-t border-slate-900/80 hover:bg-slate-900/60 transition"
+            :class="{
+              'bg-slate-900/80': m.user?.id === currentUserId,
+            }"
           >
             <td class="px-4 py-3">
               <div class="flex items-center gap-3">
@@ -124,6 +136,12 @@
                 <div class="min-w-0">
                   <div class="font-medium text-slate-50 truncate">
                     {{ m.user?.nickname || m.user?.email }}
+                    <span
+                      v-if="m.user?.id === currentUserId"
+                      class="ml-1 rounded-full bg-indigo-500/20 px-2 py-0.5 text-[10px] font-semibold text-indigo-200"
+                    >
+                      Você
+                    </span>
                   </div>
                   <div class="opacity-70 text-[11px] text-slate-400 truncate">
                     {{ m.user?.email }}
@@ -133,19 +151,31 @@
             </td>
 
             <td class="px-4 py-3 align-middle">
-              <select
-                :value="m.role"
-                @change="(e: any) => updateRole(m.id, e.target.value)"
-                class="px-2 py-1 rounded bg-slate-800/40 border border-slate-700 outline-none"
-              >
-                <option value="member">Membro</option>
-                <option value="leader">Líder</option>
-                <option value="officer">Oficial</option>
-              </select>
+              <div class="flex items-center gap-2">
+                <!-- badge sempre visível -->
+                <span
+                  class="inline-flex items-center rounded-full bg-slate-800/70 border border-slate-700 px-2 py-0.5 text-[11px] text-slate-200"
+                >
+                  {{ roleLabel(m.role) }}
+                </span>
+
+                <!-- select só para quem pode gerenciar -->
+                <select
+                  v-if="canManage"
+                  :value="m.role"
+                  @change="(e: any) => updateRole(m.id, e.target.value)"
+                  class="px-2 py-1 rounded bg-slate-800/40 border border-slate-700 outline-none text-[11px]"
+                >
+                  <option value="member">Membro</option>
+                  <option value="leader">Líder</option>
+                  <option value="officer">Oficial</option>
+                </select>
+              </div>
             </td>
 
             <td class="px-4 py-3 text-right align-middle">
               <button
+                v-if="canManage"
                 @click="removeMember(m.id)"
                 class="inline-flex items-center gap-1.5 rounded-full border border-rose-500/80 bg-rose-600/10 px-3 py-1.5 text-xs font-medium text-rose-200 hover:bg-rose-600/20 hover:border-rose-400 transition"
               >
@@ -173,11 +203,11 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { GuildsApi, MembersApi } from '@/lib/api'
 import { auth } from '@/stores/auth'
 
-type GuildMemberRole = 'member' | 'leader' | 'officer'
+type GuildMemberRole = 'membro' | 'líder' | 'oficial'
 
 type Member = {
   id: number
@@ -190,7 +220,14 @@ const members = ref<Member[]>([])
 const loading = ref(true)
 const adding = ref(false)
 const error = ref('')
-const quickRole = ref<'membro' | 'líder' | 'oficial'>('membro')
+
+// AGORA o quickRole usa o MESMO tipo do back (member/leader/officer)
+const quickRole = ref<GuildMemberRole>('membro')
+
+const currentUserId = computed(() => {
+  if (!auth.user?.id) return -1
+  return Number(auth.user.id)
+})
 
 onMounted(load)
 
@@ -213,6 +250,7 @@ async function addMe() {
   adding.value = true
   error.value = ''
   try {
+    // role já está em inglês (member/leader/officer)
     await MembersApi.add(Number(auth.user.id), guild.value.id, quickRole.value)
     await load()
   } catch (e: any) {
@@ -222,9 +260,9 @@ async function addMe() {
   }
 }
 
-async function updateRole(id: number, role: string) {
+async function updateRole(id: number, role: GuildMemberRole) {
   try {
-    await MembersApi.update(id, role as any)
+    await MembersApi.update(id, role)
   } catch (e: any) {
     error.value = e.message || 'Falha ao atualizar cargo'
     await load()
@@ -239,4 +277,34 @@ async function removeMember(id: number) {
     error.value = e.message || 'Falha ao remover membro'
   }
 }
+
+/* --- extras bonitinhos (se já não tiver no teu template, não precisa usar) --- */
+
+// já sou membro?
+const alreadyMember = computed(() => {
+  if (!auth.user?.id) return false
+  const myId = Number(auth.user.id)
+  return members.value.some((m) => m.user?.id === myId)
+})
+
+// posso gerenciar cargos/membros?
+const canManage = computed(() => {
+  if (!auth.user?.id) return false
+  const myId = Number(auth.user.id)
+  const me = members.value.find((m) => m.user?.id === myId)
+  return me?.role === 'líder' || me?.role === 'oficial'
+})
+
+// label PT-BR pro select, se quiser usar no template
+function roleLabel(role: GuildMemberRole) {
+  switch (role) {
+    case 'líder':
+      return 'Líder'
+    case 'oficial':
+      return 'Oficial'
+    default:
+      return 'Membro'
+  }
+}
 </script>
+
