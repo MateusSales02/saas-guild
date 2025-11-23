@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { auth, clearSession } from '@/stores/auth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,8 +22,8 @@ const router = createRouter({
     {
       path: '/logout',
       name: 'logout',
-      redirect: () => {
-        localStorage.removeItem('authUser')
+      beforeEnter: () => {
+        clearSession()
         return { name: 'login' }
       },
       meta: { hideHeader: true },
@@ -71,7 +72,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  const authed = !!localStorage.getItem('token')
+  const authed = !!auth.token
 
   if (to.meta.requiresAuth && !authed && to.name !== 'login') {
     return { name: 'login', query: { redirect: to.fullPath } }
