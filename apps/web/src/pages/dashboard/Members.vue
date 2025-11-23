@@ -41,10 +41,10 @@
             <option value="oficial">Oficial</option>
           </select>
 
+          <!-- BOTÃO NOVO MEMBRO -->
           <button
-            v-if="canManage"
             @click="openAddMemberModal"
-            :disabled="!guild || adding"
+            :disabled="adding"
             class="inline-flex items-center gap-2 text-xs sm:text-sm px-3.5 py-2 rounded-lg
                    border border-indigo-500/80 bg-indigo-600/90 text-white font-medium
                    shadow-md shadow-indigo-900/40 hover:bg-indigo-500
@@ -345,7 +345,11 @@ async function removeMember(id: number) {
 
 // modal helpers
 function openAddMemberModal() {
-  if (!guild.value) return
+  if (!guild.value) {
+    error.value = 'Crie ou selecione uma guilda antes de adicionar membros.'
+    return
+  }
+
   newMemberName.value = ''
   newMemberRole.value = quickRole.value
   showAddMemberModal.value = true
@@ -378,7 +382,7 @@ async function submitNewMember() {
       email,
       password,
       nickname: newMemberName.value.trim(),
-      role: 'user', // papel geral do sistema, diferente de 'membro/líder/oficial' da guilda
+      role: 'user', // papel geral do sistema
     })
 
     const userId = res.user.id
