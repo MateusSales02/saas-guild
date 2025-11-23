@@ -48,21 +48,16 @@
             <option value="officer">Oficial</option>
           </select>
 
-          <!-- BOTÃO: sempre clicável (só desativa enquanto salva) -->
+          <!-- BOTÃO: SEM QUALQUER LÓGICA DE DISABLED -->
           <button
             type="button"
-            @click="showAddMemberModal = true"
-            :disabled="saving"
+            @click="openModal"
             class="inline-flex items-center gap-2 text-xs sm:text-sm px-3.5 py-2 rounded-lg
                    border border-indigo-500/80 bg-indigo-600/90 text-white font-medium
                    shadow-md shadow-indigo-900/40 hover:bg-indigo-500
-                   disabled:opacity-50 disabled:cursor-not-allowed transition"
+                   transition"
           >
-            <span
-              v-if="saving"
-              class="h-3 w-3 rounded-full border-2 border-white/60 border-t-transparent animate-spin"
-            />
-            <span v-else>Adicionar-me</span>
+            Adicionar-me
           </button>
         </div>
       </div>
@@ -215,7 +210,7 @@
           <button
             type="button"
             class="text-slate-400 hover:text-slate-200 text-xs"
-            @click="closeAddMemberModal"
+            @click="closeModal"
           >
             ✕
           </button>
@@ -249,7 +244,7 @@
             <button
               type="button"
               class="px-3 py-1.5 text-xs rounded-lg border border-slate-600 text-slate-200 hover:bg-slate-800/70"
-              @click="closeAddMemberModal"
+              @click="closeModal"
             >
               Cancelar
             </button>
@@ -344,7 +339,13 @@ async function removeMember(id: number) {
   }
 }
 
-function closeAddMemberModal() {
+function openModal() {
+  newMemberName.value = ''
+  newMemberRole.value = quickRole.value
+  showAddMemberModal.value = true
+}
+
+function closeModal() {
   if (saving.value) return
   showAddMemberModal.value = false
 }
