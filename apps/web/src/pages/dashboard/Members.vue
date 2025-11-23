@@ -41,7 +41,7 @@
             <option value="oficial">Oficial</option>
           </select>
 
-          <!-- BOTÃO QUE ABRE O MODAL -->
+          <!-- BOTÃO: sempre habilitado, só trava enquanto estiver salvando -->
           <button
             @click="openAddMemberModal"
             :disabled="adding"
@@ -296,7 +296,7 @@ const loading = ref(true)
 const adding = ref(false)
 const error = ref('')
 
-// cargo padrão sugerido no select
+// cargo padrão sugerido
 const quickRole = ref<GuildMemberRole>('membro')
 
 // modal
@@ -343,13 +343,8 @@ async function removeMember(id: number) {
   }
 }
 
-// abrir modal a partir do botão
+// abre o modal SEM travar pelo estado da guilda
 function openAddMemberModal() {
-  if (!guild.value) {
-    error.value = 'Crie ou selecione uma guilda antes de adicionar membros.'
-    return
-  }
-
   newMemberName.value = ''
   newMemberRole.value = quickRole.value
   showAddMemberModal.value = true
@@ -362,7 +357,10 @@ function closeAddMemberModal() {
 
 // submit do formulário de novo membro
 async function submitNewMember() {
-  if (!guild.value) return
+  if (!guild.value) {
+    error.value = 'Crie uma guilda antes de adicionar membros.'
+    return
+  }
   if (!newMemberName.value.trim()) return
 
   adding.value = true
@@ -398,7 +396,7 @@ async function submitNewMember() {
   }
 }
 
-// quem pode gerenciar (select + remover)
+// quem pode gerenciar cargos/remover
 const canManage = computed(() => {
   if (!auth.user?.id) return false
   const myId = Number(auth.user.id)
