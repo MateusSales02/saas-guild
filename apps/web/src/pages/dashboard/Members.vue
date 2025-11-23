@@ -43,6 +43,7 @@
 
           <!-- BOTÃO: sempre habilitado, só trava enquanto estiver salvando -->
           <button
+            type="button"
             @click="openAddMemberModal"
             :disabled="adding"
             class="inline-flex items-center gap-2 text-xs sm:text-sm px-3.5 py-2 rounded-lg
@@ -199,6 +200,7 @@
       </table>
     </div>
 
+    <!-- MODAL: Novo membro (SEM Teleport, direto na árvore) -->
     <div
       v-if="showAddMemberModal"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
@@ -342,7 +344,7 @@ async function removeMember(id: number) {
 
 // abre o modal SEM travar pelo estado da guilda
 function openAddMemberModal() {
-  console.log('Cliquei em Adicionar-me') // DEBUG
+  console.log('Clique no botão Adicionar-me') // debug pra você ver no console
   newMemberName.value = ''
   newMemberRole.value = quickRole.value
   showAddMemberModal.value = true
