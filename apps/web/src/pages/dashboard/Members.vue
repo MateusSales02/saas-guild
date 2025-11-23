@@ -2,6 +2,12 @@
   <section
     class="rounded-2xl border border-slate-800/70 bg-slate-950/70 px-4 py-5 sm:px-6 sm:py-6 shadow-[0_18px_60px_rgba(15,23,42,0.9)]"
   >
+    <!-- DEBUG VISUAL -->
+    <p class="mb-3 text-[10px] text-emerald-400">
+      DEBUG: Members.vue carregado — showAddMemberModal =
+      <strong>{{ showAddMemberModal ? 'true' : 'false' }}</strong>
+    </p>
+
     <!-- HEADER -->
     <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
       <div>
@@ -41,18 +47,18 @@
             <option value="oficial">Oficial</option>
           </select>
 
-          <!-- BOTÃO: sempre habilitado, só trava enquanto estiver salvando -->
+          <!-- BOTÃO: sempre clicável (só desativa enquanto salva) -->
           <button
             type="button"
             @click="openAddMemberModal"
-            :disabled="adding"
+            :disabled="saving"
             class="inline-flex items-center gap-2 text-xs sm:text-sm px-3.5 py-2 rounded-lg
                    border border-indigo-500/80 bg-indigo-600/90 text-white font-medium
                    shadow-md shadow-indigo-900/40 hover:bg-indigo-500
                    disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             <span
-              v-if="adding"
+              v-if="saving"
               class="h-3 w-3 rounded-full border-2 border-white/60 border-t-transparent animate-spin"
             />
             <span v-else>Adicionar-me</span>
@@ -121,13 +127,10 @@
             v-for="m in members"
             :key="m.id"
             class="border-t border-slate-900/80 hover:bg-slate-900/60 transition"
-            :class="{
-              'bg-slate-900/80': m.user?.id === currentUserId,
-            }"
+            :class="{ 'bg-slate-900/80': m.user?.id === currentUserId }"
           >
             <td class="px-4 py-3">
               <div class="flex items-center gap-3">
-                <!-- avatar com inicial -->
                 <div
                   class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500/90 to-sky-500/90 text-xs font-semibold text-white shadow-md shadow-indigo-900/40"
                 >
@@ -152,14 +155,12 @@
 
             <td class="px-4 py-3 align-middle">
               <div class="flex items-center gap-2">
-                <!-- badge sempre visível -->
                 <span
                   class="inline-flex items-center rounded-full bg-slate-800/70 border border-slate-700 px-2 py-0.5 text-[11px] text-slate-200"
                 >
                   {{ roleLabel(m.role) }}
                 </span>
 
-                <!-- select só para quem pode gerenciar -->
                 <select
                   v-if="canManage"
                   :value="m.role"
@@ -200,7 +201,7 @@
       </table>
     </div>
 
-    <!-- MODAL: Novo membro (SEM Teleport, direto na árvore) -->
+    <!-- MODAL: Novo membro (SEM Teleport) -->
     <div
       v-if="showAddMemberModal"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
@@ -253,13 +254,13 @@
             </button>
             <button
               type="submit"
-              :disabled="adding || !newMemberName.trim()"
+              :disabled="saving || !newMemberName.trim()"
               class="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs rounded-lg
                      bg-indigo-600 hover:bg-indigo-500 text-white font-medium
                      disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span
-                v-if="adding"
+                v-if="saving"
                 class="h-3 w-3 rounded-full border-2 border-white/60 border-t-transparent animate-spin"
               />
               <span v-else>Salvar membro</span>
@@ -292,7 +293,7 @@ type RegisterResponse = {
 const guild = ref<any>(null)
 const members = ref<Member[]>([])
 const loading = ref(true)
-const adding = ref(false)
+const saving = ref(false)
 const error = ref('')
 
 // cargo padrão sugerido
@@ -342,20 +343,20 @@ async function removeMember(id: number) {
   }
 }
 
-// abre o modal SEM travar pelo estado da guilda
+// abre o modal SEM checar guild
 function openAddMemberModal() {
-  console.log('Clique no botão Adicionar-me') // debug pra você ver no console
+  console.log('DEBUG: clique no botão Adicionar-me')
   newMemberName.value = ''
   newMemberRole.value = quickRole.value
   showAddMemberModal.value = true
 }
 
 function closeAddMemberModal() {
-  if (adding.value) return
+  if (saving.value) return
   showAddMemberModal.value = false
 }
 
-// submit do formulário de novo membro
+// submit do formulário de novo membro (agora sim valida guild)
 async function submitNewMember() {
   if (!guild.value) {
     error.value = 'Crie uma guilda antes de adicionar membros.'
@@ -363,7 +364,7 @@ async function submitNewMember() {
   }
   if (!newMemberName.value.trim()) return
 
-  adding.value = true
+  saving.value = true
   error.value = ''
 
   try {
@@ -391,7 +392,7 @@ async function submitNewMember() {
   } catch (e: any) {
     error.value = e.message || 'Falha ao criar membro'
   } finally {
-    adding.value = false
+    saving.value = false
   }
 }
 
