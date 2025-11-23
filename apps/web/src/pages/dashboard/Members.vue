@@ -41,7 +41,7 @@
             <option value="oficial">Oficial</option>
           </select>
 
-          <!-- BOTÃO NOVO MEMBRO -->
+          <!-- BOTÃO QUE ABRE O MODAL -->
           <button
             @click="openAddMemberModal"
             :disabled="adding"
@@ -54,7 +54,7 @@
               v-if="adding"
               class="h-3 w-3 rounded-full border-2 border-white/60 border-t-transparent animate-spin"
             />
-            <span v-else>Novo membro</span>
+            <span v-else>Adicionar-me</span>
           </button>
         </div>
       </div>
@@ -190,7 +190,7 @@
                 <span class="text-2xl">✨</span>
                 <span class="font-medium text-slate-200">Nenhum membro ainda.</span>
                 <span class="text-xs text-slate-400">
-                  Use o botão <strong>“Novo membro”</strong> para adicionar o primeiro jogador.
+                  Use o botão <strong>“Adicionar-me”</strong> para adicionar o primeiro jogador.
                 </span>
               </div>
             </td>
@@ -296,7 +296,7 @@ const loading = ref(true)
 const adding = ref(false)
 const error = ref('')
 
-// cargo padrão para o modal
+// cargo padrão sugerido no select
 const quickRole = ref<GuildMemberRole>('membro')
 
 // modal
@@ -343,7 +343,7 @@ async function removeMember(id: number) {
   }
 }
 
-// modal helpers
+// abrir modal a partir do botão
 function openAddMemberModal() {
   if (!guild.value) {
     error.value = 'Crie ou selecione uma guilda antes de adicionar membros.'
@@ -360,6 +360,7 @@ function closeAddMemberModal() {
   showAddMemberModal.value = false
 }
 
+// submit do formulário de novo membro
 async function submitNewMember() {
   if (!guild.value) return
   if (!newMemberName.value.trim()) return
@@ -368,7 +369,6 @@ async function submitNewMember() {
   error.value = ''
 
   try {
-    // gera um e-mail e senha "fake" pro jogador
     const safeName = newMemberName.value
       .trim()
       .toLowerCase()
@@ -382,7 +382,7 @@ async function submitNewMember() {
       email,
       password,
       nickname: newMemberName.value.trim(),
-      role: 'user', // papel geral do sistema
+      role: 'user',
     })
 
     const userId = res.user.id
@@ -398,7 +398,7 @@ async function submitNewMember() {
   }
 }
 
-// posso gerenciar cargos/membros?
+// quem pode gerenciar (select + remover)
 const canManage = computed(() => {
   if (!auth.user?.id) return false
   const myId = Number(auth.user.id)
@@ -406,7 +406,6 @@ const canManage = computed(() => {
   return me?.role === 'líder' || me?.role === 'oficial'
 })
 
-// label PT-BR pro select
 function roleLabel(role: GuildMemberRole) {
   switch (role) {
     case 'líder':
