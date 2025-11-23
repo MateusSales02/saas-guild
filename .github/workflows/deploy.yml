@@ -2,31 +2,30 @@ name: Deploy to EC2
 
 on:
   push:
-    branches: [ main ]   # ou a branch que você usa como principal
+    branches: [ "main" ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout código
-        uses: actions/checkout@v4
+    - name: Checkout código
+      uses: actions/checkout@v4
 
-      - name: Deploy via SSH para EC2
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
-          script_stop: true
+    - name: Deploy via SSH para EC2
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        port: 22
+        script_stop: true
+        script: |
+          echo "== [CI] Indo para pasta do projeto =="
+          cd ~/saas-guild
 
-          script: |
-            echo "== [CI] Indo para pasta do projeto =="
-            cd ~/saas-guild
+          echo "== [CI] Garantindo permissão =="
+          chmod +x deploy.sh
 
-            echo "== [CI] Garantindo permissão no deploy.sh =="
-            chmod +x deploy.sh
-
-            echo "== [CI] Rodando deploy.sh =="
-            ./deploy.sh
+          echo "== [CI] Rodando deploy.sh =="
+          ./deploy.sh
