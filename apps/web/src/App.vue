@@ -51,8 +51,10 @@
 import { computed } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 
+import { auth } from '@/stores/auth'
+
 const route = useRoute()
-const authed = computed(() => !!localStorage.getItem('authUser'))
+const authed = computed(() => !!auth.token)
 const hideHeader = computed(() => route.meta.hideHeader === true)
 
 const AppLink = {
