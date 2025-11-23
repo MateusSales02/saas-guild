@@ -30,21 +30,21 @@
           </span>
         </div>
 
-        <!-- seleção de cargo + botão -->
+        <!-- seleção de cargo padrão + botão -->
         <div class="flex items-center gap-2">
           <select
             v-model="quickRole"
             class="text-sm px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700 outline-none"
           >
-            <!-- label em PT-BR, value em inglês -->
             <option value="membro">Membro</option>
             <option value="líder">Líder</option>
             <option value="oficial">Oficial</option>
           </select>
 
           <button
-            @click="addMe"
-            :disabled="!guild || adding || alreadyMember"
+            v-if="canManage"
+            @click="openAddMemberModal"
+            :disabled="!guild || adding"
             class="inline-flex items-center gap-2 text-xs sm:text-sm px-3.5 py-2 rounded-lg
                    border border-indigo-500/80 bg-indigo-600/90 text-white font-medium
                    shadow-md shadow-indigo-900/40 hover:bg-indigo-500
@@ -54,8 +54,7 @@
               v-if="adding"
               class="h-3 w-3 rounded-full border-2 border-white/60 border-t-transparent animate-spin"
             />
-            <span v-else-if="alreadyMember">Você já está na guilda</span>
-            <span v-else>Adicionar-me</span>
+            <span v-else>Novo membro</span>
           </button>
         </div>
       </div>
@@ -135,7 +134,7 @@
                 </div>
                 <div class="min-w-0">
                   <div class="font-medium text-slate-50 truncate">
-                    {{ m.user?.nickname || m.user?.email }}
+                    {{ m.user?.nickname || m.user?.email || '—' }}
                     <span
                       v-if="m.user?.id === currentUserId"
                       class="ml-1 rounded-full bg-indigo-500/20 px-2 py-0.5 text-[10px] font-semibold text-indigo-200"
@@ -144,7 +143,7 @@
                     </span>
                   </div>
                   <div class="opacity-70 text-[11px] text-slate-400 truncate">
-                    {{ m.user?.email }}
+                    {{ m.user?.email || 'Sem e-mail' }}
                   </div>
                 </div>
               </div>
@@ -163,12 +162,12 @@
                 <select
                   v-if="canManage"
                   :value="m.role"
-                  @change="(e: any) => updateRole(m.id, e.target.value)"
+                  @change="(e: any) => updateRole(m.id, e.target.value as GuildMemberRole)"
                   class="px-2 py-1 rounded bg-slate-800/40 border border-slate-700 outline-none text-[11px]"
                 >
-                  <option value="member">Membro</option>
-                  <option value="leader">Líder</option>
-                  <option value="officer">Oficial</option>
+                  <option value="membro">Membro</option>
+                  <option value="líder">Líder</option>
+                  <option value="oficial">Oficial</option>
                 </select>
               </div>
             </td>
@@ -191,7 +190,7 @@
                 <span class="text-2xl">✨</span>
                 <span class="font-medium text-slate-200">Nenhum membro ainda.</span>
                 <span class="text-xs text-slate-400">
-                  Use o botão <strong>“Adicionar-me”</strong> para ser o primeiro membro da guilda.
+                  Use o botão <strong>“Novo membro”</strong> para adicionar o primeiro jogador.
                 </span>
               </div>
             </td>
@@ -199,12 +198,83 @@
         </tbody>
       </table>
     </div>
+
+    <!-- MODAL: Novo membro -->
+    <Teleport to="body">
+      <div
+        v-if="showAddMemberModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+      >
+        <div
+          class="w-[90%] max-w-md rounded-2xl bg-slate-900 border border-slate-700 p-5 shadow-2xl"
+        >
+          <header class="mb-4 flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-slate-50">Adicionar membro</h3>
+            <button
+              type="button"
+              class="text-slate-400 hover:text-slate-200 text-xs"
+              @click="closeAddMemberModal"
+            >
+              ✕
+            </button>
+          </header>
+
+          <form class="space-y-4" @submit.prevent="submitNewMember">
+            <div class="space-y-1">
+              <label class="text-xs font-medium text-slate-300">Nome do jogador</label>
+              <input
+                v-model="newMemberName"
+                type="text"
+                required
+                class="w-full rounded-lg bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500"
+                placeholder="Ex.: Guerreiro Supremo"
+              />
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-xs font-medium text-slate-300">Cargo</label>
+              <select
+                v-model="newMemberRole"
+                class="w-full rounded-lg bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500"
+              >
+                <option value="membro">Membro</option>
+                <option value="líder">Líder</option>
+                <option value="oficial">Oficial</option>
+              </select>
+            </div>
+
+            <div class="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                class="px-3 py-1.5 text-xs rounded-lg border border-slate-600 text-slate-200 hover:bg-slate-800/70"
+                @click="closeAddMemberModal"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                :disabled="adding || !newMemberName.trim()"
+                class="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs rounded-lg
+                       bg-indigo-600 hover:bg-indigo-500 text-white font-medium
+                       disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span
+                  v-if="adding"
+                  class="h-3 w-3 rounded-full border-2 border-white/60 border-t-transparent animate-spin"
+                />
+                <span v-else>Salvar membro</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Teleport>
   </section>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
-import { GuildsApi, MembersApi } from '@/lib/api'
+import { GuildsApi, MembersApi, postJSON } from '@/lib/api'
 import { auth } from '@/stores/auth'
 
 type GuildMemberRole = 'membro' | 'líder' | 'oficial'
@@ -215,14 +285,24 @@ type Member = {
   user: { id: number; email: string; nickname?: string }
 }
 
+type RegisterResponse = {
+  token: string
+  user: { id: number }
+}
+
 const guild = ref<any>(null)
 const members = ref<Member[]>([])
 const loading = ref(true)
 const adding = ref(false)
 const error = ref('')
 
-// AGORA o quickRole usa o MESMO tipo do back (member/leader/officer)
+// cargo padrão para o modal
 const quickRole = ref<GuildMemberRole>('membro')
+
+// modal
+const showAddMemberModal = ref(false)
+const newMemberName = ref('')
+const newMemberRole = ref<GuildMemberRole>('membro')
 
 const currentUserId = computed(() => {
   if (!auth.user?.id) return -1
@@ -245,21 +325,6 @@ async function load() {
   }
 }
 
-async function addMe() {
-  if (!guild.value || !auth.user?.id) return
-  adding.value = true
-  error.value = ''
-  try {
-    // role já está em inglês (member/leader/officer)
-    await MembersApi.add(Number(auth.user.id), guild.value.id, quickRole.value)
-    await load()
-  } catch (e: any) {
-    error.value = e.message || 'Falha ao adicionar'
-  } finally {
-    adding.value = false
-  }
-}
-
 async function updateRole(id: number, role: GuildMemberRole) {
   try {
     await MembersApi.update(id, role)
@@ -278,14 +343,56 @@ async function removeMember(id: number) {
   }
 }
 
-/* --- extras bonitinhos (se já não tiver no teu template, não precisa usar) --- */
+// modal helpers
+function openAddMemberModal() {
+  if (!guild.value) return
+  newMemberName.value = ''
+  newMemberRole.value = quickRole.value
+  showAddMemberModal.value = true
+}
 
-// já sou membro?
-const alreadyMember = computed(() => {
-  if (!auth.user?.id) return false
-  const myId = Number(auth.user.id)
-  return members.value.some((m) => m.user?.id === myId)
-})
+function closeAddMemberModal() {
+  if (adding.value) return
+  showAddMemberModal.value = false
+}
+
+async function submitNewMember() {
+  if (!guild.value) return
+  if (!newMemberName.value.trim()) return
+
+  adding.value = true
+  error.value = ''
+
+  try {
+    // gera um e-mail e senha "fake" pro jogador
+    const safeName = newMemberName.value
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '.')
+      .replace(/[^a-z0-9.]/g, '')
+
+    const email = `${safeName || 'user'}.${Date.now()}@guild.local`
+    const password = Math.random().toString(36).slice(-10)
+
+    const res = await postJSON<RegisterResponse>('/auth/register', {
+      email,
+      password,
+      nickname: newMemberName.value.trim(),
+      role: 'user', // papel geral do sistema, diferente de 'membro/líder/oficial' da guilda
+    })
+
+    const userId = res.user.id
+
+    await MembersApi.add(userId, guild.value.id, newMemberRole.value)
+
+    showAddMemberModal.value = false
+    await load()
+  } catch (e: any) {
+    error.value = e.message || 'Falha ao criar membro'
+  } finally {
+    adding.value = false
+  }
+}
 
 // posso gerenciar cargos/membros?
 const canManage = computed(() => {
@@ -295,7 +402,7 @@ const canManage = computed(() => {
   return me?.role === 'líder' || me?.role === 'oficial'
 })
 
-// label PT-BR pro select, se quiser usar no template
+// label PT-BR pro select
 function roleLabel(role: GuildMemberRole) {
   switch (role) {
     case 'líder':
@@ -307,4 +414,3 @@ function roleLabel(role: GuildMemberRole) {
   }
 }
 </script>
-
