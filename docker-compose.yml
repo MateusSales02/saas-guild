@@ -22,13 +22,22 @@ services:
       - "6379:6379"
 
   api:
-    build:
-      context: ./apps/api
-      dockerfile: Dockerfile
-    container_name: saas_api
+    build: ./apps/api
+    container_name: saas_guild_api
     restart: always
-    ports:
-      - "3000:3000"
+    env_file:
+      - ./apps/api/.env
     depends_on:
       - db
       - redis
+    ports:
+      - "3000:3000"
+
+  web:
+    build: ./apps/web
+    container_name: saas_guild_web
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - api
