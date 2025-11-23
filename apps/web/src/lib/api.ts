@@ -66,10 +66,10 @@ export const MembersApi = {
   listByGuild(guildId: number) {
     return api.get('/guild-members', { params: { guildId } }).then((r) => r.data)
   },
-  add(userId: number, guildId: number, role: 'membro' | 'líder' | 'oficial') {
+  add(userId: number, guildId: number, role: 'member' | 'leader' | 'officer') {
     return api.post('/guild-members', { userId, guildId, role }).then((r) => r.data)
   },
-  update(id: number, role: 'membro' | 'líder' | 'oficial') {
+  update(id: number, role: 'member' | 'leader' | 'officer') {
     return api.put(`/guild-members/${id}`, { role }).then((r) => r.data)
   },
   remove(id: number) {

@@ -42,15 +42,16 @@
             v-model="quickRole"
             class="text-sm px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700 outline-none"
           >
-            <option value="membro">Membro</option>
-            <option value="líder">Líder</option>
-            <option value="oficial">Oficial</option>
+            <!-- value em inglês, label em PT-BR -->
+            <option value="member">Membro</option>
+            <option value="leader">Líder</option>
+            <option value="officer">Oficial</option>
           </select>
 
           <!-- BOTÃO: sempre clicável (só desativa enquanto salva) -->
           <button
             type="button"
-            @click="openAddMemberModal"
+            @click="showAddMemberModal = true"
             :disabled="saving"
             class="inline-flex items-center gap-2 text-xs sm:text-sm px-3.5 py-2 rounded-lg
                    border border-indigo-500/80 bg-indigo-600/90 text-white font-medium
@@ -164,12 +165,12 @@
                 <select
                   v-if="canManage"
                   :value="m.role"
-                  @change="(e: any) => updateRole(m.id, e.target.value as GuildMemberRole)"
+                  @change="(e: any) => updateRole(m.id, e.target.value)"
                   class="px-2 py-1 rounded bg-slate-800/40 border border-slate-700 outline-none text-[11px]"
                 >
-                  <option value="membro">Membro</option>
-                  <option value="líder">Líder</option>
-                  <option value="oficial">Oficial</option>
+                  <option value="member">Membro</option>
+                  <option value="leader">Líder</option>
+                  <option value="officer">Oficial</option>
                 </select>
               </div>
             </td>
@@ -201,7 +202,7 @@
       </table>
     </div>
 
-    <!-- MODAL: Novo membro (SEM Teleport) -->
+    <!-- MODAL: Novo membro -->
     <div
       v-if="showAddMemberModal"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
@@ -238,9 +239,9 @@
               v-model="newMemberRole"
               class="w-full rounded-lg bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500"
             >
-              <option value="membro">Membro</option>
-              <option value="líder">Líder</option>
-              <option value="oficial">Oficial</option>
+              <option value="member">Membro</option>
+              <option value="leader">Líder</option>
+              <option value="officer">Oficial</option>
             </select>
           </div>
 
@@ -277,7 +278,7 @@ import { onMounted, ref, computed } from 'vue'
 import { GuildsApi, MembersApi, postJSON } from '@/lib/api'
 import { auth } from '@/stores/auth'
 
-type GuildMemberRole = 'membro' | 'líder' | 'oficial'
+type GuildMemberRole = 'member' | 'leader' | 'officer'
 
 type Member = {
   id: number
@@ -297,12 +298,12 @@ const saving = ref(false)
 const error = ref('')
 
 // cargo padrão sugerido
-const quickRole = ref<GuildMemberRole>('membro')
+const quickRole = ref<GuildMemberRole>('member')
 
 // modal
 const showAddMemberModal = ref(false)
 const newMemberName = ref('')
-const newMemberRole = ref<GuildMemberRole>('membro')
+const newMemberRole = ref<GuildMemberRole>('member')
 
 const currentUserId = computed(() => {
   if (!auth.user?.id) return -1
@@ -325,9 +326,9 @@ async function load() {
   }
 }
 
-async function updateRole(id: number, role: GuildMemberRole) {
+async function updateRole(id: number, role: string) {
   try {
-    await MembersApi.update(id, role)
+    await MembersApi.update(id, role as GuildMemberRole)
   } catch (e: any) {
     error.value = e.message || 'Falha ao atualizar cargo'
     await load()
@@ -343,20 +344,12 @@ async function removeMember(id: number) {
   }
 }
 
-// abre o modal SEM checar guild
-function openAddMemberModal() {
-  console.log('DEBUG: clique no botão Adicionar-me')
-  newMemberName.value = ''
-  newMemberRole.value = quickRole.value
-  showAddMemberModal.value = true
-}
-
 function closeAddMemberModal() {
   if (saving.value) return
   showAddMemberModal.value = false
 }
 
-// submit do formulário de novo membro (agora sim valida guild)
+// submit do formulário de novo membro
 async function submitNewMember() {
   if (!guild.value) {
     error.value = 'Crie uma guilda antes de adicionar membros.'
@@ -401,14 +394,14 @@ const canManage = computed(() => {
   if (!auth.user?.id) return false
   const myId = Number(auth.user.id)
   const me = members.value.find((m) => m.user?.id === myId)
-  return me?.role === 'líder' || me?.role === 'oficial'
+  return me?.role === 'leader' || me?.role === 'officer'
 })
 
 function roleLabel(role: GuildMemberRole) {
   switch (role) {
-    case 'líder':
+    case 'leader':
       return 'Líder'
-    case 'oficial':
+    case 'officer':
       return 'Oficial'
     default:
       return 'Membro'
