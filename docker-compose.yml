@@ -20,3 +20,15 @@ services:
     restart: always
     ports:
       - "6379:6379"
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: saas_api
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - redis
