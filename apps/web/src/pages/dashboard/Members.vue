@@ -345,6 +345,7 @@ async function removeMember(id: number) {
 
 // abre o modal SEM travar pelo estado da guilda
 function openAddMemberModal() {
+  // mesmo que não tenha guild ainda, deixa abrir o modal
   newMemberName.value = ''
   newMemberRole.value = quickRole.value
   showAddMemberModal.value = true
@@ -384,7 +385,6 @@ async function submitNewMember() {
     })
 
     const userId = res.user.id
-
     await MembersApi.add(userId, guild.value.id, newMemberRole.value)
 
     showAddMemberModal.value = false
