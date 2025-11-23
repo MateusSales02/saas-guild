@@ -199,76 +199,73 @@
       </table>
     </div>
 
-    <!-- MODAL: Novo membro -->
-    <Teleport to="body">
+    <div
+      v-if="showAddMemberModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+    >
       <div
-        v-if="showAddMemberModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+        class="w-[90%] max-w-md rounded-2xl bg-slate-900 border border-slate-700 p-5 shadow-2xl"
       >
-        <div
-          class="w-[90%] max-w-md rounded-2xl bg-slate-900 border border-slate-700 p-5 shadow-2xl"
-        >
-          <header class="mb-4 flex items-center justify-between">
-            <h3 class="text-sm font-semibold text-slate-50">Adicionar membro</h3>
+        <header class="mb-4 flex items-center justify-between">
+          <h3 class="text-sm font-semibold text-slate-50">Adicionar membro</h3>
+          <button
+            type="button"
+            class="text-slate-400 hover:text-slate-200 text-xs"
+            @click="closeAddMemberModal"
+          >
+            ✕
+          </button>
+        </header>
+
+        <form class="space-y-4" @submit.prevent="submitNewMember">
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-300">Nome do jogador</label>
+            <input
+              v-model="newMemberName"
+              type="text"
+              required
+              class="w-full rounded-lg bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500"
+              placeholder="Ex.: Guerreiro Supremo"
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-300">Cargo</label>
+            <select
+              v-model="newMemberRole"
+              class="w-full rounded-lg bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500"
+            >
+              <option value="membro">Membro</option>
+              <option value="líder">Líder</option>
+              <option value="oficial">Oficial</option>
+            </select>
+          </div>
+
+          <div class="mt-5 flex justify-end gap-2">
             <button
               type="button"
-              class="text-slate-400 hover:text-slate-200 text-xs"
+              class="px-3 py-1.5 text-xs rounded-lg border border-slate-600 text-slate-200 hover:bg-slate-800/70"
               @click="closeAddMemberModal"
             >
-              ✕
+              Cancelar
             </button>
-          </header>
-
-          <form class="space-y-4" @submit.prevent="submitNewMember">
-            <div class="space-y-1">
-              <label class="text-xs font-medium text-slate-300">Nome do jogador</label>
-              <input
-                v-model="newMemberName"
-                type="text"
-                required
-                class="w-full rounded-lg bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500"
-                placeholder="Ex.: Guerreiro Supremo"
+            <button
+              type="submit"
+              :disabled="adding || !newMemberName.trim()"
+              class="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs rounded-lg
+                     bg-indigo-600 hover:bg-indigo-500 text-white font-medium
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span
+                v-if="adding"
+                class="h-3 w-3 rounded-full border-2 border-white/60 border-t-transparent animate-spin"
               />
-            </div>
-
-            <div class="space-y-1">
-              <label class="text-xs font-medium text-slate-300">Cargo</label>
-              <select
-                v-model="newMemberRole"
-                class="w-full rounded-lg bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500"
-              >
-                <option value="membro">Membro</option>
-                <option value="líder">Líder</option>
-                <option value="oficial">Oficial</option>
-              </select>
-            </div>
-
-            <div class="mt-5 flex justify-end gap-2">
-              <button
-                type="button"
-                class="px-3 py-1.5 text-xs rounded-lg border border-slate-600 text-slate-200 hover:bg-slate-800/70"
-                @click="closeAddMemberModal"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                :disabled="adding || !newMemberName.trim()"
-                class="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs rounded-lg
-                       bg-indigo-600 hover:bg-indigo-500 text-white font-medium
-                       disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span
-                  v-if="adding"
-                  class="h-3 w-3 rounded-full border-2 border-white/60 border-t-transparent animate-spin"
-                />
-                <span v-else>Salvar membro</span>
-              </button>
-            </div>
-          </form>
-        </div>
+              <span v-else>Salvar membro</span>
+            </button>
+          </div>
+        </form>
       </div>
-    </Teleport>
+    </div>
   </section>
 </template>
 
@@ -345,7 +342,7 @@ async function removeMember(id: number) {
 
 // abre o modal SEM travar pelo estado da guilda
 function openAddMemberModal() {
-  // mesmo que não tenha guild ainda, deixa abrir o modal
+  console.log('Cliquei em Adicionar-me') // DEBUG
   newMemberName.value = ''
   newMemberRole.value = quickRole.value
   showAddMemberModal.value = true
