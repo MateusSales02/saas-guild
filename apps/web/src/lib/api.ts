@@ -5,8 +5,11 @@
 import axios from 'axios'
 import { auth, setSession } from '@/stores/auth'
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ?? (import.meta.env.PROD ? 'http://54.161.67.120' : 'http://localhost:3000')
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:3000',
+  baseURL: API_BASE_URL,
 })
 
 api.interceptors.request.use((config) => {
