@@ -25,10 +25,18 @@ export const AuthApi = {
     return res.data
   },
 
-  async register(email: string, password: string, nickname: string, role: string) {
-    const res = await api.post('/auth/register', { email, password, nickname, role })
+  // registro público -> sempre cria LEADER no backend
+  async register(email: string, password: string, nickname: string) {
+    const res = await api.post('/auth/register', { email, password, nickname })
     const { token, user } = res.data
     setSession(token, user)
+    return res.data
+  },
+
+  // criar jogador "player" (para usar em Members.vue)
+  async createPlayer(email: string, password: string, nickname: string) {
+    const res = await api.post('/auth/players', { email, password, nickname })
+    // NÃO faz login, nem chama setSession
     return res.data
   },
 
