@@ -1,14 +1,11 @@
-# Etapa 1: build do front
-FROM node:20-alpine AS build
-WORKDIR /app
-COPY package*.json ./
-RUN npm install -g pnpm
-RUN pnpm install
-COPY . .
-RUN pnpm run build
+FROM node:20-alpine
 
-# Etapa 2: servir via Nginx
-FROM nginx:stable-alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+
+RUN npm install --production
+
+COPY . .
+
+CMD ["npm", "run", "start:prod"]
