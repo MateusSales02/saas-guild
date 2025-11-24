@@ -22,7 +22,7 @@ const router = createRouter({
     {
       path: '/logout',
       name: 'logout',
-      beforeEnter: () => {
+      redirect: () => {
         clearSession()
         return { name: 'login' }
       },
