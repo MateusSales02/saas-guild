@@ -84,9 +84,9 @@ jobs:
           export API_IMAGE="$API_IMAGE"
           export WEB_IMAGE="$WEB_IMAGE"
 
-          sudo -E docker compose -f docker-compose.prod.yml pull
-          sudo -E docker compose -f docker-compose.prod.yml up -d
+          sudo -E docker-compose -f docker-compose.prod.yml pull
+          sudo -E docker-compose -f docker-compose.prod.yml up -d
 
           sleep 10
-          sudo docker compose -f docker-compose.prod.yml ps
+          sudo docker-compose -f docker-compose.prod.yml ps
           echo "Deploy OK"
