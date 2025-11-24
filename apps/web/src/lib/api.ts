@@ -93,11 +93,12 @@ export const EventsApi = {
     return api.get('/events', { params: { guildId } }).then((r) => r.data)
   },
   create(payload: {
+    title: string
+    description: string
+    date: string
+    type: 'RAID' | 'GATHERING' | 'DUNGEON' | 'PVP'
+    location?: string
     guildId: number
-    name: string
-    description?: string
-    event_date: string
-    recurring: boolean
   }) {
     return api.post('/events', payload).then((r) => r.data)
   },

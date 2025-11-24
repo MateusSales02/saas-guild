@@ -18,16 +18,19 @@ export class Event {
   guild: Guild;
 
   @Column()
-  name: string;
+  title: string;
 
-  @Column({ nullable: true })
+  @Column()
   description: string;
 
   @Column()
-  event_date: Date;
+  date: Date;
 
-  @Column({ default: false })
-  recurring: boolean;
+  @Column()
+  type: string; // RAID, GATHERING, DUNGEON, PVP
+
+  @Column({ nullable: true })
+  location: string;
 
   @CreateDateColumn()
   created_at: Date;
