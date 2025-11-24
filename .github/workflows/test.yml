@@ -1,0 +1,72 @@
+name: Tests
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-api:
+    name: API Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 9
+
+    - name: Install dependencies
+      working-directory: ./apps/api
+      run: pnpm install
+
+    - name: Run tests with coverage
+      working-directory: ./apps/api
+      run: pnpm test:cov
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: api-coverage
+        path: apps/api/coverage
+
+  test-web:
+    name: Web Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 9
+
+    - name: Install dependencies
+      working-directory: ./apps/web
+      run: pnpm install
+
+    - name: Run tests with coverage
+      working-directory: ./apps/web
+      run: pnpm test:coverage
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: web-coverage
+        path: apps/web/coverage

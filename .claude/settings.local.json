@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(cat:*)",
-      "Bash(git remote:*)"
+      "Bash(git remote:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []
