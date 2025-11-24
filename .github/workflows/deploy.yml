@@ -46,11 +46,6 @@ jobs:
         push: true
         tags: ${{ steps.vars.outputs.web_image }}:latest,${{ steps.vars.outputs.web_image }}:${{ github.sha }}
 
-    - name: Save image names
-      run: |
-        echo "API_IMAGE=${{ steps.vars.outputs.api_image }}:latest" >> $GITHUB_ENV
-        echo "WEB_IMAGE=${{ steps.vars.outputs.web_image }}:latest" >> $GITHUB_ENV
-
     outputs:
       api_image: ${{ steps.vars.outputs.api_image }}:latest
       web_image: ${{ steps.vars.outputs.web_image }}:latest
@@ -70,24 +65,12 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
-        script_stop: true
-        command_timeout: 10m
+        command_timeout: 3m
         envs: API_IMAGE,WEB_IMAGE
         script: |
-          set -e
-
-          cd ~/saas-guild || { git clone https://github.com/${{ github.repository }} ~/saas-guild && cd ~/saas-guild; }
-
-          git fetch --all
-          git reset --hard origin/main
-
+          cd ~/saas-guild && git fetch --all && git reset --hard origin/main
           export API_IMAGE="$API_IMAGE"
           export WEB_IMAGE="$WEB_IMAGE"
-
-          sudo -E docker-compose -f docker-compose.prod.yml pull
-          sudo -E docker-compose -f docker-compose.prod.yml up -d --no-deps db redis
+          sudo -E docker-compose -f docker-compose.prod.yml pull --quiet
           sudo -E docker-compose -f docker-compose.prod.yml up -d
-
-          echo "Deploy iniciado - containers subindo em background"
-          sudo docker-compose -f docker-compose.prod.yml ps
           echo "Deploy OK"
