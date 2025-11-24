@@ -1,17 +1,44 @@
-FROM node:20-alpine
+# Stage 1: Build
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copia apenas arquivos essenciais
+# Copia arquivos de dependências
 COPY package.json package-lock.json ./
 
-# Instalações apenas de produção
-RUN npm install --omit=dev
+# Instala TODAS as dependências (incluindo devDependencies para build)
+RUN npm ci
 
-# Agora copia o restante do código
+# Copia código fonte
 COPY . .
 
-# Build (caso seu Nest use build)
+# Compila TypeScript
 RUN npm run build
 
-CMD ["npm", "run", "start:prod"]
+# Stage 2: Production
+FROM node:20-alpine AS production
+
+WORKDIR /app
+
+# Copia arquivos de dependências
+COPY package.json package-lock.json ./
+
+# Instala apenas dependências de produção
+RUN npm ci --omit=dev
+
+# Copia código compilado do stage anterior
+COPY --from=builder /app/dist ./dist
+
+# Copia arquivo de configuração (se existir)
+COPY --from=builder /app/.env* ./
+
+# Usuário não-root para segurança
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001 -G nodejs && \
+    chown -R nestjs:nodejs /app
+
+USER nestjs
+
+EXPOSE 3000
+
+CMD ["node", "dist/main.js"]

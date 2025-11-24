@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, StrategyOptions } from 'passport-jwt';
 import type { Request } from 'express';
 
-type JwtPayload = {
+export type JwtPayload = {
   sub: number;
   email: string;
   role: string;
@@ -32,14 +33,17 @@ interface JwtOpts {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(private readonly config: ConfigService) {
+    const secret = config.get<string>('JWT_SECRET');
+    if (!secret) {
+      throw new Error('JWT_SECRET não configurado. Defina a variável de ambiente.');
+    }
+
     const opts: JwtOpts = {
       jwtFromRequest: bearerExtractor,
-      secretOrKey: process.env.JWT_SECRET ?? 'dev-secret',
+      secretOrKey: secret,
     };
 
-    // O construtor do Strategy aceita StrategyOptions.
-    // Esta conversão é segura e evita os falsos-positivos do linter.
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     super(opts as unknown as StrategyOptions);
   }
