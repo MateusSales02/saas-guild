@@ -82,12 +82,12 @@ jobs:
           # Parar containers antigos
           sudo docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
 
-          # Limpar imagens Docker antigas para liberar espaço (mantém apenas as mais recentes)
-          echo "Limpando imagens Docker antigas..."
-          sudo docker image prune -a -f --filter "until=24h"
+          # Limpar TUDO do Docker (imagens, containers, volumes, networks)
+          echo "Limpando Docker completamente..."
+          sudo docker system prune -a -f --volumes
 
-          # Remover volumes não utilizados
-          sudo docker volume prune -f
+          # Limpar logs do sistema para liberar mais espaço
+          sudo journalctl --vacuum-size=50M
 
           export API_IMAGE="$API_IMAGE"
           export WEB_IMAGE="$WEB_IMAGE"
