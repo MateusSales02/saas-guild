@@ -36,10 +36,15 @@ services:
     build: ./apps/api
     container_name: saas_guild_api
     restart: always
-    env_file:
-      - ./apps/api/.env
     environment:
-      - NODE_ENV=production
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: saas_user
+      DB_PASSWORD: saas_pass
+      DB_DATABASE: saas_guild
+      PORT: 3000
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:-sua-chave-secreta-mude-em-producao}
     depends_on:
       db:
         condition: service_healthy
