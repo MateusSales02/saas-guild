@@ -7,7 +7,7 @@ import { CreatePlayerDto } from './dto/create-player.dto';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Roles } from './decorators/roles.decorator';
 import { RolesGuard } from './guards/roles.guard';
-import { JwtPayload } from './jwt.strategy';
+import type { JwtPayload } from './jwt.strategy';
 
 @Controller('auth')
 export class AuthController {
