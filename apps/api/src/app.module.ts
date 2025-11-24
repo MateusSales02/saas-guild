@@ -31,8 +31,9 @@ import { AuditModule } from './audit/audit.module';
         password: config.get<string>('DB_PASSWORD', 'saas_pass'),
         database: config.get<string>('DB_DATABASE', 'saas_guild'),
         autoLoadEntities: true,
-        // Em produção, usar migrations em vez de synchronize
-        synchronize: config.get<string>('NODE_ENV') !== 'production',
+        // Synchronize habilitado - cria/atualiza tabelas automaticamente
+        // Para produção real, usar migrations
+        synchronize: true,
       }),
     }),
     ScheduleModule.forRoot(),
