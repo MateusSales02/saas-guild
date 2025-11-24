@@ -92,7 +92,7 @@ describe('AuthService', () => {
       expect(bcrypt.hash).toHaveBeenCalledWith(registerDto.password, 12);
       expect(mockUsersRepo.create).toHaveBeenCalled();
       expect(mockUsersRepo.save).toHaveBeenCalled();
-      expect(mockGuildsService.createGuildWithLeader).toHaveBeenCalledWith(1, `Guilda de ${registerDto.nickname}`);
+      expect(mockGuildsService.createGuildWithLeader).toHaveBeenCalledWith(1, registerDto.nickname);
       expect(result).toHaveProperty('token', 'mock_token');
       expect(result).toHaveProperty('guild');
       expect(result.guild).toHaveProperty('id', 1);
