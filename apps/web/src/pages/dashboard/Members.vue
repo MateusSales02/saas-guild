@@ -308,7 +308,7 @@ async function load() {
     if (guild.value) {
       members.value = await MembersApi.listByGuild(guild.value.id)
     } else {
-      error.value = 'Nenhuma guilda associada ao usuário.'
+      // Se não houver guilda, simplesmente não carrega membros
       members.value = []
     }
   } catch (e: any) {
