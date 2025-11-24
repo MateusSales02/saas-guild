@@ -3,7 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuditService, AuditLogFilter } from './audit.service';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { AuditAction } from './audit-log.entity';
+import type { AuditAction } from './audit-log.entity';
 
 @Controller('audit')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
