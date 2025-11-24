@@ -28,3 +28,6 @@ data/
 
 # arquivos de build do TypeScript
 *.tsbuildinfo
+
+# Backups
+apps/api/api-backup/
