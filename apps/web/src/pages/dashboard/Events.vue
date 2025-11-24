@@ -15,9 +15,9 @@
     <!-- form novo evento -->
     <div v-if="showForm" class="mb-5 grid gap-3 md:grid-cols-4">
       <input
-        v-model="form.name"
+        v-model="form.title"
         type="text"
-        placeholder="Nome do evento"
+        placeholder="Título do evento"
         class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700 outline-none"
       />
       <input
@@ -26,6 +26,15 @@
         placeholder="Descrição (opcional)"
         class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700 outline-none md:col-span-2"
       />
+      <select
+        v-model="form.type"
+        class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700 outline-none"
+      >
+        <option value="GATHERING">Reunião</option>
+        <option value="RAID">Raid</option>
+        <option value="DUNGEON">Dungeon</option>
+        <option value="PVP">PvP</option>
+      </select>
       <div class="grid grid-cols-2 gap-3 md:col-span-2">
         <input
           v-model="form.date"
@@ -39,13 +48,15 @@
           class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700 outline-none"
         />
       </div>
-      <label class="flex items-center gap-2">
-        <input v-model="form.recurring" type="checkbox" class="accent-blue-500" />
-        Recorrente
-      </label>
+      <input
+        v-model="form.location"
+        type="text"
+        placeholder="Local (opcional)"
+        class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700 outline-none"
+      />
       <button
         @click="createEvent"
-        :disabled="creating || !form.name || !form.date || !form.time || !guild"
+        :disabled="creating || !form.title || !form.date || !form.time || !guild"
         class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
       >
         {{ creating ? 'Criando...' : 'Criar' }}
@@ -61,10 +72,10 @@
         :key="ev.id"
         class="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-900/40"
       >
-        <div class="text-xs uppercase opacity-60">{{ ev.recurring ? 'Recorrente' : 'Único' }}</div>
-        <div class="mt-1 font-medium">{{ ev.name }}</div>
+        <div class="text-xs uppercase opacity-60">{{ ev.type }}</div>
+        <div class="mt-1 font-medium">{{ ev.title }}</div>
         <div class="text-xs opacity-70">
-          {{ formatDate(ev.event_date) }}
+          {{ formatDate(ev.date) }}
         </div>
 
         <!-- contagem de inscritos (se existir participants no payload) -->
@@ -110,10 +121,11 @@ import { auth } from '@/stores/auth'
 type Participant = { id?: number; status?: 'confirmed' | 'declined' | 'pending'; user?: any }
 type EventItem = {
   id: number
-  name: string
+  title: string
   description?: string
-  event_date: string
-  recurring: boolean
+  date: string
+  type: string
+  location?: string
   participants?: Participant[] // <-- pode vir do back
 }
 
@@ -127,11 +139,12 @@ const creating = ref(false)
 const rsvping = ref<number | null>(null)
 
 const form = ref({
-  name: '',
+  title: '',
   description: '',
   date: '',
   time: '',
-  recurring: false,
+  type: 'GATHERING' as 'RAID' | 'GATHERING' | 'DUNGEON' | 'PVP',
+  location: '',
 })
 
 onMounted(load)
@@ -150,8 +163,8 @@ async function load() {
     const all = await EventsApi.listByGuild(guild.value.id)
     const now = Date.now()
     events.value = all
-      .filter((e: any) => new Date(e.event_date).getTime() >= now)
-      .sort((a: any, b: any) => +new Date(a.event_date) - +new Date(b.event_date))
+      .filter((e: any) => new Date(e.date).getTime() >= now)
+      .sort((a: any, b: any) => +new Date(a.date) - +new Date(b.date))
   } catch (e: any) {
     error.value = e.message || 'Falha ao carregar eventos'
   } finally {
@@ -177,15 +190,16 @@ async function createEvent() {
   error.value = ''
   try {
     const payload = {
+      title: form.value.title.trim(),
+      description: form.value.description?.trim() || 'Evento da guilda',
+      date: toISO(form.value.date, form.value.time),
+      type: form.value.type,
+      location: form.value.location?.trim() || undefined,
       guildId: guild.value.id,
-      name: form.value.name.trim(),
-      description: form.value.description?.trim() || undefined,
-      event_date: toISO(form.value.date, form.value.time),
-      recurring: form.value.recurring,
     }
     await EventsApi.create(payload)
     showForm.value = false
-    form.value = { name: '', description: '', date: '', time: '', recurring: false }
+    form.value = { title: '', description: '', date: '', time: '', type: 'GATHERING', location: '' }
     await load()
   } catch (e: any) {
     error.value = e.message || 'Falha ao criar evento'
