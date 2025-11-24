@@ -1,72 +1,78 @@
-name: Deploy to EC2
+name: Build and Deploy
 
 on:
   push:
     branches: [ "main" ]
 
+env:
+  REGISTRY: ghcr.io
+  API_IMAGE: ghcr.io/${{ github.repository_owner }}/saas-guild/api
+  WEB_IMAGE: ghcr.io/${{ github.repository_owner }}/saas-guild/web
+
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
 
     steps:
-    - name: Checkout código
+    - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Deploy via SSH para EC2
+    - name: Login no GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build e Push - API
+      uses: docker/build-push-action@v5
+      with:
+        context: ./apps/api
+        push: true
+        tags: ${{ env.API_IMAGE }}:latest,${{ env.API_IMAGE }}:${{ github.sha }}
+
+    - name: Build e Push - Web
+      uses: docker/build-push-action@v5
+      with:
+        context: ./apps/web
+        push: true
+        tags: ${{ env.WEB_IMAGE }}:latest,${{ env.WEB_IMAGE }}:${{ github.sha }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Deploy na EC2
       uses: appleboy/ssh-action@v1.0.3
+      env:
+        API_IMAGE: ghcr.io/${{ github.repository_owner }}/saas-guild/api:latest
+        WEB_IMAGE: ghcr.io/${{ github.repository_owner }}/saas-guild/web:latest
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
         script_stop: true
-        command_timeout: 20m
+        command_timeout: 5m
+        envs: API_IMAGE,WEB_IMAGE
         script: |
           set -e
 
-          echo "== [CI] Verificando Docker =="
-          docker --version
+          cd ~/saas-guild || { git clone https://github.com/${{ github.repository }} ~/saas-guild && cd ~/saas-guild; }
 
-          echo "== [CI] Configurando diretório do projeto =="
-
-          # Se o diretório existe mas não tem .git, remove
-          if [ -d ~/saas-guild ] && [ ! -d ~/saas-guild/.git ]; then
-            echo "== [CI] Removendo diretório sem git =="
-            sudo rm -rf ~/saas-guild
-          fi
-
-          # Clona se não existir
-          if [ ! -d ~/saas-guild ]; then
-            echo "== [CI] Clonando repositório =="
-            git clone https://github.com/${{ github.repository }} ~/saas-guild
-          fi
-
-          cd ~/saas-guild
-
-          echo "== [CI] Atualizando código =="
           git fetch --all
           git reset --hard origin/main
 
-          # Remove pasta api-backup se existir (causa problemas de submodule)
-          rm -rf apps/api/api-backup || true
+          export API_IMAGE="$API_IMAGE"
+          export WEB_IMAGE="$WEB_IMAGE"
 
-          echo "== [CI] Parando containers existentes =="
-          sudo docker compose down || true
+          sudo -E docker compose -f docker-compose.prod.yml pull
+          sudo -E docker compose -f docker-compose.prod.yml up -d
 
-          echo "== [CI] Limpando imagens antigas =="
-          sudo docker system prune -f || true
-
-          echo "== [CI] Construindo e iniciando containers =="
-          sudo docker compose up -d --build
-
-          echo "== [CI] Aguardando containers iniciarem (30s) =="
-          sleep 30
-
-          echo "== [CI] Status dos containers =="
-          sudo docker compose ps
-
-          echo "== [CI] Logs da API =="
-          sudo docker logs saas_guild_api 2>&1 | tail -50 || true
-
-          echo "== [CI] Deploy finalizado! =="
+          sleep 10
+          sudo docker compose -f docker-compose.prod.yml ps
+          echo "Deploy OK"
