@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -20,6 +21,12 @@ import { AuditModule } from './audit/audit.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    PrometheusModule.register({
+      defaultMetrics: {
+        enabled: true,
+      },
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
