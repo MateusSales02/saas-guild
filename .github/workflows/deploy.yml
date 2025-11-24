@@ -71,7 +71,7 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
         script_stop: true
-        command_timeout: 5m
+        command_timeout: 10m
         envs: API_IMAGE,WEB_IMAGE
         script: |
           set -e
@@ -85,8 +85,9 @@ jobs:
           export WEB_IMAGE="$WEB_IMAGE"
 
           sudo -E docker-compose -f docker-compose.prod.yml pull
+          sudo -E docker-compose -f docker-compose.prod.yml up -d --no-deps db redis
           sudo -E docker-compose -f docker-compose.prod.yml up -d
 
-          sleep 10
+          echo "Deploy iniciado - containers subindo em background"
           sudo docker-compose -f docker-compose.prod.yml ps
           echo "Deploy OK"
