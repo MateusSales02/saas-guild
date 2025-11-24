@@ -58,12 +58,30 @@ jobs:
           echo "== [CI] Limpando dados antigos =="
           sudo rm -rf ~/saas-guild/data/postgres || true
 
-          echo "== [CI] Construindo e subindo containers =="
-          sudo docker-compose up -d --build || {
-            echo "== [CI] ERRO - Verificando logs do PostgreSQL =="
-            sudo docker logs saas_db 2>&1 || true
-            echo "== [CI] Verificando logs da API =="
-            sudo docker logs saas_guild_api 2>&1 || true
+          echo "== [CI] Construindo imagens =="
+          sudo docker-compose build
+
+          echo "== [CI] Iniciando banco de dados e redis =="
+          sudo docker-compose up -d db redis
+
+          echo "== [CI] Aguardando PostgreSQL inicializar (60s) =="
+          sleep 10
+          echo "== Logs do PostgreSQL após 10s =="
+          sudo docker logs saas_db 2>&1 || true
+
+          echo "== Aguardando mais 50s =="
+          sleep 50
+
+          echo "== Status dos containers =="
+          sudo docker-compose ps
+
+          echo "== Logs finais do PostgreSQL =="
+          sudo docker logs saas_db 2>&1 | tail -50 || true
+
+          echo "== [CI] Iniciando API e Web =="
+          sudo docker-compose up -d api web || {
+            echo "== ERRO nos containers =="
+            sudo docker logs saas_guild_api 2>&1 | tail -30 || true
             exit 1
           }
 
