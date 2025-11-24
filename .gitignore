@@ -30,4 +30,4 @@ data/
 *.tsbuildinfo
 
 # Backups
-apps/api/api-backup/
+apps/api/api-backup/nul
