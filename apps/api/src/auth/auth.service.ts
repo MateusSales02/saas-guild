@@ -123,6 +123,29 @@ export class AuthService {
   }
 
   /**
+   * Cria um usuário "player" de forma simplificada.
+   * Gera email e senha automaticamente baseado no nickname.
+   * NÃO faz login e NÃO retorna token.
+   */
+  async createPlayerSimple(nickname: string) {
+    // Gera email único baseado no nickname
+    const baseEmail = nickname.toLowerCase().replace(/\s+/g, '') + '@guild.local';
+    let email = baseEmail;
+    let counter = 1;
+
+    // Verifica se email já existe e incrementa contador se necessário
+    while (await this.usersRepo.findOne({ where: { email } })) {
+      email = nickname.toLowerCase().replace(/\s+/g, '') + counter + '@guild.local';
+      counter++;
+    }
+
+    // Gera senha aleatória de 10 caracteres
+    const password = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10);
+
+    return this.createPlayer(email, password, nickname);
+  }
+
+  /**
    * Busca usuário por ID (para o endpoint /auth/me)
    */
   async findById(id: number) {
