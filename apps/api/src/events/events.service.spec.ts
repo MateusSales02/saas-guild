@@ -3,28 +3,36 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { Event } from './event.entity';
+import { Guild } from '../guilds/guild.entity';
 import { ParticipantsService } from './participants.service';
 
 describe('EventsService', () => {
   let service: EventsService;
   let mockEventRepo: any;
+  let mockGuildRepo: any;
   let mockParticipantsService: any;
+
+  const mockGuild: Guild = {
+    id: 1,
+    name: 'Test Guild',
+    created_at: new Date(),
+  } as Guild;
 
   const mockEvent: Event = {
     id: 1,
-    name: 'Test Event',
+    title: 'Test Event',
     description: 'Test Description',
-    event_date: new Date(),
-    recurring: false,
-    guildId: 1,
+    date: new Date(),
+    type: 'RAID',
+    location: 'Test Location',
+    guild: mockGuild,
     participants: [],
     created_at: new Date(),
-    updated_at: new Date(),
-  };
+  } as Event;
 
   const mockEvents: Event[] = [
     mockEvent,
-    { ...mockEvent, id: 2, name: 'Event 2' },
+    { ...mockEvent, id: 2, title: 'Event 2' },
   ];
 
   beforeEach(async () => {
@@ -37,6 +45,10 @@ describe('EventsService', () => {
       remove: jest.fn(),
     };
 
+    mockGuildRepo = {
+      findOne: jest.fn(),
+    };
+
     mockParticipantsService = {
       update: jest.fn(),
     };
@@ -47,6 +59,10 @@ describe('EventsService', () => {
         {
           provide: getRepositoryToken(Event),
           useValue: mockEventRepo,
+        },
+        {
+          provide: getRepositoryToken(Guild),
+          useValue: mockGuildRepo,
         },
         {
           provide: ParticipantsService,
@@ -69,10 +85,24 @@ describe('EventsService', () => {
       const result = await service.findAll();
 
       expect(mockEventRepo.find).toHaveBeenCalledWith({
-        relations: ['participants', 'participants.user'],
-        order: { event_date: 'ASC' },
+        where: {},
+        relations: ['participants', 'participants.user', 'guild'],
+        order: { date: 'ASC' },
       });
       expect(result).toHaveLength(2);
+    });
+
+    it('should filter events by guildId', async () => {
+      mockEventRepo.find.mockResolvedValue([mockEvent]);
+
+      const result = await service.findAll(1);
+
+      expect(mockEventRepo.find).toHaveBeenCalledWith({
+        where: { guild: { id: 1 } },
+        relations: ['participants', 'participants.user', 'guild'],
+        order: { date: 'ASC' },
+      });
+      expect(result).toHaveLength(1);
     });
 
     it('should return empty array if no events', async () => {
@@ -92,43 +122,62 @@ describe('EventsService', () => {
 
       expect(mockEventRepo.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
-        relations: ['participants', 'participants.user'],
+        relations: ['participants', 'participants.user', 'guild'],
       });
-      expect(result.name).toBe('Test Event');
+      expect(result.title).toBe('Test Event');
     });
 
     it('should throw NotFoundException if event not found', async () => {
       mockEventRepo.findOne.mockResolvedValue(null);
 
       await expect(service.findOne(999)).rejects.toThrow(NotFoundException);
-      await expect(service.findOne(999)).rejects.toThrow('Evento não encontrado');
+      await expect(service.findOne(999)).rejects.toThrow(
+        'Evento não encontrado',
+      );
     });
   });
 
   describe('create', () => {
     const createDto = {
-      name: 'New Event',
+      title: 'New Event',
       description: 'New Description',
-      event_date: new Date(),
-      recurring: false,
+      date: '2025-01-15T10:00:00Z',
+      type: 'RAID' as const,
+      location: 'New Location',
       guildId: 1,
     };
 
     it('should create a new event', async () => {
+      mockGuildRepo.findOne.mockResolvedValue(mockGuild);
       mockEventRepo.create.mockReturnValue({ ...mockEvent, ...createDto });
       mockEventRepo.save.mockResolvedValue({ ...mockEvent, ...createDto });
 
-      const result = await service.create(createDto);
+      const result = await service.create(createDto, 1);
 
-      expect(mockEventRepo.create).toHaveBeenCalledWith(createDto);
+      expect(mockGuildRepo.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
+      expect(mockEventRepo.create).toHaveBeenCalledWith({
+        ...createDto,
+        guild: mockGuild,
+      });
       expect(mockEventRepo.save).toHaveBeenCalled();
-      expect(result.name).toBe('New Event');
+      expect(result.title).toBe('New Event');
+    });
+
+    it('should throw NotFoundException if guild not found', async () => {
+      mockGuildRepo.findOne.mockResolvedValue(null);
+
+      await expect(service.create(createDto, 999)).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.create(createDto, 999)).rejects.toThrow(
+        'Guilda não encontrada',
+      );
     });
   });
 
   describe('update', () => {
     const updateDto = {
-      name: 'Updated Event',
+      title: 'Updated Event',
     };
 
     it('should update an event', async () => {
@@ -138,14 +187,16 @@ describe('EventsService', () => {
       const result = await service.update(1, updateDto);
 
       expect(mockEventRepo.update).toHaveBeenCalledWith(1, updateDto);
-      expect(result.name).toBe('Updated Event');
+      expect(result.title).toBe('Updated Event');
     });
 
     it('should throw NotFoundException if event not found after update', async () => {
       mockEventRepo.update.mockResolvedValue({ affected: 0 });
       mockEventRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.update(999, updateDto)).rejects.toThrow(NotFoundException);
+      await expect(service.update(999, updateDto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -171,12 +222,20 @@ describe('EventsService', () => {
     const statusDto = { status: 'confirmed' as const };
 
     it('should update participant status', async () => {
-      const updatedParticipant = { eventId: 1, memberId: 1, status: 'confirmed' };
+      const updatedParticipant = {
+        eventId: 1,
+        memberId: 1,
+        status: 'confirmed',
+      };
       mockParticipantsService.update.mockResolvedValue(updatedParticipant);
 
       const result = await service.updateParticipantStatus(1, 1, statusDto);
 
-      expect(mockParticipantsService.update).toHaveBeenCalledWith(1, 1, statusDto);
+      expect(mockParticipantsService.update).toHaveBeenCalledWith(
+        1,
+        1,
+        statusDto,
+      );
       expect(result.status).toBe('confirmed');
     });
   });
