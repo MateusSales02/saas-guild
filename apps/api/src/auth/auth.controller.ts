@@ -35,6 +35,18 @@ export class AuthController {
   }
 
   /**
+   * Cria um usuário "player" de forma simplificada (apenas nickname).
+   * O backend gera email e senha automaticamente.
+   * Apenas líderes podem criar jogadores.
+   */
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('leader')
+  @Post('create-player')
+  createPlayerSimple(@Body() dto: { nickname: string }) {
+    return this.auth.createPlayerSimple(dto.nickname);
+  }
+
+  /**
    * Retorna os dados do usuário autenticado.
    * Usado para verificar se o token é válido.
    */
