@@ -24,10 +24,10 @@ jobs:
           set -e
           echo "== [CI] Configurando diretório do projeto =="
 
-          # Se o diretório existe mas não tem .git, remove e clona
+          # Se o diretório existe mas não tem .git, remove com sudo
           if [ -d ~/saas-guild ] && [ ! -d ~/saas-guild/.git ]; then
             echo "== [CI] Removendo diretório sem git =="
-            rm -rf ~/saas-guild
+            sudo rm -rf ~/saas-guild
           fi
 
           # Clona se não existir
@@ -43,12 +43,12 @@ jobs:
           git reset --hard origin/main
 
           echo "== [CI] Parando containers existentes =="
-          docker compose down || true
+          sudo docker compose down || true
 
           echo "== [CI] Construindo e subindo containers =="
-          docker compose up -d --build
+          sudo docker compose up -d --build
 
           echo "== [CI] Verificando status dos containers =="
-          docker compose ps
+          sudo docker compose ps
 
           echo "== [CI] Deploy finalizado com sucesso! =="
