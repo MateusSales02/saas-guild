@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpar Cache</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #1e293b;
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: #334155;
+            border-radius: 1rem;
+        }
+        button {
+            margin: 1rem;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            background: #3b82f6;
+            color: white;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .info {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #475569;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Debug - SaaS Guild</h1>
+        <div class="info">
+            <p><strong>API Base URL:</strong> <span id="apiUrl">Carregando...</span></p>
+            <p><strong>Modo:</strong> <span id="mode">Carregando...</span></p>
+            <p><strong>LocalStorage Token:</strong> <span id="hasToken">Carregando...</span></p>
+        </div>
+        <button onclick="clearAndReload()">Limpar Cache e Recarregar</button>
+        <button onclick="goToRegister()">Ir para Registro</button>
+    </div>
+
+    <script>
+        // Mostrar informações
+        const isProd = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+        const apiUrl = isProd ? 'http://54.161.67.120' : 'http://localhost:3000';
+
+        document.getElementById('apiUrl').textContent = apiUrl;
+        document.getElementById('mode').textContent = isProd ? 'Produção' : 'Desenvolvimento';
+        document.getElementById('hasToken').textContent = localStorage.getItem('token') ? 'Sim' : 'Não';
+
+        function clearAndReload() {
+            localStorage.clear();
+            sessionStorage.clear();
+            alert('Cache limpo! Recarregando...');
+            window.location.reload(true);
+        }
+
+        function goToRegister() {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = '/registrar';
+        }
+    </script>
+</body>
+</html>
