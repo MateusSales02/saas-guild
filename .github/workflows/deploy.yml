@@ -7,6 +7,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
     - name: Checkout código
@@ -20,21 +21,16 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
         script_stop: true
+        command_timeout: 20m
         script: |
           set -e
 
-          echo "== [CI] Instalando Docker Compose =="
-          if [ ! -f /usr/local/bin/docker-compose ]; then
-            echo "Baixando Docker Compose..."
-            sudo curl -SL "https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
-            sudo ln -sf /usr/local/bin/docker-compose /usr/bin/docker-compose
-          fi
-          docker-compose --version
+          echo "== [CI] Verificando Docker =="
+          docker --version
 
           echo "== [CI] Configurando diretório do projeto =="
 
-          # Se o diretório existe mas não tem .git, remove com sudo
+          # Se o diretório existe mas não tem .git, remove
           if [ -d ~/saas-guild ] && [ ! -d ~/saas-guild/.git ]; then
             echo "== [CI] Removendo diretório sem git =="
             sudo rm -rf ~/saas-guild
@@ -52,41 +48,25 @@ jobs:
           git fetch --all
           git reset --hard origin/main
 
+          # Remove pasta api-backup se existir (causa problemas de submodule)
+          rm -rf apps/api/api-backup || true
+
           echo "== [CI] Parando containers existentes =="
-          sudo docker-compose down -v || true
+          sudo docker compose down || true
 
-          echo "== [CI] Limpando dados antigos =="
-          sudo rm -rf ~/saas-guild/data/postgres || true
+          echo "== [CI] Limpando imagens antigas =="
+          sudo docker system prune -f || true
 
-          echo "== [CI] Construindo imagens =="
-          sudo docker-compose build
+          echo "== [CI] Construindo e iniciando containers =="
+          sudo docker compose up -d --build
 
-          echo "== [CI] Iniciando banco de dados e redis =="
-          sudo docker-compose up -d db redis
+          echo "== [CI] Aguardando containers iniciarem (30s) =="
+          sleep 30
 
-          echo "== [CI] Aguardando PostgreSQL inicializar (60s) =="
-          sleep 10
-          echo "== Logs do PostgreSQL após 10s =="
-          sudo docker logs saas_db 2>&1 || true
+          echo "== [CI] Status dos containers =="
+          sudo docker compose ps
 
-          echo "== Aguardando mais 50s =="
-          sleep 50
+          echo "== [CI] Logs da API =="
+          sudo docker logs saas_guild_api 2>&1 | tail -50 || true
 
-          echo "== Status dos containers =="
-          sudo docker-compose ps
-
-          echo "== Logs finais do PostgreSQL =="
-          sudo docker logs saas_db 2>&1 | tail -50 || true
-
-          echo "== [CI] Iniciando API e Web =="
-          sudo docker-compose up -d api web || {
-            echo "== ERRO nos containers =="
-            sudo docker logs saas_guild_api 2>&1 | tail -30 || true
-            exit 1
-          }
-
-          echo "== [CI] Aguardando containers ficarem saudáveis =="
-          sleep 10
-          sudo docker-compose ps
-
-          echo "== [CI] Deploy finalizado com sucesso! =="
+          echo "== [CI] Deploy finalizado! =="
