@@ -18,7 +18,7 @@ import { UpdateGuildDto } from './dto/update-guild.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { JwtPayload } from '../auth/jwt.strategy';
+import type { JwtPayload } from '../auth/jwt.strategy';
 
 @Controller('guilds')
 @UseGuards(AuthGuard('jwt'))
