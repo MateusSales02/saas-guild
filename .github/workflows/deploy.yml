@@ -53,7 +53,10 @@ jobs:
           git reset --hard origin/main
 
           echo "== [CI] Parando containers existentes =="
-          sudo docker-compose down || true
+          sudo docker-compose down -v || true
+
+          echo "== [CI] Limpando dados antigos =="
+          sudo rm -rf ~/saas-guild/data/postgres || true
 
           echo "== [CI] Construindo e subindo containers =="
           sudo docker-compose up -d --build
