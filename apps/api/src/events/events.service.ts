@@ -7,26 +7,31 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { UpdateParticipantStatusDto } from './dto/update-participant.dto';
 import { ParticipantsService } from './participants.service';
+import { Guild } from '../guilds/guild.entity';
 
 @Injectable()
 export class EventsService {
   constructor(
     @InjectRepository(Event)
     private readonly eventRepo: Repository<Event>,
+    @InjectRepository(Guild)
+    private readonly guildRepo: Repository<Guild>,
     private readonly participantsService: ParticipantsService,
   ) {}
 
-  async findAll() {
+  async findAll(guildId?: number) {
+    const where = guildId ? { guild: { id: guildId } } : {};
     return this.eventRepo.find({
-      relations: ['participants', 'participants.user'],
-      order: { event_date: 'ASC' as const },
+      where,
+      relations: ['participants', 'participants.user', 'guild'],
+      order: { date: 'ASC' as const },
     });
   }
 
   async findOne(id: number) {
     const event = await this.eventRepo.findOne({
       where: { id },
-      relations: ['participants', 'participants.user'],
+      relations: ['participants', 'participants.user', 'guild'],
     });
 
     if (!event) {
@@ -36,8 +41,16 @@ export class EventsService {
     return event;
   }
 
-  async create(dto: CreateEventDto) {
-    const event = this.eventRepo.create(dto);
+  async create(dto: CreateEventDto, guildId: number) {
+    const guild = await this.guildRepo.findOne({ where: { id: guildId } });
+    if (!guild) {
+      throw new NotFoundException('Guilda não encontrada');
+    }
+
+    const event = this.eventRepo.create({
+      ...dto,
+      guild,
+    });
     return this.eventRepo.save(event);
   }
 

@@ -27,12 +27,12 @@
         <div
           class="w-10 h-10 rounded-xl bg-[#C6A95D]/15 grid place-items-center text-[#C6A95D] font-bold"
         >
-          {{ formatDay(r.event_date) }}
+          {{ formatDay(r.date) }}
         </div>
         <div class="flex-1">
-          <div class="text-sm font-medium">{{ r.name }}</div>
+          <div class="text-sm font-medium">{{ r.title }}</div>
           <div class="text-xs opacity-70">
-            {{ formatDate(r.event_date) }} · {{ formatTime(r.event_date) }}
+            {{ formatDate(r.date) }} · {{ formatTime(r.date) }}
             <span v-if="r.description"> · {{ r.description }}</span>
           </div>
         </div>
@@ -59,7 +59,7 @@
           <div>
             <label class="block text-sm mb-1">Nome da Raid</label>
             <input
-              v-model="newRaid.name"
+              v-model="newRaid.title"
               type="text"
               placeholder="Ex: Fortaleza de Aço"
               class="w-full p-2 rounded-lg bg-slate-700 border border-slate-600 focus:ring-2 focus:ring-[#C6A95D] outline-none"
@@ -77,7 +77,7 @@
           <div>
             <label class="block text-sm mb-1">Data e Hora</label>
             <input
-              v-model="newRaid.event_date"
+              v-model="newRaid.date"
               type="datetime-local"
               class="w-full p-2 rounded-lg bg-slate-700 border border-slate-600 focus:ring-2 focus:ring-[#C6A95D] outline-none"
             />
@@ -86,7 +86,7 @@
           <div class="flex gap-2">
             <button
               @click="createRaid"
-              :disabled="saving || !newRaid.name || !newRaid.event_date"
+              :disabled="saving || !newRaid.title || !newRaid.date"
               class="flex-1 bg-[#C6A95D] text-slate-900 p-2 rounded-lg font-semibold hover:bg-[#D4B96E] transition disabled:opacity-50"
             >
               {{ saving ? 'Criando...' : 'Criar' }}
@@ -111,10 +111,11 @@ import { auth } from '@/stores/auth'
 
 interface Raid {
   id: number
-  name: string
-  description?: string
-  event_date: string
-  recurring: boolean
+  title: string
+  description: string
+  date: string
+  type: string
+  location?: string
   guild: { id: number; name: string }
 }
 
@@ -126,9 +127,9 @@ const saving = ref(false)
 const createError = ref('')
 
 const newRaid = ref({
-  name: '',
+  title: '',
   description: '',
-  event_date: '',
+  date: '',
 })
 
 const guild = computed(() => auth.guild)
@@ -139,7 +140,9 @@ async function loadRaids() {
   loading.value = true
   error.value = ''
   try {
-    raids.value = await EventsApi.listByGuild(guild.value.id)
+    const allEvents = await EventsApi.listByGuild(guild.value.id)
+    // Filtra apenas eventos do tipo RAID
+    raids.value = allEvents.filter((e: any) => e.type === 'RAID')
   } catch (e: any) {
     error.value = e?.response?.data?.message ?? e?.message ?? 'Erro ao carregar raids'
   } finally {
@@ -148,21 +151,22 @@ async function loadRaids() {
 }
 
 async function createRaid() {
-  if (!guild.value || !newRaid.value.name || !newRaid.value.event_date) return
+  if (!guild.value || !newRaid.value.title || !newRaid.value.date) return
 
   saving.value = true
   createError.value = ''
   try {
     await EventsApi.create({
+      title: newRaid.value.title,
+      description: newRaid.value.description || 'Raid de guilda',
+      date: newRaid.value.date,
+      type: 'RAID',
+      location: undefined,
       guildId: guild.value.id,
-      name: newRaid.value.name,
-      description: newRaid.value.description || undefined,
-      event_date: newRaid.value.event_date,
-      recurring: false,
     })
 
     showCreateModal.value = false
-    newRaid.value = { name: '', description: '', event_date: '' }
+    newRaid.value = { title: '', description: '', date: '' }
     await loadRaids()
   } catch (e: any) {
     createError.value = e?.response?.data?.message ?? e?.message ?? 'Erro ao criar raid'

@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -17,10 +18,10 @@ import { UpdateParticipantStatusDto } from './dto/update-participant.dto';
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
-  // GET /events
+  // GET /events?guildId=123
   @Get()
-  findAll() {
-    return this.eventsService.findAll();
+  findAll(@Query('guildId', new ParseIntPipe({ optional: true })) guildId?: number) {
+    return this.eventsService.findAll(guildId);
   }
 
   // GET /events/:id
@@ -31,8 +32,11 @@ export class EventsController {
 
   // POST /events
   @Post()
-  create(@Body() dto: CreateEventDto) {
-    return this.eventsService.create(dto);
+  create(
+    @Body() dto: CreateEventDto,
+    @Body('guildId', ParseIntPipe) guildId: number,
+  ) {
+    return this.eventsService.create(dto, guildId);
   }
 
   // PATCH /events/:id
