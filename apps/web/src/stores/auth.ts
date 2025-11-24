@@ -114,17 +114,11 @@ export function clearSession(): void {
 }
 
 export const AuthApi = {
-  async register(
-    email: string,
-    password: string,
-    nickname: string,
-    role: string,
-  ): Promise<AuthResponse> {
+  async register(email: string, password: string, nickname: string): Promise<AuthResponse> {
     const res = await api.post<AuthResponse>('/auth/register', {
       email,
       password,
       nickname,
-      role,
     })
     const { token, user, guild } = res.data
     setSession(token, user, guild)

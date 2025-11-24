@@ -9,7 +9,8 @@
       "Bash(npm test:*)",
       "Bash(pnpm install:*)",
       "Bash(git add:*)",
-      "Bash(npm run start:dev:*)"
+      "Bash(npm run start:dev:*)",
+      "Bash(netstat:*)"
     ],
     "deny": [],
     "ask": []
