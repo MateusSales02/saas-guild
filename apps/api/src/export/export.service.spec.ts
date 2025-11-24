@@ -28,8 +28,14 @@ describe('ExportService', () => {
       providers: [
         ExportService,
         { provide: getRepositoryToken(Event), useValue: mockEventRepo },
-        { provide: getRepositoryToken(FinanceTransaction), useValue: mockFinanceRepo },
-        { provide: getRepositoryToken(GuildMember), useValue: mockMemberRepo },
+        {
+          provide: getRepositoryToken(FinanceTransaction),
+          useValue: mockFinanceRepo,
+        },
+        {
+          provide: getRepositoryToken(GuildMember),
+          useValue: mockMemberRepo,
+        },
       ],
     }).compile();
 
@@ -78,9 +84,7 @@ describe('ExportService', () => {
     });
 
     it('should handle members without user data', async () => {
-      const mockMembers = [
-        { id: 1, role: 'member', user: null },
-      ];
+      const mockMembers = [{ id: 1, role: 'member', user: null }];
       mockMemberRepo.find.mockResolvedValue(mockMembers);
 
       const result = await service.exportMembers(1);
@@ -94,10 +98,11 @@ describe('ExportService', () => {
       const mockEvents = [
         {
           id: 1,
-          name: 'Raid Night',
+          title: 'Raid Night',
           description: 'Weekly raid',
-          event_date: new Date('2024-01-15'),
-          recurring: true,
+          date: new Date('2024-01-15'),
+          type: 'RAID',
+          location: 'Dungeon A',
           participants: [
             { status: 'confirmed' },
             { status: 'confirmed' },
@@ -106,10 +111,11 @@ describe('ExportService', () => {
         },
         {
           id: 2,
-          name: 'PvP Event',
+          title: 'PvP Event',
           description: null,
-          event_date: new Date('2024-01-20'),
-          recurring: false,
+          date: new Date('2024-01-20'),
+          type: 'PVP',
+          location: null,
           participants: [],
         },
       ];
@@ -119,15 +125,17 @@ describe('ExportService', () => {
 
       expect(mockEventRepo.find).toHaveBeenCalledWith({
         where: { guild: { id: 1 } },
-        relations: ['participants', 'participants.member', 'participants.member.user'],
-        order: { event_date: 'DESC' },
+        relations: ['participants', 'participants.user'],
+        order: { date: 'DESC' },
       });
-      expect(result).toContain('id,name,description,event_date,recurring,participants_count,confirmed_count');
+      expect(result).toContain(
+        'id,title,description,date,type,location,participants_count,confirmed_count',
+      );
       expect(result).toContain('Raid Night');
       expect(result).toContain('Weekly raid');
-      expect(result).toContain('Sim'); // recurring = true
+      expect(result).toContain('RAID');
       expect(result).toContain('PvP Event');
-      expect(result).toContain('Não'); // recurring = false
+      expect(result).toContain('PVP');
     });
 
     it('should handle empty events list', async () => {
@@ -135,17 +143,20 @@ describe('ExportService', () => {
 
       const result = await service.exportEvents(1);
 
-      expect(result).toBe('id,name,description,event_date,recurring,participants_count,confirmed_count\n');
+      expect(result).toBe(
+        'id,title,description,date,type,location,participants_count,confirmed_count\n',
+      );
     });
 
     it('should escape special characters in CSV', async () => {
       const mockEvents = [
         {
           id: 1,
-          name: 'Event, with comma',
+          title: 'Event, with comma',
           description: 'Description with "quotes"',
-          event_date: new Date('2024-01-15'),
-          recurring: false,
+          date: new Date('2024-01-15'),
+          type: 'GATHERING',
+          location: '',
           participants: [],
         },
       ];
@@ -220,13 +231,31 @@ describe('ExportService', () => {
   describe('exportFullReport', () => {
     it('should combine all exports into one report', async () => {
       mockMemberRepo.find.mockResolvedValue([
-        { id: 1, role: 'leader', user: { id: 1, nickname: 'Leader', email: 'leader@test.com' } },
+        {
+          id: 1,
+          role: 'leader',
+          user: { id: 1, nickname: 'Leader', email: 'leader@test.com' },
+        },
       ]);
       mockEventRepo.find.mockResolvedValue([
-        { id: 1, name: 'Event1', description: '', event_date: new Date(), recurring: false, participants: [] },
+        {
+          id: 1,
+          title: 'Event1',
+          description: '',
+          date: new Date(),
+          type: 'RAID',
+          location: '',
+          participants: [],
+        },
       ]);
       mockFinanceRepo.find.mockResolvedValue([
-        { id: 1, type: 'in', amount: 100, note: 'Test', created_at: new Date() },
+        {
+          id: 1,
+          type: 'in',
+          amount: 100,
+          note: 'Test',
+          created_at: new Date(),
+        },
       ]);
 
       const result = await service.exportFullReport(1);
