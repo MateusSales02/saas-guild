@@ -59,9 +59,16 @@ jobs:
           sudo rm -rf ~/saas-guild/data/postgres || true
 
           echo "== [CI] Construindo e subindo containers =="
-          sudo docker-compose up -d --build
+          sudo docker-compose up -d --build || {
+            echo "== [CI] ERRO - Verificando logs do PostgreSQL =="
+            sudo docker logs saas_db 2>&1 || true
+            echo "== [CI] Verificando logs da API =="
+            sudo docker logs saas_guild_api 2>&1 || true
+            exit 1
+          }
 
-          echo "== [CI] Verificando status dos containers =="
+          echo "== [CI] Aguardando containers ficarem saudáveis =="
+          sleep 10
           sudo docker-compose ps
 
           echo "== [CI] Deploy finalizado com sucesso! =="
