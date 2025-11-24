@@ -6,6 +6,8 @@ import {
   Delete,
   Param,
   Body,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { GuildMembersService } from './guild-members.service';
 import { GuildMember } from './guild-member.entity';
@@ -15,7 +17,12 @@ export class GuildMembersController {
   constructor(private readonly guildMembersService: GuildMembersService) {}
 
   @Get()
-  async findAll(): Promise<GuildMember[]> {
+  async findAll(
+    @Query('guildId', new ParseIntPipe({ optional: true })) guildId?: number,
+  ): Promise<GuildMember[]> {
+    if (guildId) {
+      return this.guildMembersService.findByGuild(guildId);
+    }
     return this.guildMembersService.findAll();
   }
 

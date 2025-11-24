@@ -20,6 +20,13 @@ export class GuildMembersService {
     return this.guildMembersRepository.find();
   }
 
+  findByGuild(guildId: number): Promise<GuildMember[]> {
+    return this.guildMembersRepository.find({
+      where: { guild: { id: guildId } },
+      relations: ['user', 'guild'],
+    });
+  }
+
   findOne(id: number): Promise<GuildMember | null> {
     return this.guildMembersRepository.findOneBy({ id });
   }
