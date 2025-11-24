@@ -21,17 +21,22 @@ jobs:
         port: 22
         script_stop: true
         script: |
+          set -e
           echo "== [CI] Configurando diretório do projeto =="
 
-          # Cria diretório se não existir
-          mkdir -p ~/saas-guild
-          cd ~/saas-guild
-
-          # Inicializa git se necessário
-          if [ ! -d ".git" ]; then
-            echo "== [CI] Clonando repositório =="
-            git clone https://github.com/${{ github.repository }} .
+          # Se o diretório existe mas não tem .git, remove e clona
+          if [ -d ~/saas-guild ] && [ ! -d ~/saas-guild/.git ]; then
+            echo "== [CI] Removendo diretório sem git =="
+            rm -rf ~/saas-guild
           fi
+
+          # Clona se não existir
+          if [ ! -d ~/saas-guild ]; then
+            echo "== [CI] Clonando repositório =="
+            git clone https://github.com/${{ github.repository }} ~/saas-guild
+          fi
+
+          cd ~/saas-guild
 
           echo "== [CI] Atualizando código =="
           git fetch --all
