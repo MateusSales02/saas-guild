@@ -57,11 +57,11 @@ async function register() {
         </div>
 
         <div>
-          <label class="block text-sm mb-2">Nickname</label>
+          <label class="block text-sm mb-2">Nome da Guilda</label>
           <input
             v-model="nickname"
             type="text"
-            placeholder="Seu apelido"
+            placeholder="Ex: Cavaleiros do Apocalipse"
             class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 focus:ring-2 focus:ring-blue-500 outline-none"
           />
         </div>

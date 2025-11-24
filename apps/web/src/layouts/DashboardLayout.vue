@@ -9,7 +9,7 @@
           :src="avatarUrl"
           class="w-10 h-10 rounded-full border border-slate-300 dark:border-slate-700"
         />
-        <span class="font-semibold">{{ username }}</span>
+        <span class="font-semibold">{{ guildName }}</span>
       </div>
       <button
         @click="logout"
@@ -48,15 +48,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter, RouterView } from 'vue-router'
 import SidebarLink from '@/components/SidebarLink.vue'
-import { clearSession } from '@/stores/auth'
+import { clearSession, auth } from '@/stores/auth'
 
 const sidebarOpen = ref(false)
 const router = useRouter()
 
-const username = localStorage.getItem('authUser') ?? 'Aventureiro'
+const guildName = computed(() => auth.guild?.name ?? 'Minha Guilda')
 const avatarUrl =
   'https://images.unsplash.com/photo-1541534401786-2077eed87a4b?q=80&w=200&auto=format&fit=crop'
 

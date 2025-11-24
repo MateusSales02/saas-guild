@@ -47,11 +47,10 @@ export class AuthService {
 
     const saved = await this.usersRepo.save(user);
 
-    // Cria automaticamente uma guilda com o nome do usuário e associa como líder
-    const guildName = `Guilda de ${dto.nickname}`;
+    // Cria automaticamente uma guilda com o nome informado pelo usuário e associa como líder
     const guild = await this.guildsService.createGuildWithLeader(
       saved.id,
-      guildName,
+      dto.nickname,
     );
 
     const token = await this.signToken(saved);
