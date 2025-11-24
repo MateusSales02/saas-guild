@@ -87,6 +87,16 @@
             {{ totalCount(ev) }} inscritos
           </span>
         </div>
+
+        <div class="mt-3">
+          <button
+            @click="finishEvent(ev.id)"
+            :disabled="deleting === ev.id"
+            class="text-xs px-3 py-1 rounded border border-red-600 hover:bg-red-700 disabled:opacity-50 w-full"
+          >
+            {{ deleting === ev.id ? 'Finalizando...' : 'Finalizar evento' }}
+          </button>
+        </div>
       </article>
     </div>
 
@@ -118,6 +128,7 @@ const error = ref('')
 
 const showForm = ref(false)
 const creating = ref(false)
+const deleting = ref<number | null>(null)
 
 const form = ref({
   title: '',
@@ -186,6 +197,21 @@ async function createEvent() {
     error.value = e.message || 'Falha ao criar evento'
   } finally {
     creating.value = false
+  }
+}
+
+async function finishEvent(eventId: number) {
+  if (!confirm('Tem certeza que deseja finalizar este evento?')) return
+
+  deleting.value = eventId
+  error.value = ''
+  try {
+    await EventsApi.remove(eventId)
+    await load()
+  } catch (e: any) {
+    error.value = e.message || 'Falha ao finalizar evento'
+  } finally {
+    deleting.value = null
   }
 }
 
