@@ -68,9 +68,23 @@ jobs:
         command_timeout: 3m
         envs: API_IMAGE,WEB_IMAGE
         script: |
-          cd ~/saas-guild && git fetch --all && git reset --hard origin/main
+          cd ~/saas-guild
+          git fetch --all
+          git reset --hard origin/main
+
+          # Parar nginx se estiver rodando (libera porta 80)
+          sudo systemctl stop nginx 2>/dev/null || true
+
+          # Parar containers antigos
+          sudo docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
+
           export API_IMAGE="$API_IMAGE"
           export WEB_IMAGE="$WEB_IMAGE"
-          sudo -E docker-compose -f docker-compose.prod.yml pull --quiet > /dev/null 2>&1
-          sudo -E docker-compose -f docker-compose.prod.yml up -d > /dev/null 2>&1
-          echo "Deploy OK"
+
+          # Pull das imagens
+          sudo -E docker-compose -f docker-compose.prod.yml pull
+
+          # Subir containers
+          sudo -E docker-compose -f docker-compose.prod.yml up -d
+
+          echo "Deploy concluído"
