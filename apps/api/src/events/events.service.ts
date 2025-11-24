@@ -18,7 +18,7 @@ export class EventsService {
 
   async findAll() {
     return this.eventRepo.find({
-      relations: ['participants', 'participants.member'],
+      relations: ['participants', 'participants.user'],
       order: { event_date: 'ASC' as const },
     });
   }
@@ -26,7 +26,7 @@ export class EventsService {
   async findOne(id: number) {
     const event = await this.eventRepo.findOne({
       where: { id },
-      relations: ['participants', 'participants.member'],
+      relations: ['participants', 'participants.user'],
     });
 
     if (!event) {

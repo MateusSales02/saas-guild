@@ -69,7 +69,7 @@ describe('EventsService', () => {
       const result = await service.findAll();
 
       expect(mockEventRepo.find).toHaveBeenCalledWith({
-        relations: ['participants', 'participants.member'],
+        relations: ['participants', 'participants.user'],
         order: { event_date: 'ASC' },
       });
       expect(result).toHaveLength(2);
@@ -92,7 +92,7 @@ describe('EventsService', () => {
 
       expect(mockEventRepo.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
-        relations: ['participants', 'participants.member'],
+        relations: ['participants', 'participants.user'],
       });
       expect(result.name).toBe('Test Event');
     });
