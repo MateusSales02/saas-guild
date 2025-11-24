@@ -6,8 +6,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  API_IMAGE: ghcr.io/${{ github.repository_owner }}/saas-guild/api
-  WEB_IMAGE: ghcr.io/${{ github.repository_owner }}/saas-guild/web
+  IMAGE_PREFIX: ghcr.io/mateusales02/saas-guild
 
 jobs:
   build:
@@ -32,14 +31,14 @@ jobs:
       with:
         context: ./apps/api
         push: true
-        tags: ${{ env.API_IMAGE }}:latest,${{ env.API_IMAGE }}:${{ github.sha }}
+        tags: ${{ env.IMAGE_PREFIX }}/api:latest,${{ env.IMAGE_PREFIX }}/api:${{ github.sha }}
 
     - name: Build e Push - Web
       uses: docker/build-push-action@v5
       with:
         context: ./apps/web
         push: true
-        tags: ${{ env.WEB_IMAGE }}:latest,${{ env.WEB_IMAGE }}:${{ github.sha }}
+        tags: ${{ env.IMAGE_PREFIX }}/web:latest,${{ env.IMAGE_PREFIX }}/web:${{ github.sha }}
 
   deploy:
     needs: build
@@ -48,9 +47,6 @@ jobs:
     steps:
     - name: Deploy na EC2
       uses: appleboy/ssh-action@v1.0.3
-      env:
-        API_IMAGE: ghcr.io/${{ github.repository_owner }}/saas-guild/api:latest
-        WEB_IMAGE: ghcr.io/${{ github.repository_owner }}/saas-guild/web:latest
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
@@ -58,7 +54,6 @@ jobs:
         port: 22
         script_stop: true
         command_timeout: 5m
-        envs: API_IMAGE,WEB_IMAGE
         script: |
           set -e
 
@@ -67,11 +62,8 @@ jobs:
           git fetch --all
           git reset --hard origin/main
 
-          export API_IMAGE="$API_IMAGE"
-          export WEB_IMAGE="$WEB_IMAGE"
-
-          sudo -E docker compose -f docker-compose.prod.yml pull
-          sudo -E docker compose -f docker-compose.prod.yml up -d
+          sudo docker compose -f docker-compose.prod.yml pull
+          sudo docker compose -f docker-compose.prod.yml up -d
 
           sleep 10
           sudo docker compose -f docker-compose.prod.yml ps
