@@ -1,4 +1,4 @@
-import { IsString, IsDateString, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsDateString, IsOptional, IsEnum, IsInt } from 'class-validator';
 
 export enum EventType {
   RAID = 'RAID',
@@ -10,6 +10,7 @@ export enum EventType {
 export class CreateEventDto {
   @IsString()
   title: string;
+
   @IsString()
   description: string;
 
@@ -22,4 +23,7 @@ export class CreateEventDto {
   @IsOptional()
   @IsString()
   location?: string;
+
+  @IsInt()
+  guildId: number;
 }

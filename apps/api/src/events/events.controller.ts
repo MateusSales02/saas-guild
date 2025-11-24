@@ -32,11 +32,8 @@ export class EventsController {
 
   // POST /events
   @Post()
-  create(
-    @Body() dto: CreateEventDto,
-    @Body('guildId', ParseIntPipe) guildId: number,
-  ) {
-    return this.eventsService.create(dto, guildId);
+  create(@Body() dto: CreateEventDto) {
+    return this.eventsService.create(dto, dto.guildId);
   }
 
   // PATCH /events/:id
