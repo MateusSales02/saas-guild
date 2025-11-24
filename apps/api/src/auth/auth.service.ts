@@ -2,6 +2,7 @@ import {
   Injectable,
   BadRequestException,
   UnauthorizedException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -10,6 +11,8 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+
+const BCRYPT_ROUNDS = 12;
 
 @Injectable()
 export class AuthService {
@@ -30,13 +33,13 @@ export class AuthService {
       throw new BadRequestException('E-mail já cadastrado');
     }
 
-    const password_hash = await bcrypt.hash(dto.password, 10);
+    const password_hash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
 
     const user = this.usersRepo.create({
       email: dto.email,
       password_hash,
       nickname: dto.nickname,
-      role: 'leader', // <--- sempre leader
+      role: 'leader',
       uid: null,
     });
 
@@ -48,7 +51,6 @@ export class AuthService {
 
   /**
    * Login normal.
-   * (Depois você pode filtrar por role === 'leader' no guard/front.)
    */
   async login(dto: LoginDto) {
     const user = await this.usersRepo.findOne({
@@ -70,7 +72,6 @@ export class AuthService {
   /**
    * Cria um usuário "player" para ser vinculado como membro de guilda.
    * NÃO faz login e NÃO retorna token.
-   * Ideal para ser usado por um serviço de Members.
    */
   async createPlayer(email: string, password: string, nickname: string) {
     const exists = await this.usersRepo.findOne({ where: { email } });
@@ -78,18 +79,29 @@ export class AuthService {
       throw new BadRequestException('E-mail já cadastrado');
     }
 
-    const password_hash = await bcrypt.hash(password, 10);
+    const password_hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
     const user = this.usersRepo.create({
       email,
       password_hash,
       nickname,
-      role: 'player', // jogador comum, não entra no dashboard
+      role: 'player',
       uid: null,
     });
 
     const saved = await this.usersRepo.save(user);
     return this.publicUser(saved);
+  }
+
+  /**
+   * Busca usuário por ID (para o endpoint /auth/me)
+   */
+  async findById(id: number) {
+    const user = await this.usersRepo.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+    return this.publicUser(user);
   }
 
   private async signToken(user: User) {
@@ -102,7 +114,7 @@ export class AuthService {
 
   private publicUser(u: User) {
     const { password_hash, ...rest } = u;
-    void password_hash; // só pra não ficar "unused"
+    void password_hash;
     return rest;
   }
 }
