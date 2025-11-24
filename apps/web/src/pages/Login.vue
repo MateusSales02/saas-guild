@@ -13,11 +13,11 @@ async function login() {
   error.value = ''
   loading.value = true
   try {
-    const { token, user } = await postJSON<{ token: string; user: any }>('/auth/login', {
+    const { token, user, guild } = await postJSON<{ token: string; user: any; guild?: { id: number; name: string } | null }>('/auth/login', {
       email: email.value,
       password: password.value,
     })
-    setSession(token, user)
+    setSession(token, user, guild)
     router.push('/dashboard')
   } catch (e: any) {
     error.value = e.message || 'Falha no login'
