@@ -21,11 +21,29 @@ jobs:
         port: 22
         script_stop: true
         script: |
-          echo "== [CI] Indo para pasta do projeto =="
+          echo "== [CI] Configurando diretório do projeto =="
+
+          # Cria diretório se não existir
+          mkdir -p ~/saas-guild
           cd ~/saas-guild
 
-          echo "== [CI] Garantindo permissão =="
-          chmod +x deploy.sh
+          # Inicializa git se necessário
+          if [ ! -d ".git" ]; then
+            echo "== [CI] Clonando repositório =="
+            git clone https://github.com/${{ github.repository }} .
+          fi
 
-          echo "== [CI] Rodando deploy.sh =="
-          ./deploy.sh
+          echo "== [CI] Atualizando código =="
+          git fetch --all
+          git reset --hard origin/main
+
+          echo "== [CI] Parando containers existentes =="
+          docker compose down || true
+
+          echo "== [CI] Construindo e subindo containers =="
+          docker compose up -d --build
+
+          echo "== [CI] Verificando status dos containers =="
+          docker compose ps
+
+          echo "== [CI] Deploy finalizado com sucesso! =="
