@@ -11,19 +11,27 @@ export interface AuthUser {
   [key: string]: unknown
 }
 
+export interface Guild {
+  id: number
+  name: string
+}
+
 interface AuthState {
   token: string | null
   user: AuthUser | null
+  guild: Guild | null
 }
 
 interface AuthResponse {
   token: string
   user: AuthUser
+  guild?: Guild | null
 }
 
 export const auth = reactive<AuthState>({
   token: null,
   user: null,
+  guild: null,
 })
 
 const API_BASE_URL = import.meta.env.PROD
@@ -42,11 +50,15 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config
 })
 
-export function setSession(token: string, user: AuthUser): void {
+export function setSession(token: string, user: AuthUser, guild?: Guild | null): void {
   auth.token = token
   auth.user = user
+  auth.guild = guild || null
   localStorage.setItem('token', token)
   localStorage.setItem('user', JSON.stringify(user))
+  if (guild) {
+    localStorage.setItem('guild', JSON.stringify(guild))
+  }
 
   api.defaults.headers.common.Authorization = `Bearer ${token}`
 }
@@ -65,6 +77,7 @@ function isAuthUser(value: unknown): value is AuthUser {
 export function loadSession(): void {
   const t = localStorage.getItem('token')
   const u = localStorage.getItem('user')
+  const g = localStorage.getItem('guild')
 
   if (!t || !u) return
 
@@ -74,6 +87,13 @@ export function loadSession(): void {
       auth.token = t
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       auth.user = parsed
+      if (g) {
+        try {
+          auth.guild = JSON.parse(g) as Guild
+        } catch {
+          auth.guild = null
+        }
+      }
       api.defaults.headers.common.Authorization = `Bearer ${t}`
     } else {
       clearSession()
@@ -86,8 +106,10 @@ export function loadSession(): void {
 export function clearSession(): void {
   auth.token = null
   auth.user = null
+  auth.guild = null
   localStorage.removeItem('token')
   localStorage.removeItem('user')
+  localStorage.removeItem('guild')
   delete api.defaults.headers.common.Authorization
 }
 
@@ -104,15 +126,15 @@ export const AuthApi = {
       nickname,
       role,
     })
-    const { token, user } = res.data
-    setSession(token, user)
+    const { token, user, guild } = res.data
+    setSession(token, user, guild)
     return res.data
   },
 
   async login(email: string, password: string): Promise<AuthResponse> {
     const res = await api.post<AuthResponse>('/auth/login', { email, password })
-    const { token, user } = res.data
-    setSession(token, user)
+    const { token, user, guild } = res.data
+    setSession(token, user, guild)
     return res.data
   },
 

@@ -5,6 +5,7 @@ import { BadRequestException, UnauthorizedException, NotFoundException } from '@
 import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { User } from '../users/user.entity';
+import { GuildsService } from '../guilds/guilds.service';
 
 jest.mock('bcrypt');
 
@@ -12,6 +13,7 @@ describe('AuthService', () => {
   let service: AuthService;
   let mockUsersRepo: any;
   let mockJwtService: any;
+  let mockGuildsService: any;
 
   const mockUser: User = {
     id: 1,
@@ -22,6 +24,12 @@ describe('AuthService', () => {
     uid: null,
     created_at: new Date(),
     updated_at: new Date(),
+  };
+
+  const mockGuild = {
+    id: 1,
+    name: 'Guilda de TestUser',
+    created_at: new Date(),
   };
 
   beforeEach(async () => {
@@ -35,6 +43,11 @@ describe('AuthService', () => {
       signAsync: jest.fn().mockResolvedValue('mock_token'),
     };
 
+    mockGuildsService = {
+      createGuildWithLeader: jest.fn().mockResolvedValue(mockGuild),
+      findByMember: jest.fn().mockResolvedValue([mockGuild]),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -45,6 +58,10 @@ describe('AuthService', () => {
         {
           provide: JwtService,
           useValue: mockJwtService,
+        },
+        {
+          provide: GuildsService,
+          useValue: mockGuildsService,
         },
       ],
     }).compile();
@@ -67,7 +84,7 @@ describe('AuthService', () => {
       mockUsersRepo.findOne.mockResolvedValue(null);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed_password');
       mockUsersRepo.create.mockReturnValue({ ...mockUser, email: registerDto.email });
-      mockUsersRepo.save.mockResolvedValue({ ...mockUser, email: registerDto.email });
+      mockUsersRepo.save.mockResolvedValue({ ...mockUser, email: registerDto.email, id: 1 });
 
       const result = await service.register(registerDto);
 
@@ -75,7 +92,10 @@ describe('AuthService', () => {
       expect(bcrypt.hash).toHaveBeenCalledWith(registerDto.password, 12);
       expect(mockUsersRepo.create).toHaveBeenCalled();
       expect(mockUsersRepo.save).toHaveBeenCalled();
+      expect(mockGuildsService.createGuildWithLeader).toHaveBeenCalledWith(1, `Guilda de ${registerDto.nickname}`);
       expect(result).toHaveProperty('token', 'mock_token');
+      expect(result).toHaveProperty('guild');
+      expect(result.guild).toHaveProperty('id', 1);
       expect(result.user).not.toHaveProperty('password_hash');
     });
 
@@ -114,7 +134,10 @@ describe('AuthService', () => {
 
       expect(mockUsersRepo.findOne).toHaveBeenCalledWith({ where: { email: loginDto.email } });
       expect(bcrypt.compare).toHaveBeenCalledWith(loginDto.password, mockUser.password_hash);
+      expect(mockGuildsService.findByMember).toHaveBeenCalledWith(mockUser.id);
       expect(result).toHaveProperty('token', 'mock_token');
+      expect(result).toHaveProperty('guild');
+      expect(result.guild).toHaveProperty('id', 1);
       expect(result.user).not.toHaveProperty('password_hash');
     });
 

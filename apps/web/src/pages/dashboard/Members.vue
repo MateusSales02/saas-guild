@@ -263,7 +263,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
-import { GuildsApi, MembersApi, postJSON } from '@/lib/api'
+import { MembersApi, postJSON } from '@/lib/api'
 import { auth } from '@/stores/auth'
 
 type GuildMemberRole = 'member' | 'leader' | 'officer'
@@ -280,7 +280,7 @@ type PlayerUser = {
   nickname?: string
 }
 
-const guild = ref<any>(null)
+const guild = computed(() => auth.guild)
 const members = ref<Member[]>([])
 const loading = ref(true)
 const saving = ref(false)
@@ -305,9 +305,12 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    const guilds = await GuildsApi.list()
-    guild.value = guilds?.[0] ?? null
-    members.value = guild.value ? await MembersApi.listByGuild(guild.value.id) : []
+    if (guild.value) {
+      members.value = await MembersApi.listByGuild(guild.value.id)
+    } else {
+      error.value = 'Nenhuma guilda associada ao usuário.'
+      members.value = []
+    }
   } catch (e: any) {
     error.value = e.message || 'Falha ao carregar membros'
   } finally {

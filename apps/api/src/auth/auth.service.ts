@@ -11,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { GuildsService } from '../guilds/guilds.service';
 
 const BCRYPT_ROUNDS = 12;
 
@@ -19,6 +20,7 @@ export class AuthService {
   constructor(
     @InjectRepository(User) private readonly usersRepo: Repository<User>,
     private readonly jwt: JwtService,
+    private readonly guildsService: GuildsService,
   ) {}
 
   /**
@@ -44,9 +46,24 @@ export class AuthService {
     });
 
     const saved = await this.usersRepo.save(user);
+
+    // Cria automaticamente uma guilda com o nome do usuário e associa como líder
+    const guildName = `Guilda de ${dto.nickname}`;
+    const guild = await this.guildsService.createGuildWithLeader(
+      saved.id,
+      guildName,
+    );
+
     const token = await this.signToken(saved);
 
-    return { user: this.publicUser(saved), token };
+    return {
+      user: this.publicUser(saved),
+      token,
+      guild: {
+        id: guild.id,
+        name: guild.name,
+      },
+    };
   }
 
   /**
@@ -65,8 +82,21 @@ export class AuthService {
       throw new UnauthorizedException('Credenciais inválidas');
     }
 
+    // Busca a guilda do usuário
+    const guilds = await this.guildsService.findByMember(user.id);
+    const guild = guilds.length > 0 ? guilds[0] : null;
+
     const token = await this.signToken(user);
-    return { user: this.publicUser(user), token };
+    return {
+      user: this.publicUser(user),
+      token,
+      guild: guild
+        ? {
+            id: guild.id,
+            name: guild.name,
+          }
+        : null,
+    };
   }
 
   /**
