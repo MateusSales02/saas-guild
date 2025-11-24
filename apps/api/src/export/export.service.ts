@@ -71,26 +71,28 @@ export class ExportService {
   async exportEvents(guildId: number): Promise<string> {
     const events = await this.eventRepo.find({
       where: { guild: { id: guildId } },
-      relations: ['participants', 'participants.member', 'participants.member.user'],
-      order: { event_date: 'DESC' },
+      relations: ['participants', 'participants.user'],
+      order: { date: 'DESC' },
     });
 
     const data = events.map((e) => ({
       id: e.id,
-      name: e.name,
+      title: e.title,
       description: e.description ?? '',
-      event_date: e.event_date?.toISOString() ?? '',
-      recurring: e.recurring ? 'Sim' : 'Não',
+      date: e.date?.toISOString() ?? '',
+      type: e.type,
+      location: e.location ?? '',
       participants_count: e.participants?.length ?? 0,
       confirmed_count: e.participants?.filter((p) => p.status === 'confirmed').length ?? 0,
     }));
 
     return this.toCSV(data, [
       'id',
-      'name',
+      'title',
       'description',
-      'event_date',
-      'recurring',
+      'date',
+      'type',
+      'location',
       'participants_count',
       'confirmed_count',
     ]);
