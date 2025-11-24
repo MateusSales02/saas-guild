@@ -87,23 +87,6 @@
             {{ totalCount(ev) }} inscritos
           </span>
         </div>
-
-        <div class="mt-3 flex items-center gap-2">
-          <button
-            @click="rsvp(ev.id, 'confirmed')"
-            :disabled="rsvping === ev.id"
-            class="text-xs px-3 py-1 rounded border border-green-600 hover:bg-green-700 disabled:opacity-50"
-          >
-            Confirmar presença
-          </button>
-          <button
-            @click="rsvp(ev.id, 'declined')"
-            :disabled="rsvping === ev.id"
-            class="text-xs px-3 py-1 rounded border border-slate-600 hover:bg-slate-700 disabled:opacity-50"
-          >
-            Não vou
-          </button>
-        </div>
       </article>
     </div>
 
@@ -116,7 +99,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { GuildsApi, EventsApi } from '@/lib/api'
-import { auth } from '@/stores/auth'
 
 type Participant = { id?: number; status?: 'confirmed' | 'declined' | 'pending'; user?: any }
 type EventItem = {
@@ -136,7 +118,6 @@ const error = ref('')
 
 const showForm = ref(false)
 const creating = ref(false)
-const rsvping = ref<number | null>(null)
 
 const form = ref({
   title: '',
@@ -205,22 +186,6 @@ async function createEvent() {
     error.value = e.message || 'Falha ao criar evento'
   } finally {
     creating.value = false
-  }
-}
-
-async function rsvp(eventId: number, status: 'confirmed' | 'declined' | 'pending') {
-  if (!auth.user?.id) {
-    error.value = 'Você precisa estar logado'
-    return
-  }
-  try {
-    rsvping.value = eventId
-    await EventsApi.rsvp(eventId, Number(auth.user.id), status)
-    await load()
-  } catch (e: any) {
-    error.value = e.message || 'Falha ao registrar presença'
-  } finally {
-    rsvping.value = null
   }
 }
 
