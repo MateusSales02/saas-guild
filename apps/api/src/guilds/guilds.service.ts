@@ -46,4 +46,26 @@ export class GuildsService {
 
     return rows.map((r): Guild => r.guild);
   }
+
+  /**
+   * Cria uma guilda e associa o usuário como líder
+   */
+  async createGuildWithLeader(
+    userId: number,
+    guildName: string,
+  ): Promise<Guild> {
+    // Cria a guilda
+    const guild = this.guildsRepository.create({ name: guildName });
+    const savedGuild = await this.guildsRepository.save(guild);
+
+    // Associa o usuário como líder da guilda
+    const guildMember = this.gmRepository.create({
+      user: { id: userId },
+      guild: savedGuild,
+      role: 'líder',
+    });
+    await this.gmRepository.save(guildMember);
+
+    return savedGuild;
+  }
 }

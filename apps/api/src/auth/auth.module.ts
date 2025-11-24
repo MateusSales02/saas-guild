@@ -8,11 +8,13 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 
 import { User } from '../users/user.entity';
+import { GuildsModule } from '../guilds/guilds.module';
 
 @Module({
   imports: [
     ConfigModule,
     TypeOrmModule.forFeature([User]),
+    GuildsModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
