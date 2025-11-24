@@ -6,55 +6,80 @@ import {
   Delete,
   Param,
   Body,
-  Req,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Request } from 'express';
 
 import { GuildsService } from './guilds.service';
 import { Guild } from './guild.entity';
-
-type AuthedRequest = Request & { user?: { sub?: number } };
+import { CreateGuildDto } from './dto/create-guild.dto';
+import { UpdateGuildDto } from './dto/update-guild.dto';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { JwtPayload } from '../auth/jwt.strategy';
 
 @Controller('guilds')
+@UseGuards(AuthGuard('jwt'))
 export class GuildsController {
   constructor(private readonly guildsService: GuildsService) {}
 
-  // Minhas guildas (precisa de JWT)
-  @UseGuards(AuthGuard('jwt'))
+  /**
+   * Lista as guildas do usuário autenticado
+   */
   @Get('my')
-  async my(@Req() req: AuthedRequest): Promise<Guild[]> {
-    const userId = Number(req.user?.sub);
-    return this.guildsService.findByMember(userId);
+  async my(@CurrentUser() user: JwtPayload): Promise<Guild[]> {
+    return this.guildsService.findByMember(user.sub);
   }
 
+  /**
+   * Lista todas as guildas (público para visualização)
+   */
   @Get()
   async findAll(): Promise<Guild[]> {
     return this.guildsService.findAll();
   }
 
+  /**
+   * Busca uma guilda por ID
+   */
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<Guild | null> {
-    return this.guildsService.findOne(Number(id));
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<Guild | null> {
+    return this.guildsService.findOne(id);
   }
 
+  /**
+   * Cria uma nova guilda (apenas líderes)
+   */
+  @UseGuards(RolesGuard)
+  @Roles('leader')
   @Post()
-  async create(@Body() guildData: Partial<Guild>): Promise<Guild> {
-    return this.guildsService.create(guildData);
+  async create(@Body() dto: CreateGuildDto): Promise<Guild> {
+    return this.guildsService.create(dto);
   }
 
+  /**
+   * Atualiza uma guilda (apenas líderes)
+   */
+  @UseGuards(RolesGuard)
+  @Roles('leader')
   @Put(':id')
   async update(
-    @Param('id') id: string,
-    @Body() guildData: Partial<Guild>,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateGuildDto,
   ): Promise<Guild | null> {
-    return this.guildsService.update(Number(id), guildData);
+    return this.guildsService.update(id, dto);
   }
 
+  /**
+   * Remove uma guilda (apenas líderes)
+   */
+  @UseGuards(RolesGuard)
+  @Roles('leader')
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<{ deleted: boolean }> {
-    await this.guildsService.remove(Number(id));
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<{ deleted: boolean }> {
+    await this.guildsService.remove(id);
     return { deleted: true };
   }
 }
