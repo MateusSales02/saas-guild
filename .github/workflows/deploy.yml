@@ -71,6 +71,6 @@ jobs:
           cd ~/saas-guild && git fetch --all && git reset --hard origin/main
           export API_IMAGE="$API_IMAGE"
           export WEB_IMAGE="$WEB_IMAGE"
-          sudo -E docker-compose -f docker-compose.prod.yml pull --quiet
-          sudo -E docker-compose -f docker-compose.prod.yml up -d
+          sudo -E docker-compose -f docker-compose.prod.yml pull --quiet > /dev/null 2>&1
+          sudo -E docker-compose -f docker-compose.prod.yml up -d > /dev/null 2>&1
           echo "Deploy OK"
