@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { GuildsModule } from './guilds/guilds.module';
 import { GuildMembersModule } from './guilds/guild-members.module';
@@ -15,15 +18,22 @@ import { AuditModule } from './audit/audit.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '5432'),
-      username: process.env.DB_USERNAME || 'saas_user',
-      password: process.env.DB_PASSWORD || 'saas_pass',
-      database: process.env.DB_DATABASE || 'saas_guild',
-      autoLoadEntities: true,
-      synchronize: true,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres' as const,
+        host: configService.get<string>('DB_HOST', 'localhost'),
+        port: configService.get<number>('DB_PORT', 5432),
+        username: configService.get<string>('DB_USERNAME', 'saas_user'),
+        password: configService.get<string>('DB_PASSWORD', 'saas_pass'),
+        database: configService.get<string>('DB_DATABASE', 'saas_guild'),
+        autoLoadEntities: true,
+        synchronize: true,
+      }),
     }),
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     ScheduleModule.forRoot(),
@@ -39,5 +49,7 @@ import { AuditModule } from './audit/audit.module';
     ExportModule,
     AuditModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
