@@ -4,7 +4,12 @@ import { auth, clearSession } from '@/stores/auth'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/', name: 'home', component: () => import('@/pages/Home.vue') },
+    {
+      path: '/',
+      name: 'home',
+      component: () => import('@/pages/Home.vue'),
+      meta: { hideHeader: true },
+    },
 
     {
       path: '/login',
