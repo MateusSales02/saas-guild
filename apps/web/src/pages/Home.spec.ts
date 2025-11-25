@@ -32,7 +32,7 @@ describe('Home', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('SaaS Guild · v0.1')
+    expect(wrapper.text()).toContain('SaaS Guild v0.1')
   })
 
   it('renders the description text', () => {
@@ -52,7 +52,7 @@ describe('Home', () => {
       },
     })
 
-    const registerLink = wrapper.findAll('a').find(a => a.text().includes('Registrar-se'))
+    const registerLink = wrapper.findAll('a').find(a => a.text().includes('Criar Conta Grátis'))
     expect(registerLink?.attributes('href')).toBe('/registrar')
   })
 
@@ -74,7 +74,7 @@ describe('Home', () => {
       },
     })
 
-    const dashboardLink = wrapper.findAll('a').find(a => a.text().includes('Ver Dashboard'))
+    const dashboardLink = wrapper.findAll('a').find(a => a.text().includes('Ver Demo'))
     expect(dashboardLink?.attributes('href')).toBe('/dashboard')
   })
 
@@ -85,11 +85,12 @@ describe('Home', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('Prévia do Dashboard')
     expect(wrapper.text()).toContain('Membros')
-    expect(wrapper.text()).toContain('Online')
-    expect(wrapper.text()).toContain('128')
-    expect(wrapper.text()).toContain('17')
+    expect(wrapper.text()).toContain('Raids')
+    expect(wrapper.text()).toContain('Eventos')
+    expect(wrapper.text()).toContain('Gold')
+    expect(wrapper.text()).toContain('247')
+    expect(wrapper.text()).toContain('18')
   })
 
   it('renders the demo message', () => {
@@ -99,7 +100,7 @@ describe('Home', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('Sem cartas de crédito mágicas')
-    expect(wrapper.text()).toContain('demo local')
+    expect(wrapper.text()).toContain('Sem cartão de crédito')
+    expect(wrapper.text()).toContain('100% seguro')
   })
 })
