@@ -25,7 +25,9 @@
       "Bash(git rm:*)",
       "Bash(gh run list:*)",
       "Bash(ssh -i ~/.ssh/saas-guild-key.pem ubuntu@54.161.67.120:*)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(ssh:*)",
+      "Bash(icacls:*)"
     ],
     "deny": [],
     "ask": []
