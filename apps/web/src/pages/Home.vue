@@ -1,7 +1,38 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <!-- Logo -->
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#C6A95D] to-amber-500 grid place-items-center text-lg">
+              🛡️
+            </div>
+            <span class="font-black text-lg text-slate-100">Guild Mesh</span>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex items-center gap-3">
+            <RouterLink
+              to="/registrar"
+              class="px-4 py-2 rounded-lg bg-gradient-to-r from-[#C6A95D] to-amber-500 text-slate-900 font-semibold text-sm hover:shadow-lg hover:shadow-[#C6A95D]/50 transition-all"
+            >
+              Registrar-se
+            </RouterLink>
+            <RouterLink
+              to="/login"
+              class="px-4 py-2 rounded-lg border border-slate-700 text-slate-200 font-medium text-sm hover:border-[#C6A95D] hover:text-[#C6A95D] transition-all"
+            >
+              Entrar
+            </RouterLink>
+          </div>
+        </div>
+      </div>
+    </nav>
+
     <!-- HERO SECTION -->
-    <section class="relative overflow-hidden">
+    <section class="relative overflow-hidden min-h-screen flex items-center">
       <!-- Background Effects -->
       <div class="absolute inset-0 pointer-events-none">
         <div class="absolute top-0 left-1/4 w-96 h-96 bg-[#C6A95D]/10 rounded-full blur-3xl animate-pulse" />
@@ -9,7 +40,7 @@
         <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItaDJWMTh6TTI4IDE4djE2aDJ2LTJoLTJ6bTAgMnYyaDJWMjB6bTAgNnYyaDJ2LTJ6bTAtNnYyaDJ2LTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
       </div>
 
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
+      <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div class="text-center space-y-8">
           <!-- Badge -->
           <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#C6A95D]/20 to-indigo-500/20 border border-[#C6A95D]/30 backdrop-blur-sm animate-fade-in">
