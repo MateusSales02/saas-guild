@@ -11,8 +11,7 @@ const error = ref('')
 const loading = ref(false)
 
 function goToHome() {
-  console.log('Navegando para home...')
-  window.location.href = '/'
+  router.push('/')
 }
 
 async function login() {

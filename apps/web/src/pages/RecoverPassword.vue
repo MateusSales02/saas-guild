@@ -10,8 +10,7 @@ const success = ref(false)
 const loading = ref(false)
 
 function goToLogin() {
-  console.log('Navegando para login...')
-  window.location.href = '/login'
+  router.push('/login')
 }
 
 async function recoverPassword() {
