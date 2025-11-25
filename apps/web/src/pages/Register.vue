@@ -11,6 +11,7 @@ const loading = ref(false)
 const error = ref('')
 
 function goToHome() {
+  console.log('goToHome chamado - navegando para /')
   router.push('/')
 }
 
