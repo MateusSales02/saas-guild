@@ -47,7 +47,8 @@ async function login() {
       <button
         @click="goToHome"
         type="button"
-        class="inline-flex items-center gap-2 text-slate-400 hover:text-[#C6A95D] transition-colors mb-6 group cursor-pointer"
+        style="cursor: pointer;"
+        class="inline-flex items-center gap-2 text-slate-400 hover:text-[#C6A95D] transition-colors mb-6 group"
       >
         <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
