@@ -42,7 +42,8 @@ async function recoverPassword() {
       <button
         @click="goToLogin"
         type="button"
-        class="inline-flex items-center gap-2 text-slate-400 hover:text-[#C6A95D] transition-colors mb-6 group cursor-pointer"
+        style="cursor: pointer;"
+        class="relative z-10 inline-flex items-center gap-2 text-slate-400 hover:text-[#C6A95D] transition-colors mb-6 group"
       >
         <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -51,7 +52,7 @@ async function recoverPassword() {
       </button>
 
       <!-- Glow Effect -->
-      <div class="absolute -inset-4 bg-gradient-to-r from-[#C6A95D]/20 via-indigo-500/20 to-[#C6A95D]/20 rounded-3xl blur-3xl opacity-50" />
+      <div class="absolute -inset-4 bg-gradient-to-r from-[#C6A95D]/20 via-indigo-500/20 to-[#C6A95D]/20 rounded-3xl blur-3xl opacity-50 pointer-events-none" />
 
       <!-- Card Content -->
       <div class="relative bg-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-8 sm:p-10">
