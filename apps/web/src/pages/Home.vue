@@ -298,6 +298,7 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import { ref, onMounted } from 'vue'
+import { GuildsApi, MembersApi, EventsApi } from '@/lib/api'
 import { auth } from '@/stores/auth'
 
 const totalGuilds = ref(0)
@@ -306,21 +307,18 @@ const totalEvents = ref(0)
 
 onMounted(async () => {
   try {
-    // Busca dados reais da guild do usuário logado ou dados agregados
+    // Busca total de guildas
+    const guilds = await GuildsApi.list()
+    totalGuilds.value = guilds.length || 1
+
+    // Busca dados da guild do usuário logado se existir
     if (auth.guild) {
-      const response = await fetch(`http://54.161.67.120:3000/guild-members?guildId=${auth.guild.id}`)
-      const members = await response.json()
+      const members = await MembersApi.listByGuild(auth.guild.id)
       totalMembers.value = members.length || 0
 
-      const eventsResponse = await fetch(`http://54.161.67.120:3000/events?guildId=${auth.guild.id}`)
-      const events = await eventsResponse.json()
+      const events = await EventsApi.listByGuild(auth.guild.id)
       totalEvents.value = events.length || 0
     }
-
-    // Busca total de guildas
-    const guildsResponse = await fetch('http://54.161.67.120:3000/guilds')
-    const guilds = await guildsResponse.json()
-    totalGuilds.value = guilds.length || 1
   } catch (error) {
     console.error('Erro ao buscar dados:', error)
     // Valores padrão em caso de erro
