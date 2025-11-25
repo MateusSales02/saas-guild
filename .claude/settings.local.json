@@ -10,7 +10,22 @@
       "Bash(pnpm install:*)",
       "Bash(git add:*)",
       "Bash(npm run start:dev:*)",
-      "Bash(netstat:*)"
+      "Bash(netstat:*)",
+      "Bash(npm run dev:*)",
+      "Bash(timeout /t 3)",
+      "Bash(nul)",
+      "Bash(git push:*)",
+      "Bash(curl:*)",
+      "Bash(ping:*)",
+      "Bash(taskkill:*)",
+      "Bash(del nul 2)",
+      "Bash(git reset:*)",
+      "Bash(.gitignore)",
+      "Bash(git commit:*)",
+      "Bash(git rm:*)",
+      "Bash(gh run list:*)",
+      "Bash(ssh -i ~/.ssh/saas-guild-key.pem ubuntu@54.161.67.120:*)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []

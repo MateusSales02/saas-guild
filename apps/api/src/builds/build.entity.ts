@@ -13,6 +13,7 @@ import { BuildSpec } from './build-spec.entity';
 import { BuildItem } from './build-item.entity';
 import { Guild } from '../guilds/guild.entity';
 import { User } from '../users/user.entity';
+import { GuildMember } from '../guilds/guild-member.entity';
 
 @Entity('builds')
 export class Build {
@@ -51,6 +52,10 @@ export class Build {
   @ManyToOne(() => User, { eager: true, onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ name: 'author_id' })
   author?: User | null;
+
+  @ManyToOne(() => GuildMember, { eager: true, onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'member_id' })
+  member?: GuildMember | null;
 
   @Column({ default: true })
   is_public: boolean;

@@ -146,6 +146,19 @@
         </label>
 
         <label class="flex flex-col gap-1 text-sm">
+          <span>Membro</span>
+          <select
+            v-model.number="form.memberId"
+            class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700"
+          >
+            <option :value="undefined">Selecione um membro (opcional)</option>
+            <option v-for="member in members" :key="member.id" :value="member.id">
+              {{ member.user?.nickname || member.user?.email || 'Sem nome' }}
+            </option>
+          </select>
+        </label>
+
+        <label class="flex flex-col gap-1 text-sm">
           <span>Função / Papel</span>
           <input
             v-model="form.role"
@@ -245,6 +258,7 @@ import {
   BuildSpecsApi,
   BuildsApi,
   GuildsApi,
+  MembersApi,
 } from '@/lib/api'
 
 // Tipos simples usados no front
@@ -270,6 +284,7 @@ const specs = ref<Option[]>([])
 const items = ref<BuildItem[]>([])
 const builds = ref<any[]>([])
 const guild = ref<any>(null)
+const members = ref<any[]>([])
 
 const loading = ref(false)
 const saving = ref(false)
@@ -279,7 +294,7 @@ const formError = ref('')
 const editingId = ref<number | null>(null)
 
 // Formulário
-const form = reactive<BuildPayload & { itemIds: number[] }>({
+const form = reactive<BuildPayload & { itemIds: number[]; memberId?: number }>({
   name: '',
   description: '',
   role: '',
@@ -289,6 +304,7 @@ const form = reactive<BuildPayload & { itemIds: number[] }>({
   guildId: undefined,
   authorId: undefined,
   is_public: true,
+  memberId: undefined,
 })
 
 // Specs filtradas para o formulário (baseado no classId escolhido)
@@ -300,6 +316,7 @@ const specsForForm = computed(() => {
 onMounted(async () => {
   await Promise.all([loadClasses(), loadItems(), loadGuild()])
   await loadSpecs()
+  await loadMembers()
   await fetchBuilds()
 })
 
@@ -320,6 +337,11 @@ async function loadGuild() {
   guild.value = guilds?.[0] ?? null
   if (guild.value) form.guildId = guild.value.id
   if (auth.user?.id) form.authorId = Number(auth.user.id)
+}
+
+async function loadMembers() {
+  if (!guild.value?.id) return
+  members.value = await MembersApi.listByGuild(guild.value.id)
 }
 
 async function fetchBuilds() {
@@ -382,6 +404,7 @@ function resetForm() {
   form.specId = undefined
   form.itemIds = []
   form.is_public = true
+  form.memberId = undefined
   message.value = ''
   formError.value = ''
 }
@@ -398,6 +421,7 @@ function editBuild(build: any) {
   form.is_public = build.is_public ?? true
   form.guildId = build.guild?.id ?? guild.value?.id
   form.authorId = build.author?.id ?? auth.user?.id
+  form.memberId = build.member?.id ?? undefined
 }
 
 // Criar / atualizar
@@ -417,6 +441,7 @@ async function submit() {
       guildId: guild.value?.id,
       authorId: Number(auth.user?.id),
       is_public: form.is_public,
+      memberId: form.memberId,
     }
 
     if (editingId.value) {
