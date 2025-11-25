@@ -8,6 +8,7 @@ import { BuildSpec } from './build-spec.entity';
 import { BuildItem } from './build-item.entity';
 import { Guild } from '../guilds/guild.entity';
 import { User } from '../users/user.entity';
+import { GuildMember } from '../guilds/guild-member.entity';
 
 describe('BuildsService', () => {
   let service: BuildsService;
@@ -17,6 +18,7 @@ describe('BuildsService', () => {
   let mockItemRepo: any;
   let mockGuildRepo: any;
   let mockUserRepo: any;
+  let mockMemberRepo: any;
 
   const mockClass: BuildClass = {
     id: 1,
@@ -52,8 +54,8 @@ describe('BuildsService', () => {
     items: [mockItem],
     guild: null,
     author: null,
+    member: null,
     created_at: new Date(),
-    updated_at: new Date(),
   };
 
   beforeEach(async () => {
@@ -102,6 +104,10 @@ describe('BuildsService', () => {
       findOne: jest.fn(),
     };
 
+    mockMemberRepo = {
+      findOne: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         BuildsService,
@@ -111,6 +117,7 @@ describe('BuildsService', () => {
         { provide: getRepositoryToken(BuildItem), useValue: mockItemRepo },
         { provide: getRepositoryToken(Guild), useValue: mockGuildRepo },
         { provide: getRepositoryToken(User), useValue: mockUserRepo },
+        { provide: getRepositoryToken(GuildMember), useValue: mockMemberRepo },
       ],
     }).compile();
 
@@ -177,7 +184,15 @@ describe('BuildsService', () => {
 
       expect(mockBuildRepo.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
-        relations: ['class', 'spec', 'items', 'guild', 'author'],
+        relations: [
+          'class',
+          'spec',
+          'items',
+          'guild',
+          'author',
+          'member',
+          'member.user',
+        ],
       });
       expect(result.name).toBe('Tank Build');
     });
