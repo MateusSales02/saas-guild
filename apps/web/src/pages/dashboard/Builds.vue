@@ -153,9 +153,12 @@
           >
             <option :value="undefined">Selecione um membro (opcional)</option>
             <option v-for="member in members" :key="member.id" :value="member.id">
-              {{ member.user?.nickname || member.user?.email || 'Sem nome' }}
+              {{ member.user?.nickname || member.user?.email || member.user?.name || 'Sem nome' }}
             </option>
           </select>
+          <span v-if="members.length === 0" class="text-[11px] opacity-60 text-yellow-400">
+            Nenhum membro encontrado na guilda
+          </span>
         </label>
 
         <label class="flex flex-col gap-1 text-sm">
@@ -339,8 +342,17 @@ async function loadGuild() {
 }
 
 async function loadMembers() {
-  if (!guild.value?.id) return
-  members.value = await MembersApi.listByGuild(guild.value.id)
+  if (!guild.value?.id) {
+    console.log('Nenhuma guild encontrada, não é possível carregar membros')
+    return
+  }
+  try {
+    members.value = await MembersApi.listByGuild(guild.value.id)
+    console.log('Membros carregados:', JSON.stringify(members.value, null, 2))
+    console.log('Total de membros:', members.value.length)
+  } catch (e) {
+    console.error('Erro ao carregar membros:', e)
+  }
 }
 
 async function fetchBuilds() {
