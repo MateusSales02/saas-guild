@@ -326,14 +326,31 @@ async function fetchBuilds() {
   loading.value = true
   error.value = ''
   try {
-    const params: any = { ...filters }
+    const params: any = {}
+
+    // Adicionar search apenas se não vazio
+    if (filters.search) {
+      params.search = filters.search
+    }
+
+    // Adicionar filtros de classe e spec
+    if (filters.classId) {
+      params.classId = filters.classId
+    }
+    if (filters.specId) {
+      params.specId = filters.specId
+    }
+
+    // Se "Só minhas" estiver marcado, filtrar por autor
     if (filters.onlyMine && auth.user?.id) {
       params.authorId = auth.user.id
     }
+
+    // Adicionar guildId para filtrar builds da guilda ou públicas
     if (guild.value?.id) {
       params.guildId = guild.value.id
     }
-    Object.keys(params).forEach((k) => params[k] === undefined && delete params[k])
+
     builds.value = await BuildsApi.list(params)
   } catch (e: any) {
     error.value = e.message || 'Falha ao carregar builds'
