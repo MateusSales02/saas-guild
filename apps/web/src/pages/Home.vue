@@ -1,38 +1,7 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-    <!-- NAVIGATION -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <!-- Logo -->
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#C6A95D] to-amber-500 grid place-items-center text-lg">
-              🛡️
-            </div>
-            <span class="font-black text-lg text-slate-100">Guild Mesh</span>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex items-center gap-3">
-            <RouterLink
-              to="/registrar"
-              class="px-4 py-2 rounded-lg bg-gradient-to-r from-[#C6A95D] to-amber-500 text-slate-900 font-semibold text-sm hover:shadow-lg hover:shadow-[#C6A95D]/50 transition-all"
-            >
-              Registrar-se
-            </RouterLink>
-            <RouterLink
-              to="/login"
-              class="px-4 py-2 rounded-lg border border-slate-700 text-slate-200 font-medium text-sm hover:border-[#C6A95D] hover:text-[#C6A95D] transition-all"
-            >
-              Entrar
-            </RouterLink>
-          </div>
-        </div>
-      </div>
-    </nav>
-
     <!-- HERO SECTION -->
-    <section class="relative overflow-hidden min-h-screen flex items-center">
+    <section class="relative overflow-hidden min-h-screen flex items-center justify-center">
       <!-- Background Effects -->
       <div class="absolute inset-0 pointer-events-none">
         <div class="absolute top-0 left-1/4 w-96 h-96 bg-[#C6A95D]/10 rounded-full blur-3xl animate-pulse" />
@@ -90,23 +59,23 @@
           <div class="flex flex-wrap justify-center items-center gap-8 pt-12 animate-fade-in" style="animation-delay: 0.6s">
             <div class="text-center">
               <div class="text-4xl font-black bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent">
-                1,284
+                {{ totalGuilds || '...' }}
               </div>
-              <div class="text-sm text-slate-400 mt-1">Guildas Ativas</div>
+              <div class="text-sm text-slate-400 mt-1">{{ totalGuilds === 1 ? 'Guilda Ativa' : 'Guildas Ativas' }}</div>
             </div>
             <div class="w-px h-12 bg-slate-700" />
             <div class="text-center">
               <div class="text-4xl font-black bg-gradient-to-r from-indigo-400 to-sky-400 bg-clip-text text-transparent">
-                12.5k+
+                {{ totalMembers || '...' }}
               </div>
-              <div class="text-sm text-slate-400 mt-1">Membros Gerenciados</div>
+              <div class="text-sm text-slate-400 mt-1">{{ totalMembers === 1 ? 'Membro Gerenciado' : 'Membros Gerenciados' }}</div>
             </div>
             <div class="w-px h-12 bg-slate-700" />
             <div class="text-center">
               <div class="text-4xl font-black bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-                4.8★
+                {{ totalEvents || '...' }}
               </div>
-              <div class="text-sm text-slate-400 mt-1">Avaliação Média</div>
+              <div class="text-sm text-slate-400 mt-1">{{ totalEvents === 1 ? 'Evento Criado' : 'Eventos Criados' }}</div>
             </div>
           </div>
         </div>
@@ -317,6 +286,38 @@
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { auth } from '@/stores/auth'
+
+const totalGuilds = ref(0)
+const totalMembers = ref(0)
+const totalEvents = ref(0)
+
+onMounted(async () => {
+  try {
+    // Busca dados reais da guild do usuário logado ou dados agregados
+    if (auth.guild) {
+      const response = await fetch(`http://54.161.67.120:3000/guild-members?guildId=${auth.guild.id}`)
+      const members = await response.json()
+      totalMembers.value = members.length || 0
+
+      const eventsResponse = await fetch(`http://54.161.67.120:3000/events?guildId=${auth.guild.id}`)
+      const events = await eventsResponse.json()
+      totalEvents.value = events.length || 0
+    }
+
+    // Busca total de guildas
+    const guildsResponse = await fetch('http://54.161.67.120:3000/guilds')
+    const guilds = await guildsResponse.json()
+    totalGuilds.value = guilds.length || 1
+  } catch (error) {
+    console.error('Erro ao buscar dados:', error)
+    // Valores padrão em caso de erro
+    totalGuilds.value = 1
+    totalMembers.value = 0
+    totalEvents.value = 0
+  }
+})
 </script>
 
 <style scoped>
