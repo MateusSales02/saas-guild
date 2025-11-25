@@ -10,6 +10,7 @@ import { BuildItem } from './build-item.entity';
 import { FilterBuildsDto } from './dto/filter-builds.dto';
 import { Guild } from '../guilds/guild.entity';
 import { User } from '../users/user.entity';
+import { GuildMember } from '../guilds/guild-member.entity';
 import { CreateBuildClassDto } from './dto/create-build-class.dto';
 import { UpdateBuildClassDto } from './dto/update-build-class.dto';
 import { CreateBuildSpecDto } from './dto/create-build-spec.dto';
@@ -32,6 +33,8 @@ export class BuildsService {
     private readonly guildRepo: Repository<Guild>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    @InjectRepository(GuildMember)
+    private readonly memberRepo: Repository<GuildMember>,
   ) { }
 
   async findAll(filters: FilterBuildsDto) {
@@ -42,6 +45,8 @@ export class BuildsService {
       .leftJoinAndSelect('build.items', 'items')
       .leftJoinAndSelect('build.guild', 'guild')
       .leftJoinAndSelect('build.author', 'author')
+      .leftJoinAndSelect('build.member', 'member')
+      .leftJoinAndSelect('member.user', 'memberUser')
       .orderBy('build.created_at', 'DESC');
 
     if (filters.search) {
@@ -62,7 +67,15 @@ export class BuildsService {
   async findOne(id: number) {
     const build = await this.buildRepo.findOne({
       where: { id },
-      relations: ['class', 'spec', 'items', 'guild', 'author'],
+      relations: [
+        'class',
+        'spec',
+        'items',
+        'guild',
+        'author',
+        'member',
+        'member.user',
+      ],
     });
     if (!build) throw new NotFoundException('Build não encontrada');
     return build;
@@ -236,6 +249,13 @@ export class BuildsService {
     if (dto.authorId !== undefined) {
       const author = await this.userRepo.findOne({ where: { id: dto.authorId } });
       build.author = author ?? null;
+    }
+
+    if (dto.memberId !== undefined) {
+      const member = await this.memberRepo.findOne({
+        where: { id: dto.memberId },
+      });
+      build.member = member ?? null;
     }
 
     if (dto.itemIds) {

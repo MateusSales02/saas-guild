@@ -163,6 +163,7 @@ export type BuildPayload = {
   itemIds?: number[]
   guildId?: number
   authorId?: number
+  memberId?: number
   is_public?: boolean
 }
 

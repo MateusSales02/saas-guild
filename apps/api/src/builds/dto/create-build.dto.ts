@@ -46,6 +46,11 @@ export class CreateBuildDto {
   authorId?: number;
 
   @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  memberId?: number;
+
+  @IsOptional()
   @IsBoolean()
   is_public?: boolean;
 }
