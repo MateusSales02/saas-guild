@@ -307,17 +307,24 @@ const totalEvents = ref(0)
 
 onMounted(async () => {
   try {
-    // Busca total de guildas
-    const guilds = await GuildsApi.list()
-    totalGuilds.value = guilds.length || 1
+    // Apenas busca dados se o usuário estiver autenticado
+    if (auth.token) {
+      const guilds = await GuildsApi.list()
+      totalGuilds.value = guilds.length || 1
 
-    // Busca dados da guild do usuário logado se existir
-    if (auth.guild) {
-      const members = await MembersApi.listByGuild(auth.guild.id)
-      totalMembers.value = members.length || 0
+      // Busca dados da guild do usuário logado se existir
+      if (auth.guild) {
+        const members = await MembersApi.listByGuild(auth.guild.id)
+        totalMembers.value = members.length || 0
 
-      const events = await EventsApi.listByGuild(auth.guild.id)
-      totalEvents.value = events.length || 0
+        const events = await EventsApi.listByGuild(auth.guild.id)
+        totalEvents.value = events.length || 0
+      }
+    } else {
+      // Valores padrão para usuários não autenticados
+      totalGuilds.value = 1
+      totalMembers.value = 0
+      totalEvents.value = 0
     }
   } catch (error) {
     console.error('Erro ao buscar dados:', error)
