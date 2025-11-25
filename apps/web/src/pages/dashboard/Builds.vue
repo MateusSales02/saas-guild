@@ -80,9 +80,9 @@
 
           <dl class="mt-3 grid grid-cols-2 gap-2 text-[11px]">
             <div>
-              <dt class="opacity-60">Autor</dt>
+              <dt class="opacity-60">Membro</dt>
               <dd class="font-medium">
-                {{ build.author?.nickname || build.author?.email || 'Desconhecido' }}
+                {{ build.member?.user?.nickname || build.member?.user?.email || 'Não atribuído' }}
               </dd>
             </div>
             <div>
@@ -314,9 +314,8 @@ const specsForForm = computed(() => {
 })
 
 onMounted(async () => {
-  await Promise.all([loadClasses(), loadItems(), loadGuild()])
-  await loadSpecs()
-  await loadMembers()
+  await loadGuild()
+  await Promise.all([loadClasses(), loadItems(), loadSpecs(), loadMembers()])
   await fetchBuilds()
 })
 
