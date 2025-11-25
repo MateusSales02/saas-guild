@@ -1,9 +1,11 @@
 <template>
   <div class="space-y-6">
     <!-- HEADER -->
-    <header>
-      <h1 class="text-2xl font-bold text-slate-50">Dashboard</h1>
-      <p class="text-sm text-slate-400 mt-1">
+    <header class="mb-2">
+      <h1 class="text-3xl font-black bg-gradient-to-r from-[#C6A95D] via-amber-400 to-[#C6A95D] bg-clip-text text-transparent">
+        Dashboard
+      </h1>
+      <p class="text-sm text-slate-400 mt-2">
         Visão geral da {{ guild?.name || 'sua guilda' }}
       </p>
     </header>
@@ -32,76 +34,88 @@
     <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
       <!-- Membros -->
       <div
-        class="rounded-xl border border-slate-800 bg-gradient-to-br from-slate-900/80 to-slate-950/80 p-5 shadow-lg"
+        class="group relative rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 p-6 shadow-lg hover:border-indigo-500/50 transition-all duration-300"
       >
-        <div class="flex items-center justify-between">
+        <div class="absolute -inset-0.5 bg-gradient-to-r from-indigo-500/20 to-sky-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div class="relative flex items-center justify-between">
           <div>
-            <p class="text-xs font-medium text-slate-400 uppercase tracking-wide">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Membros
             </p>
-            <p class="mt-2 text-3xl font-bold text-slate-50">{{ kpis.members }}</p>
+            <p class="mt-2 text-3xl font-black text-slate-50">{{ kpis.members }}</p>
           </div>
           <div
-            class="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-500/20 text-2xl"
+            class="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-sky-500 shadow-lg shadow-indigo-500/30"
           >
-            👥
+            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+            </svg>
           </div>
         </div>
       </div>
 
       <!-- Eventos (7 dias) -->
       <div
-        class="rounded-xl border border-slate-800 bg-gradient-to-br from-slate-900/80 to-slate-950/80 p-5 shadow-lg"
+        class="group relative rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 p-6 shadow-lg hover:border-emerald-500/50 transition-all duration-300"
       >
-        <div class="flex items-center justify-between">
+        <div class="absolute -inset-0.5 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div class="relative flex items-center justify-between">
           <div>
-            <p class="text-xs font-medium text-slate-400 uppercase tracking-wide">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Eventos (7d)
             </p>
-            <p class="mt-2 text-3xl font-bold text-slate-50">{{ kpis.events }}</p>
+            <p class="mt-2 text-3xl font-black text-slate-50">{{ kpis.events }}</p>
           </div>
           <div
-            class="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20 text-2xl"
+            class="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30"
           >
-            📅
+            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+            </svg>
           </div>
         </div>
       </div>
 
       <!-- Tesouraria -->
       <div
-        class="rounded-xl border border-slate-800 bg-gradient-to-br from-slate-900/80 to-slate-950/80 p-5 shadow-lg"
+        class="group relative rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 p-6 shadow-lg hover:border-[#C6A95D]/50 transition-all duration-300"
       >
-        <div class="flex items-center justify-between">
+        <div class="absolute -inset-0.5 bg-gradient-to-r from-[#C6A95D]/20 to-amber-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div class="relative flex items-center justify-between">
           <div>
-            <p class="text-xs font-medium text-slate-400 uppercase tracking-wide">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Tesouraria
             </p>
-            <p class="mt-2 text-3xl font-bold text-[#C6A95D]">{{ toGold(kpis.treasury) }}</p>
+            <p class="mt-2 text-3xl font-black text-[#C6A95D]">{{ toGold(kpis.treasury) }}</p>
           </div>
           <div
-            class="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-500/20 text-2xl"
+            class="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#C6A95D] to-amber-500 shadow-lg shadow-[#C6A95D]/30"
           >
-            💰
+            <svg class="w-8 h-8 text-slate-900" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/>
+            </svg>
           </div>
         </div>
       </div>
 
       <!-- Builds -->
       <div
-        class="rounded-xl border border-slate-800 bg-gradient-to-br from-slate-900/80 to-slate-950/80 p-5 shadow-lg"
+        class="group relative rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 p-6 shadow-lg hover:border-rose-500/50 transition-all duration-300"
       >
-        <div class="flex items-center justify-between">
+        <div class="absolute -inset-0.5 bg-gradient-to-r from-rose-500/20 to-pink-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div class="relative flex items-center justify-between">
           <div>
-            <p class="text-xs font-medium text-slate-400 uppercase tracking-wide">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Builds
             </p>
-            <p class="mt-2 text-3xl font-bold text-slate-50">{{ kpis.builds }}</p>
+            <p class="mt-2 text-3xl font-black text-slate-50">{{ kpis.builds }}</p>
           </div>
           <div
-            class="flex h-12 w-12 items-center justify-center rounded-full bg-sky-500/20 text-2xl"
+            class="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-pink-500 shadow-lg shadow-rose-500/30"
           >
-            ⚔️
+            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" clip-rule="evenodd"/>
+            </svg>
           </div>
         </div>
       </div>
@@ -111,16 +125,18 @@
     <div class="grid gap-6 lg:grid-cols-2">
       <!-- Gráfico de Eventos -->
       <div
-        class="rounded-xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg"
+        class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl p-6 shadow-2xl"
       >
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center justify-between mb-6">
           <div>
-            <h2 class="text-lg font-semibold text-slate-50">Eventos</h2>
-            <p class="text-xs text-slate-400">Últimos {{ range === '7d' ? '7' : '30' }} dias</p>
+            <h2 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent">
+              Eventos
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Últimos {{ range === '7d' ? '7' : '30' }} dias</p>
           </div>
           <select
             v-model="range"
-            class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/60 border border-slate-700 outline-none"
+            class="text-xs px-3 py-2 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
           >
             <option value="7d">7 dias</option>
             <option value="30d">30 dias</option>
@@ -146,7 +162,7 @@
           <path :d="areaPath" fill="url(#gradient)" opacity="0.3" />
 
           <!-- Line -->
-          <path :d="linePath" fill="none" stroke="#3b82f6" stroke-width="2" />
+          <path :d="linePath" fill="none" stroke="#C6A95D" stroke-width="3" />
 
           <!-- Points -->
           <circle
@@ -154,16 +170,16 @@
             :key="i"
             :cx="p.x"
             :cy="p.y"
-            r="4"
-            fill="#3b82f6"
-            class="cursor-pointer hover:r-6 transition-all"
+            r="5"
+            fill="#C6A95D"
+            class="cursor-pointer hover:r-7 transition-all"
           />
 
           <!-- Gradient -->
           <defs>
             <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.8" />
-              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
+              <stop offset="0%" stop-color="#C6A95D" stop-opacity="0.6" />
+              <stop offset="100%" stop-color="#C6A95D" stop-opacity="0" />
             </linearGradient>
           </defs>
         </svg>
@@ -171,9 +187,11 @@
 
       <!-- Próximos Eventos -->
       <div
-        class="rounded-xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg"
+        class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl p-6 shadow-2xl"
       >
-        <h2 class="text-lg font-semibold text-slate-50 mb-4">Próximos Eventos</h2>
+        <h2 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent mb-6">
+          Próximos Eventos
+        </h2>
 
         <div v-if="upcoming.length === 0" class="text-sm text-slate-400 text-center py-8">
           Nenhum evento agendado
@@ -183,20 +201,20 @@
           <div
             v-for="ev in upcoming"
             :key="ev.id"
-            class="flex items-start gap-3 p-3 rounded-lg bg-slate-800/40 border border-slate-700/50 hover:border-slate-600 transition"
+            class="group flex items-start gap-3 p-3 rounded-lg bg-slate-800/40 border border-slate-700/50 hover:border-emerald-500/50 hover:bg-slate-800/60 transition-all duration-300"
           >
             <div
-              class="flex h-12 w-12 flex-col items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500/20 to-sky-500/20 border border-indigo-500/30"
+              class="flex h-12 w-12 flex-col items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/30 to-teal-500/30 border border-emerald-500/40 group-hover:border-emerald-400 group-hover:shadow-lg group-hover:shadow-emerald-500/20 transition-all"
             >
-              <span class="text-xs font-semibold text-indigo-300">
+              <span class="text-sm font-bold text-emerald-300">
                 {{ dayOfMonth(ev.event_date) }}
               </span>
-              <span class="text-[10px] text-slate-400">
+              <span class="text-[10px] text-slate-400 uppercase">
                 {{ new Date(ev.event_date).toLocaleDateString('pt-BR', { month: 'short' }) }}
               </span>
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-slate-50 truncate">{{ ev.name }}</p>
+              <p class="text-sm font-semibold text-slate-50 truncate">{{ ev.name }}</p>
               <p class="text-xs text-slate-400">
                 {{ shortTime(ev.event_date) }}
                 <span v-if="ev.lead" class="ml-2">• {{ ev.lead }}</span>
@@ -211,9 +229,11 @@
     <div class="grid gap-6 lg:grid-cols-2">
       <!-- Membros Recentes -->
       <div
-        class="rounded-xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg"
+        class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl p-6 shadow-2xl"
       >
-        <h2 class="text-lg font-semibold text-slate-50 mb-4">Membros da Guilda</h2>
+        <h2 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent mb-6">
+          Membros da Guilda
+        </h2>
 
         <div v-if="members.length === 0" class="text-sm text-slate-400 text-center py-8">
           Nenhum membro ainda
@@ -223,21 +243,21 @@
           <div
             v-for="m in members.slice(0, 6)"
             :key="m.id"
-            class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/40 transition"
+            class="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800/60 border border-transparent hover:border-indigo-500/30 transition-all duration-300"
           >
             <div
-              class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500/90 to-sky-500/90 text-xs font-semibold text-white shadow-md"
+              class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-sky-500 text-sm font-bold text-white shadow-lg shadow-indigo-500/30"
             >
               {{ (m.user?.nickname || m.user?.email || '?').charAt(0).toUpperCase() }}
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-slate-50 truncate">
+              <p class="text-sm font-semibold text-slate-50 truncate">
                 {{ m.user?.nickname || m.user?.email || '—' }}
               </p>
               <p class="text-xs text-slate-400">{{ roleLabel(m.role) }}</p>
             </div>
           </div>
-          <div v-if="members.length > 6" class="text-xs text-slate-400 text-center pt-2">
+          <div v-if="members.length > 6" class="text-xs text-slate-400 text-center pt-3 border-t border-slate-800 mt-3">
             +{{ members.length - 6 }} membros
           </div>
         </div>
@@ -245,36 +265,40 @@
 
       <!-- Builds Recentes -->
       <div
-        class="rounded-xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg"
+        class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl p-6 shadow-2xl"
       >
-        <h2 class="text-lg font-semibold text-slate-50 mb-4">Builds Recentes</h2>
+        <h2 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent mb-6">
+          Builds Recentes
+        </h2>
 
         <div v-if="recentBuilds.length === 0" class="text-sm text-slate-400 text-center py-8">
           Nenhuma build criada ainda
         </div>
 
-        <div v-else class="space-y-2">
+        <div v-else class="space-y-3">
           <div
             v-for="build in recentBuilds"
             :key="build.id"
-            class="p-3 rounded-lg bg-slate-800/40 border border-slate-700/50 hover:border-slate-600 transition"
+            class="group p-4 rounded-lg bg-slate-800/40 border border-slate-700/50 hover:border-rose-500/50 hover:bg-slate-800/60 transition-all duration-300"
           >
             <div class="flex items-start justify-between gap-2">
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-slate-50 truncate">{{ build.name }}</p>
-                <p class="text-xs text-slate-400">
+                <p class="text-sm font-semibold text-slate-50 truncate group-hover:text-rose-300 transition-colors">
+                  {{ build.name }}
+                </p>
+                <p class="text-xs text-slate-400 mt-1">
                   {{ build.class?.name || 'Sem classe' }}
                   <span v-if="build.spec"> • {{ build.spec.name }}</span>
                 </p>
               </div>
               <span
-                class="px-2 py-0.5 rounded text-[10px] whitespace-nowrap"
-                :class="build.is_public ? 'bg-emerald-900/40 text-emerald-200' : 'bg-slate-800 text-slate-200'"
+                class="px-2.5 py-1 rounded-lg text-[10px] font-medium whitespace-nowrap border"
+                :class="build.is_public ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-slate-700/50 text-slate-300 border-slate-600'"
               >
                 {{ build.is_public ? 'Pública' : 'Privada' }}
               </span>
             </div>
-            <p v-if="build.member" class="mt-1 text-xs text-slate-500">
+            <p v-if="build.member" class="mt-2 text-xs text-slate-500">
               Por: {{ build.member.user?.nickname || build.member.user?.email }}
             </p>
           </div>
@@ -285,35 +309,47 @@
     <!-- RAIDS RECENTES (se houver) -->
     <div
       v-if="recentRaids.length > 0"
-      class="rounded-xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg"
+      class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl p-6 shadow-2xl"
     >
-      <h2 class="text-lg font-semibold text-slate-50 mb-4">Raids Recentes</h2>
+      <h2 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent mb-6">
+        Raids Recentes
+      </h2>
 
       <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <div
           v-for="raid in recentRaids"
           :key="raid.id"
-          class="p-4 rounded-lg bg-slate-800/40 border border-slate-700/50"
+          class="group p-4 rounded-lg bg-slate-800/40 border border-slate-700/50 hover:border-purple-500/50 hover:bg-slate-800/60 transition-all duration-300"
         >
-          <div class="flex items-start justify-between mb-2">
-            <div>
-              <p class="text-sm font-medium text-slate-50">{{ raid.name }}</p>
-              <p class="text-xs text-slate-400">{{ shortDate(raid.raid_date) }}</p>
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-semibold text-slate-50 truncate">{{ raid.name }}</p>
+              <p class="text-xs text-slate-400 mt-1">{{ shortDate(raid.raid_date) }}</p>
             </div>
             <span
-              class="px-2 py-0.5 rounded text-[10px]"
+              class="px-2.5 py-1 rounded-lg text-[10px] font-medium whitespace-nowrap border ml-2"
               :class="{
-                'bg-emerald-900/40 text-emerald-200': raid.status === 'completed',
-                'bg-amber-900/40 text-amber-200': raid.status === 'scheduled',
-                'bg-slate-800 text-slate-200': raid.status === 'cancelled'
+                'bg-emerald-500/20 text-emerald-300 border-emerald-500/40': raid.status === 'completed',
+                'bg-amber-500/20 text-amber-300 border-amber-500/40': raid.status === 'scheduled',
+                'bg-slate-700/50 text-slate-300 border-slate-600': raid.status === 'cancelled'
               }"
             >
               {{ statusLabel(raid.status) }}
             </span>
           </div>
-          <div class="flex items-center gap-4 text-xs text-slate-400">
-            <span>👥 {{ raid.participants?.length || 0 }}</span>
-            <span>💰 {{ toGold(raid.loot_distributed || 0) }}</span>
+          <div class="flex items-center gap-4 text-xs">
+            <div class="flex items-center gap-1.5 text-indigo-300">
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+              </svg>
+              <span>{{ raid.participants?.length || 0 }}</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-[#C6A95D]">
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/>
+              </svg>
+              <span>{{ toGold(raid.loot_distributed || 0) }}</span>
+            </div>
           </div>
         </div>
       </div>

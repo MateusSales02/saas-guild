@@ -27,7 +27,15 @@
       "Bash(ssh -i ~/.ssh/saas-guild-key.pem ubuntu@54.161.67.120:*)",
       "Bash(git pull:*)",
       "Bash(ssh:*)",
-      "Bash(icacls:*)"
+      "Bash(icacls:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(pnpm rebuild:*)",
+      "Bash(node:*)",
+      "Bash(npm --version:*)",
+      "Bash(pnpm:*)",
+      "Bash(if not exist .env copy .env.example .env)",
+      "Bash(psql:*)"
     ],
     "deny": [],
     "ask": []

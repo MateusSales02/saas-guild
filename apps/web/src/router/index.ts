@@ -23,6 +23,12 @@ const router = createRouter({
       component: () => import('@/pages/Register.vue'),
       meta: { hideHeader: true },
     },
+    {
+      path: '/recuperar-senha',
+      name: 'recover-password',
+      component: () => import('@/pages/RecoverPassword.vue'),
+      meta: { hideHeader: true },
+    },
 
     {
       path: '/logout',
@@ -79,10 +85,13 @@ const router = createRouter({
 router.beforeEach((to) => {
   const authed = !!auth.token
 
+  // Redireciona para login se a rota requer autenticação e usuário não está logado
   if (to.meta.requiresAuth && !authed && to.name !== 'login') {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
 
+  // Se está logado e tenta acessar login ou register, redireciona para dashboard
+  // MAS permite acesso à home, recuperar-senha sempre
   if (authed && (to.name === 'login' || to.name === 'register')) {
     return { name: 'dashboard.overview' }
   }

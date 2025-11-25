@@ -1,19 +1,19 @@
 <template>
   <section
-    class="rounded-2xl border border-slate-800/70 bg-slate-950/70 px-4 py-5 sm:px-6 sm:py-6 shadow-[0_18px_60px_rgba(15,23,42,0.9)]"
+    class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl px-4 py-5 sm:px-6 sm:py-6 shadow-2xl"
   >
     <!-- HEADER -->
-    <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
+    <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
       <div>
-        <h2 class="text-lg font-semibold text-slate-50 flex items-center gap-2">
-          <span
-            class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500/90 text-xs shadow-md shadow-indigo-900/50"
-          >
-            👥
-          </span>
+        <h2 class="text-2xl font-black bg-gradient-to-r from-[#C6A95D] via-amber-400 to-[#C6A95D] bg-clip-text text-transparent flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-sky-500 shadow-lg shadow-indigo-500/30">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+            </svg>
+          </div>
           Membros da Guilda
         </h2>
-        <p class="mt-1 text-xs text-slate-400">
+        <p class="mt-2 text-sm text-slate-400">
           Gerencie quem faz parte da sua guilda e os cargos de cada jogador.
         </p>
       </div>
@@ -34,7 +34,7 @@
         <div class="flex items-center gap-2">
           <select
             v-model="quickRole"
-            class="text-sm px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700 outline-none"
+            class="text-sm px-3 py-2 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
           >
             <!-- value em inglês, label em PT-BR -->
             <option value="member">Membro</option>
@@ -46,11 +46,14 @@
           <button
             type="button"
             @click="openModal"
-            class="inline-flex items-center gap-2 text-xs sm:text-sm px-3.5 py-2 rounded-lg
-                   border border-indigo-500/80 bg-indigo-600/90 text-white font-medium
-                   shadow-md shadow-indigo-900/40 hover:bg-indigo-500 transition"
+            class="group inline-flex items-center gap-2 text-xs sm:text-sm px-4 py-2 rounded-lg
+                   bg-gradient-to-r from-[#C6A95D] to-amber-500 text-slate-900 font-bold
+                   shadow-lg shadow-[#C6A95D]/30 hover:shadow-[#C6A95D]/50 hover:scale-105 transition-all duration-300"
           >
-            Adicionar-me
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/>
+            </svg>
+            Adicionar Membro
           </button>
         </div>
       </div>
@@ -100,14 +103,14 @@
     <!-- CONTEÚDO -->
     <div
       v-else
-      class="overflow-hidden rounded-xl border border-slate-800/80 bg-slate-950/80 shadow-lg shadow-black/40"
+      class="overflow-hidden rounded-xl border border-slate-700/50 bg-slate-800/30 shadow-lg"
     >
       <table class="w-full text-xs sm:text-sm">
-        <thead class="bg-slate-900/90 border-b border-slate-800/80">
-          <tr class="text-left text-[11px] sm:text-xs font-semibold uppercase tracking-wide text-slate-400">
-            <th class="px-4 py-2.5">Usuário</th>
-            <th class="px-4 py-2.5">Cargo</th>
-            <th class="px-4 py-2.5 text-right">Ações</th>
+        <thead class="bg-slate-800/60 border-b border-slate-700/50">
+          <tr class="text-left text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-300">
+            <th class="px-4 py-3.5">Usuário</th>
+            <th class="px-4 py-3.5">Cargo</th>
+            <th class="px-4 py-3.5 text-right">Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -115,13 +118,13 @@
           <tr
             v-for="m in members"
             :key="m.id"
-            class="border-t border-slate-900/80 hover:bg-slate-900/60 transition"
-            :class="{ 'bg-slate-900/80': m.user?.id === currentUserId }"
+            class="border-t border-slate-700/30 hover:bg-slate-800/50 transition-all duration-200"
+            :class="{ 'bg-indigo-500/10 border-indigo-500/30': m.user?.id === currentUserId }"
           >
             <td class="px-4 py-3">
               <div class="flex items-center gap-3">
                 <div
-                  class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500/90 to-sky-500/90 text-xs font-semibold text-white shadow-md shadow-indigo-900/40"
+                  class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-sky-500 text-sm font-bold text-white shadow-lg shadow-indigo-500/30"
                 >
                   {{ (m.user?.nickname || m.user?.email || '?').charAt(0).toUpperCase() }}
                 </div>
@@ -145,7 +148,11 @@
             <td class="px-4 py-3 align-middle">
               <div class="flex items-center gap-2">
                 <span
-                  class="inline-flex items-center rounded-full bg-slate-800/70 border border-slate-700 px-2 py-0.5 text-[11px] text-slate-200"
+                  class="inline-flex items-center rounded-lg bg-slate-700/50 border border-slate-600 px-3 py-1 text-xs font-semibold text-slate-200"
+                  :class="{
+                    'bg-[#C6A95D]/20 border-[#C6A95D]/40 text-[#C6A95D]': m.role === 'leader',
+                    'bg-indigo-500/20 border-indigo-500/40 text-indigo-300': m.role === 'officer'
+                  }"
                 >
                   {{ roleLabel(m.role) }}
                 </span>
@@ -154,7 +161,7 @@
                   v-if="canManage"
                   :value="m.role"
                   @change="(e: any) => updateRole(m.id, e.target.value)"
-                  class="px-2 py-1 rounded bg-slate-800/40 border border-slate-700 outline-none text-[11px]"
+                  class="px-2 py-1.5 rounded-lg bg-slate-800/60 border border-slate-700 text-slate-300 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-xs transition-all"
                 >
                   <option value="member">Membro</option>
                   <option value="leader">Líder</option>
@@ -167,9 +174,12 @@
               <button
                 v-if="canManage"
                 @click="removeMember(m.id)"
-                class="inline-flex items-center gap-1.5 rounded-full border border-rose-500/80 bg-rose-600/10 px-3 py-1.5 text-xs font-medium text-rose-200 hover:bg-rose-600/20 hover:border-rose-400 transition"
+                class="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/50 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-300 hover:bg-rose-500/20 hover:border-rose-400 transition-all duration-200"
               >
-                🗑 <span class="hidden sm:inline">Remover</span>
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                <span class="hidden sm:inline">Remover</span>
               </button>
             </td>
           </tr>
@@ -193,69 +203,79 @@
     <!-- MODAL: Novo membro -->
     <div
       v-if="showAddMemberModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
     >
       <div
-        class="w-[90%] max-w-md rounded-2xl bg-slate-900 border border-slate-700 p-5 shadow-2xl"
+        class="relative w-[90%] max-w-md rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-700/50 p-6 shadow-2xl animate-fade-in-up"
       >
-        <header class="mb-4 flex items-center justify-between">
-          <h3 class="text-sm font-semibold text-slate-50">Adicionar membro</h3>
-          <button
-            type="button"
-            class="text-slate-400 hover:text-slate-200 text-xs"
-            @click="closeModal"
-          >
-            ✕
-          </button>
-        </header>
+        <!-- Glow Effect -->
+        <div class="absolute -inset-1 bg-gradient-to-r from-[#C6A95D]/20 to-indigo-500/20 rounded-2xl blur-xl opacity-50" />
 
-        <form class="space-y-4" @submit.prevent="submitNewMember">
-          <div class="space-y-1">
-            <label class="text-xs font-medium text-slate-300">Nome do jogador</label>
-            <input
-              v-model="newMemberName"
-              type="text"
-              required
-              class="w-full rounded-lg bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500"
-              placeholder="Ex.: Guerreiro Supremo"
-            />
-          </div>
-
-          <div class="space-y-1">
-            <label class="text-xs font-medium text-slate-300">Cargo</label>
-            <select
-              v-model="newMemberRole"
-              class="w-full rounded-lg bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500"
-            >
-              <option value="member">Membro</option>
-              <option value="leader">Líder</option>
-              <option value="officer">Oficial</option>
-            </select>
-          </div>
-
-          <div class="mt-5 flex justify-end gap-2">
+        <div class="relative">
+          <header class="mb-6 flex items-center justify-between">
+            <h3 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent">
+              Adicionar Membro
+            </h3>
             <button
               type="button"
-              class="px-3 py-1.5 text-xs rounded-lg border border-slate-600 text-slate-200 hover:bg-slate-800/70"
+              class="text-slate-400 hover:text-slate-200 transition-colors"
               @click="closeModal"
             >
-              Cancelar
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
             </button>
-            <button
-              type="submit"
-              :disabled="saving || !newMemberName.trim()"
-              class="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs rounded-lg
-                     bg-indigo-600 hover:bg-indigo-500 text-white font-medium
-                     disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span
-                v-if="saving"
-                class="h-3 w-3 rounded-full border-2 border-white/60 border-t-transparent animate-spin"
+          </header>
+
+          <form class="space-y-5" @submit.prevent="submitNewMember">
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-300">Nome do jogador</label>
+              <input
+                v-model="newMemberName"
+                type="text"
+                required
+                class="w-full rounded-xl bg-slate-800/50 border border-slate-700 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
+                placeholder="Ex.: Guerreiro Supremo"
               />
-              <span v-else>Salvar membro</span>
-            </button>
-          </div>
-        </form>
+            </div>
+
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-300">Cargo</label>
+              <select
+                v-model="newMemberRole"
+                class="w-full rounded-xl bg-slate-800/50 border border-slate-700 px-4 py-3 text-sm text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
+              >
+                <option value="member">Membro</option>
+                <option value="leader">Líder</option>
+                <option value="officer">Oficial</option>
+              </select>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                class="px-4 py-2.5 text-sm rounded-xl border-2 border-slate-600 bg-slate-800/30 text-slate-200 font-semibold hover:bg-slate-800/50 hover:border-slate-500 transition-all"
+                @click="closeModal"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                :disabled="saving || !newMemberName.trim()"
+                class="inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-xl
+                       bg-gradient-to-r from-[#C6A95D] to-amber-500 text-slate-900 font-bold
+                       shadow-lg shadow-[#C6A95D]/30 hover:shadow-[#C6A95D]/50 hover:scale-105
+                       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300"
+              >
+                <span
+                  v-if="saving"
+                  class="h-4 w-4 rounded-full border-2 border-slate-900/60 border-t-transparent animate-spin"
+                />
+                <span v-else>Salvar Membro</span>
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </section>
@@ -394,3 +414,20 @@ function roleLabel(role: GuildMemberRole) {
   }
 }
 </script>
+
+<style scoped>
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s ease-out;
+}
+</style>

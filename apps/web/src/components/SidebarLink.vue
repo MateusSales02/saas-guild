@@ -1,9 +1,17 @@
 <template>
-  <RouterLink :to="to" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-800/70">
+  <RouterLink
+    :to="to"
+    class="group relative flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-slate-100 transition-all duration-300"
+    active-class="!text-[#C6A95D] bg-gradient-to-r from-[#C6A95D]/10 to-amber-500/10 border border-[#C6A95D]/30 shadow-lg shadow-[#C6A95D]/20"
+    :class="{'hover:bg-slate-800/50': true}"
+  >
+    <!-- Glow effect on hover -->
+    <div class="absolute -inset-1 bg-gradient-to-r from-[#C6A95D]/20 to-amber-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
-      class="w-5 h-5 opacity-80"
+      class="relative z-10 w-5 h-5 stroke-[2] group-hover:scale-110 transition-transform duration-300"
       fill="none"
       stroke="currentColor"
     >
@@ -38,7 +46,7 @@
         />
       </template>
     </svg>
-    <span class="text-sm">{{ label }}</span>
+    <span class="relative z-10 text-sm font-semibold tracking-wide">{{ label }}</span>
   </RouterLink>
 </template>
 

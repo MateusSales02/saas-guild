@@ -2,12 +2,21 @@
   <section class="grid lg:grid-cols-[2fr_1fr] gap-6">
     <!-- LISTA DE BUILDS -->
     <div
-      class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60"
+      class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl px-4 py-5 sm:px-6 sm:py-6 shadow-2xl"
     >
-      <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+      <header class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
         <div>
-          <h2 class="text-lg font-semibold">Builds</h2>
-          <p class="text-sm opacity-70">Filtre por classe, spec ou palavra-chave</p>
+          <h2 class="text-2xl font-black bg-gradient-to-r from-[#C6A95D] via-amber-400 to-[#C6A95D] bg-clip-text text-transparent flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 shadow-lg shadow-purple-500/30">
+              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
+              </svg>
+            </div>
+            Builds
+          </h2>
+          <p class="mt-2 text-sm text-slate-400">
+            Filtre por classe, spec ou palavra-chave
+          </p>
         </div>
 
         <div class="flex flex-wrap gap-2 items-center">
@@ -16,13 +25,13 @@
             @input="fetchBuilds"
             type="text"
             placeholder="Buscar"
-            class="px-3 py-2 rounded-lg bg-slate-800/30 border border-slate-700 outline-none text-sm"
+            class="px-3 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all"
           />
 
           <select
             v-model.number="filters.classId"
             @change="onClassFilterChange"
-            class="px-3 py-2 rounded-lg bg-slate-800/30 border border-slate-700 text-sm"
+            class="px-3 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-100 text-sm focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
           >
             <option :value="undefined">Todas classes</option>
             <option v-for="c in classes" :key="c.id" :value="c.id">
@@ -33,7 +42,7 @@
           <select
             v-model.number="filters.specId"
             @change="fetchBuilds"
-            class="px-3 py-2 rounded-lg bg-slate-800/30 border border-slate-700 text-sm"
+            class="px-3 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-100 text-sm focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
           >
             <option :value="undefined">Todas specs</option>
             <option v-for="s in specs" :key="s.id" :value="s.id">
@@ -41,152 +50,178 @@
             </option>
           </select>
 
-          <label class="flex items-center gap-1 text-xs cursor-pointer">
-            <input v-model="filters.onlyMine" type="checkbox" class="accent-[#C6A95D]" />
+          <label class="flex items-center gap-1.5 text-xs cursor-pointer text-slate-300 hover:text-slate-100 transition-colors">
+            <input v-model="filters.onlyMine" type="checkbox" class="accent-[#C6A95D] rounded" />
             Só minhas
           </label>
         </div>
       </header>
 
-      <div v-if="loading" class="text-sm opacity-70">Carregando builds...</div>
-      <div v-if="error" class="text-sm text-red-400">{{ error }}</div>
+      <div v-if="loading" class="text-sm text-slate-400">Carregando builds...</div>
+      <div v-if="error" class="text-sm text-red-400 flex items-center gap-2">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        {{ error }}
+      </div>
 
       <div v-if="!loading && !error" class="grid md:grid-cols-2 gap-4">
         <article
           v-for="build in builds"
           :key="build.id"
-          class="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-900/40 flex flex-col justify-between"
+          class="group relative p-4 rounded-xl border border-slate-700/50 bg-slate-800/30 hover:bg-slate-800/50 hover:border-purple-500/50 flex flex-col justify-between transition-all duration-300 shadow-lg"
         >
-          <header class="flex items-start justify-between gap-2">
-            <div>
-              <h3 class="font-semibold text-sm">{{ build.name }}</h3>
-              <p class="text-xs opacity-70">
-                {{ build.role || 'Sem função' }} ·
-                {{ build.class?.name || 'Classe indefinida' }}
-                <span v-if="build.spec"> · {{ build.spec.name }}</span>
+          <div class="absolute -inset-0.5 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
+
+          <div class="relative">
+            <header class="flex items-start justify-between gap-2 mb-3">
+              <div class="flex-1 min-w-0">
+                <h3 class="font-bold text-sm text-slate-100 mb-1">{{ build.name }}</h3>
+                <p class="text-xs text-slate-400 space-x-1">
+                  <span class="font-medium text-purple-300">{{ build.role || 'Sem função' }}</span>
+                  <span class="text-slate-600">·</span>
+                  <span>{{ build.class?.name || 'Classe indefinida' }}</span>
+                  <span v-if="build.spec" class="text-slate-600">·</span>
+                  <span v-if="build.spec">{{ build.spec.name }}</span>
+                </p>
+              </div>
+              <span
+                class="px-2 py-1 rounded-lg text-[10px] font-semibold border"
+                :class="build.is_public ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-slate-700/50 text-slate-300 border-slate-600'"
+              >
+                {{ build.is_public ? 'Pública' : 'Privada' }}
+              </span>
+            </header>
+
+            <p v-if="build.description" class="mt-2 text-xs text-slate-400 line-clamp-2 mb-3">
+              {{ build.description }}
+            </p>
+
+            <dl class="grid grid-cols-2 gap-2 text-[11px] mb-3">
+              <div class="p-2 rounded-lg bg-slate-900/50 border border-slate-700/30">
+                <dt class="text-slate-500 mb-0.5">Membro</dt>
+                <dd class="font-medium text-slate-200 truncate">
+                  {{ build.member?.user?.nickname || build.member?.user?.email || 'Não atribuído' }}
+                </dd>
+              </div>
+              <div class="p-2 rounded-lg bg-slate-900/50 border border-slate-700/30">
+                <dt class="text-slate-500 mb-0.5">Guilda</dt>
+                <dd class="font-medium text-slate-200 truncate">{{ build.guild?.name || 'Livre' }}</dd>
+              </div>
+            </dl>
+
+            <div class="p-2 rounded-lg bg-slate-900/50 border border-slate-700/30 mb-3">
+              <p class="text-[11px] text-slate-500 mb-1">Itens:</p>
+              <p class="text-xs text-slate-300">
+                {{ (build.items || []).map((i: any) => i.name).join(', ') || 'Nenhum' }}
               </p>
             </div>
-            <span
-              class="px-2 py-0.5 rounded-lg text-[10px]"
-              :class="build.is_public ? 'bg-emerald-900/40 text-emerald-200' : 'bg-slate-800 text-slate-200'"
-            >
-              {{ build.is_public ? 'Pública' : 'Privada' }}
-            </span>
-          </header>
 
-          <p v-if="build.description" class="mt-2 text-xs opacity-80 line-clamp-3">
-            {{ build.description }}
-          </p>
-
-          <dl class="mt-3 grid grid-cols-2 gap-2 text-[11px]">
-            <div>
-              <dt class="opacity-60">Membro</dt>
-              <dd class="font-medium">
-                {{ build.member?.user?.nickname || build.member?.user?.email || 'Não atribuído' }}
-              </dd>
-            </div>
-            <div>
-              <dt class="opacity-60">Guilda</dt>
-              <dd class="font-medium">{{ build.guild?.name || 'Livre' }}</dd>
-            </div>
-          </dl>
-
-          <p class="mt-2 text-[11px] opacity-70">
-            Itens:
-            {{ (build.items || []).map((i: any) => i.name).join(', ') || 'Nenhum' }}
-          </p>
-
-          <footer class="mt-3 flex items-center justify-between gap-2 text-xs">
-            <button
-              class="px-3 py-1 rounded-lg border border-slate-700 hover:bg-slate-800"
-              @click="editBuild(build)"
-            >
-              Editar
-            </button>
-            <button
-              class="px-3 py-1 rounded-lg border border-red-700 hover:bg-red-800 text-red-100"
-              @click="removeBuild(build.id)"
-            >
-              Remover
-            </button>
-          </footer>
+            <footer class="flex items-center justify-between gap-2">
+              <button
+                class="flex-1 px-3 py-2 rounded-lg border border-slate-600 bg-slate-800/50 text-slate-200 text-xs font-semibold hover:bg-slate-700/50 hover:border-slate-500 transition-all"
+                @click="editBuild(build)"
+              >
+                Editar
+              </button>
+              <button
+                class="px-3 py-2 rounded-lg border border-red-500/50 bg-red-500/10 text-red-300 text-xs font-semibold hover:bg-red-500/20 hover:border-red-400 transition-all"
+                @click="removeBuild(build.id)"
+              >
+                Remover
+              </button>
+            </footer>
+          </div>
         </article>
 
-        <p v-if="builds.length === 0" class="text-sm opacity-70">
-          Nenhuma build encontrada.
-        </p>
+        <div
+          v-if="builds.length === 0"
+          class="col-span-full rounded-xl border border-slate-700/50 bg-slate-800/30 p-8 text-center"
+        >
+          <div class="flex flex-col items-center gap-3">
+            <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 grid place-items-center">
+              <svg class="w-8 h-8 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
+              </svg>
+            </div>
+            <span class="font-medium text-slate-200">Nenhuma build encontrada</span>
+            <span class="text-xs text-slate-400">
+              Crie sua primeira build usando o formulário ao lado
+            </span>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- FORMULÁRIO -->
     <div
-      class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60"
+      class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl px-4 py-5 sm:px-6 sm:py-6 shadow-2xl"
     >
-      <header class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold">
+      <header class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent">
           {{ editingId ? 'Editar build' : 'Nova build' }}
         </h2>
         <button
           v-if="editingId"
-          class="text-sm text-slate-300 underline"
+          class="text-sm text-[#C6A95D] hover:text-amber-400 font-semibold transition-colors"
           @click="resetForm"
         >
           Cancelar
         </button>
       </header>
 
-      <form class="space-y-3" @submit.prevent="submit">
-        <label class="flex flex-col gap-1 text-sm">
-          <span>Nome</span>
+      <form class="space-y-4" @submit.prevent="submit">
+        <label class="flex flex-col gap-2">
+          <span class="text-sm font-semibold text-slate-300">Nome</span>
           <input
             v-model="form.name"
             required
-            class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700"
+            class="px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all"
           />
         </label>
 
-        <label class="flex flex-col gap-1 text-sm">
-          <span>Membro</span>
+        <label class="flex flex-col gap-2">
+          <span class="text-sm font-semibold text-slate-300">Membro</span>
           <select
             v-model.number="form.memberId"
-            class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700"
+            class="px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all"
           >
             <option :value="undefined">Selecione um membro (opcional)</option>
             <option v-for="member in members" :key="member.id" :value="member.id">
               {{ member.user?.nickname || member.user?.email || member.user?.name || 'Sem nome' }}
             </option>
           </select>
-          <span v-if="members.length === 0" class="text-[11px] opacity-60 text-yellow-400">
+          <span v-if="members.length === 0" class="text-[11px] text-amber-400/80">
             Nenhum membro encontrado na guilda
           </span>
         </label>
 
-        <label class="flex flex-col gap-1 text-sm">
-          <span>Função / Papel</span>
+        <label class="flex flex-col gap-2">
+          <span class="text-sm font-semibold text-slate-300">Função / Papel</span>
           <input
             v-model="form.role"
             placeholder="Tank, healer, DPS..."
-            class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700"
+            class="px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all"
           />
         </label>
 
-        <label class="flex flex-col gap-1 text-sm">
-          <span>Descrição</span>
+        <label class="flex flex-col gap-2">
+          <span class="text-sm font-semibold text-slate-300">Descrição</span>
           <textarea
             v-model="form.description"
             rows="3"
-            class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700"
+            class="px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all resize-none"
           ></textarea>
         </label>
 
-        <div class="grid grid-cols-2 gap-3 text-sm">
-          <label class="flex flex-col gap-1">
-            <span>Classe</span>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex flex-col gap-2">
+            <span class="text-sm font-semibold text-slate-300">Classe</span>
             <select
               v-model.number="form.classId"
               @change="onFormClassChange"
               required
-              class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700"
+              class="px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all"
             >
               <option :value="undefined" disabled>Selecione</option>
               <option v-for="c in classes" :key="c.id" :value="c.id">
@@ -195,11 +230,11 @@
             </select>
           </label>
 
-          <label class="flex flex-col gap-1">
-            <span>Spec</span>
+          <label class="flex flex-col gap-2">
+            <span class="text-sm font-semibold text-slate-300">Spec</span>
             <select
               v-model.number="form.specId"
-              class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700"
+              class="px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all"
             >
               <option :value="undefined">Nenhuma</option>
               <option
@@ -213,38 +248,56 @@
           </label>
         </div>
 
-        <label class="flex flex-col gap-1 text-sm">
-          <span>Itens</span>
+        <label class="flex flex-col gap-2">
+          <span class="text-sm font-semibold text-slate-300">Itens</span>
           <select
             multiple
             v-model="form.itemIds"
-            class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700 h-28"
+            class="px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm h-28 transition-all"
           >
             <option v-for="item in items" :key="item.id" :value="item.id">
               {{ item.name }}
               <span v-if="item.slot"> ({{ item.slot }})</span>
             </option>
           </select>
-          <span class="text-[11px] opacity-60">
+          <span class="text-[11px] text-slate-400">
             Use Ctrl/Cmd + clique para selecionar vários.
           </span>
         </label>
 
-        <label class="flex items-center gap-2 text-sm">
-          <input v-model="form.is_public" type="checkbox" class="accent-[#C6A95D]" />
-          Build pública (visível para outros)
+        <label class="flex items-center gap-2">
+          <input v-model="form.is_public" type="checkbox" class="accent-[#C6A95D] rounded w-4 h-4" />
+          <span class="text-sm text-slate-300">Build pública (visível para outros)</span>
         </label>
 
-        <div class="flex items-center gap-3 mt-2">
+        <div class="flex flex-col gap-3 mt-6">
           <button
             type="submit"
             :disabled="saving || !form.name || !form.classId"
-            class="px-4 py-2 rounded-lg bg-[#C6A95D] text-slate-900 text-sm disabled:opacity-50"
+            class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl
+                   bg-gradient-to-r from-[#C6A95D] to-amber-500 text-slate-900 font-bold text-sm
+                   shadow-lg shadow-[#C6A95D]/30 hover:shadow-[#C6A95D]/50 hover:scale-105
+                   disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300"
           >
-            {{ saving ? 'Salvando...' : editingId ? 'Salvar alterações' : 'Criar build' }}
+            <span
+              v-if="saving"
+              class="h-4 w-4 rounded-full border-2 border-slate-900/60 border-t-transparent animate-spin"
+            />
+            <span v-else>{{ editingId ? 'Salvar alterações' : 'Criar build' }}</span>
           </button>
-          <p v-if="formError" class="text-sm text-red-400">{{ formError }}</p>
-          <p v-if="message" class="text-sm text-emerald-400">{{ message }}</p>
+
+          <p v-if="formError" class="text-sm text-red-400 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>
+            {{ formError }}
+          </p>
+          <p v-if="message" class="text-sm text-emerald-400 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            {{ message }}
+          </p>
         </div>
       </form>
     </div>
