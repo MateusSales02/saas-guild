@@ -16,22 +16,13 @@
           'border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90',
         ]"
       >
-        <!-- Guild Info -->
-        <div class="flex items-center gap-3 p-3 mb-4 rounded-xl bg-slate-800/40 border border-slate-700/50">
-          <img
-            :src="avatarUrl"
-            class="w-10 h-10 rounded-full border-2 border-[#C6A95D]/50 shadow-lg"
-          />
-          <span class="font-bold text-slate-100">{{ guildName }}</span>
-        </div>
-
         <nav class="flex flex-col space-y-1">
+          <SidebarLink icon="chart" label="Dashboard" :to="{ name: 'dashboard.overview' }" />
           <SidebarLink icon="users" label="Membros" :to="{ name: 'members' }" />
           <SidebarLink icon="swords" label="Raids" :to="{ name: 'raids' }" />
           <SidebarLink icon="calendar" label="Eventos" :to="{ name: 'events' }" />
           <SidebarLink icon="treasure" label="Tesouraria" :to="{ name: 'treasury' }" />
           <SidebarLink icon="hammer" label="Builds" :to="{ name: 'builds' }" />
-          <SidebarLink icon="settings" label="Visão geral" :to="{ name: 'dashboard.overview' }" />
         </nav>
 
         <!-- Logout Button -->
@@ -54,17 +45,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useRouter, RouterView } from 'vue-router'
 import SidebarLink from '@/components/SidebarLink.vue'
-import { clearSession, auth } from '@/stores/auth'
+import { clearSession } from '@/stores/auth'
 
 const sidebarOpen = ref(false)
 const router = useRouter()
-
-const guildName = computed(() => auth.guild?.name ?? 'Minha Guilda')
-const avatarUrl =
-  'https://images.unsplash.com/photo-1541534401786-2077eed87a4b?q=80&w=200&auto=format&fit=crop'
 
 function logout() {
   clearSession()

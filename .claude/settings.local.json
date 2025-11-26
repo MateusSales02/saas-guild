@@ -35,7 +35,12 @@
       "Bash(npm --version:*)",
       "Bash(pnpm:*)",
       "Bash(if not exist .env copy .env.example .env)",
-      "Bash(psql:*)"
+      "Bash(psql:*)",
+      "Bash(timeout /t 1)",
+      "Bash(timeout /t 6)",
+      "Bash(npm run test:cov:*)",
+      "Bash(gh secret set:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

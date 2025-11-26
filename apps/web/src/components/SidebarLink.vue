@@ -15,7 +15,11 @@
       fill="none"
       stroke="currentColor"
     >
-      <template v-if="icon === 'users'">
+      <template v-if="icon === 'chart'">
+        <path d="M3 3v18h18" />
+        <path d="M18 17V9M13 17V5M8 17v-3" />
+      </template>
+      <template v-else-if="icon === 'users'">
         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
         <circle cx="9" cy="7" r="4" />
         <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
@@ -52,6 +56,6 @@
 
 <script setup lang="ts">
 import { RouterLink, type RouteLocationRaw } from 'vue-router'
-type IconName = 'users' | 'swords' | 'calendar' | 'treasure' | 'settings' | 'hammer'
+type IconName = 'chart' | 'users' | 'swords' | 'calendar' | 'treasure' | 'settings' | 'hammer'
 defineProps<{ icon: IconName; label: string; to: RouteLocationRaw }>()
 </script>
