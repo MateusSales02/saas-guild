@@ -28,6 +28,7 @@ Oferecer uma solução centralizada que permita a líderes e membros de clãs or
 - [NestJS](https://nestjs.com/) (TypeScript)
 - PostgreSQL (banco relacional com TypeORM)
 - Redis (preparado para cache)
+- Jest (testes unitários - 84% de cobertura)
 - JWT (autenticação)
 - Axios (HTTP client)
 
@@ -36,11 +37,13 @@ Oferecer uma solução centralizada que permita a líderes e membros de clãs or
 - [Vue.js 3](https://vuejs.org/) (Composition API)
 - [Tailwind CSS](https://tailwindcss.com/)
 - Vue Router
+- Vitest (testes unitários)
 
 ### 🧱 DevOps e Infra
 
 - Docker & Docker Compose
 - GitHub Actions (CI/CD)
+- SonarCloud (análise de qualidade de código)
 - Prometheus + Grafana (monitoramento)
 - Nginx (servidor web)
 
