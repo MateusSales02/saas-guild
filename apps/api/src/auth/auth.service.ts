@@ -129,13 +129,13 @@ export class AuthService {
    */
   async createPlayerSimple(nickname: string) {
     // Gera email único baseado no nickname
-    const baseEmail = nickname.toLowerCase().replace(/\s+/g, '') + '@guild.local';
+    const baseEmail = nickname.toLowerCase().replaceAll(/\s+/g, '') + '@guild.local';
     let email = baseEmail;
     let counter = 1;
 
     // Verifica se email já existe e incrementa contador se necessário
     while (await this.usersRepo.findOne({ where: { email } })) {
-      email = nickname.toLowerCase().replace(/\s+/g, '') + counter + '@guild.local';
+      email = nickname.toLowerCase().replaceAll(/\s+/g, '') + counter + '@guild.local';
       counter++;
     }
 

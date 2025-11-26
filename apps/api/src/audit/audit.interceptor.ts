@@ -80,8 +80,8 @@ export class AuditInterceptor implements NestInterceptor {
 
   private extractEntityId(url: string): number | undefined {
     // Procura por números no URL
-    const match = url.match(/\/(\d+)/);
-    return match ? parseInt(match[1], 10) : undefined;
+    const match = /\/(\d+)/.exec(url);
+    return match ? Number.parseInt(match[1], 10) : undefined;
   }
 
   private getClientIp(request: Request): string {

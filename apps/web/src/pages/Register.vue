@@ -79,8 +79,9 @@ async function register() {
         <form @submit.prevent="register" class="space-y-5">
           <!-- Email Input -->
           <div>
-            <label class="block text-sm font-semibold text-slate-300 mb-2">E-mail</label>
+            <label for="register-email" class="block text-sm font-semibold text-slate-300 mb-2">E-mail</label>
             <input
+              id="register-email"
               v-model="email"
               type="email"
               required
@@ -91,8 +92,9 @@ async function register() {
 
           <!-- Password Input -->
           <div>
-            <label class="block text-sm font-semibold text-slate-300 mb-2">Senha</label>
+            <label for="register-password" class="block text-sm font-semibold text-slate-300 mb-2">Senha</label>
             <input
+              id="register-password"
               v-model="password"
               type="password"
               required
@@ -104,8 +106,9 @@ async function register() {
 
           <!-- Nickname Input -->
           <div>
-            <label class="block text-sm font-semibold text-slate-300 mb-2">Nome da Guild</label>
+            <label for="register-nickname" class="block text-sm font-semibold text-slate-300 mb-2">Nome da Guild</label>
             <input
+              id="register-nickname"
               v-model="nickname"
               type="text"
               required

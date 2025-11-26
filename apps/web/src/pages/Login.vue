@@ -83,8 +83,9 @@ async function login() {
         <form @submit.prevent="login" class="space-y-5">
           <!-- Email Input -->
           <div>
-            <label class="block text-sm font-semibold text-slate-300 mb-2">E-mail</label>
+            <label for="email" class="block text-sm font-semibold text-slate-300 mb-2">E-mail</label>
             <input
+              id="email"
               v-model="email"
               type="email"
               required
@@ -95,8 +96,9 @@ async function login() {
 
           <!-- Password Input -->
           <div>
-            <label class="block text-sm font-semibold text-slate-300 mb-2">Senha</label>
+            <label for="password" class="block text-sm font-semibold text-slate-300 mb-2">Senha</label>
             <input
+              id="password"
               v-model="password"
               type="password"
               required

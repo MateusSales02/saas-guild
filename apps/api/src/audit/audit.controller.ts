@@ -27,14 +27,14 @@ export class AuditController {
   ) {
     const filter: AuditLogFilter = {};
 
-    if (userId) filter.userId = parseInt(userId, 10);
+    if (userId) filter.userId = Number.parseInt(userId, 10);
     if (entityType) filter.entityType = entityType;
-    if (entityId) filter.entityId = parseInt(entityId, 10);
+    if (entityId) filter.entityId = Number.parseInt(entityId, 10);
     if (action) filter.action = action;
     if (startDate) filter.startDate = new Date(startDate);
     if (endDate) filter.endDate = new Date(endDate);
-    if (limit) filter.limit = parseInt(limit, 10);
-    if (offset) filter.offset = parseInt(offset, 10);
+    if (limit) filter.limit = Number.parseInt(limit, 10);
+    if (offset) filter.offset = Number.parseInt(offset, 10);
 
     return this.auditService.findAll(filter);
   }
@@ -47,7 +47,7 @@ export class AuditController {
     @Query('userId', ParseIntPipe) userId: number,
     @Query('limit') limit?: string,
   ) {
-    return this.auditService.findByUser(userId, limit ? parseInt(limit, 10) : 50);
+    return this.auditService.findByUser(userId, limit ? Number.parseInt(limit, 10) : 50);
   }
 
   /**

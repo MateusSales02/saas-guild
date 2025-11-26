@@ -109,8 +109,9 @@ async function recoverPassword() {
           <form @submit.prevent="recoverPassword" class="space-y-5">
             <!-- Email Input -->
             <div>
-              <label class="block text-sm font-semibold text-slate-300 mb-2">E-mail</label>
+              <label for="recover-email" class="block text-sm font-semibold text-slate-300 mb-2">E-mail</label>
               <input
+                id="recover-email"
                 v-model="email"
                 type="email"
                 required
