@@ -85,11 +85,11 @@ describe('Register.vue', () => {
   it('should show loading state during registration', async () => {
     // Create a promise that we can control
     let resolveRegister: any
-    const registerPromise = new Promise((resolve) => {
+    const registerPromise = new Promise<any>((resolve) => {
       resolveRegister = resolve
     })
 
-    vi.mocked(authStore.AuthApi.register).mockReturnValue(registerPromise)
+    vi.mocked(authStore.AuthApi.register).mockReturnValue(registerPromise as any)
 
     const wrapper = mount(Register, {
       global: {
