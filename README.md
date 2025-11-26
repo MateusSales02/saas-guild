@@ -259,15 +259,6 @@ Orientadores: Claudinei Dias, Manfred Heil Junior e Paulo Rogerio Pires Manseira
 
 ---
 
-## 📞 Contato
-
-Para dúvidas sobre o projeto ou demonstrações:
-- 📧 Email: [seu-email@exemplo.com]
-- 💼 LinkedIn: [seu-linkedin]
-- 🐙 GitHub: [MateusSales02](https://github.com/MateusSales02)
-
----
-
 <div align="center">
   <sub>Desenvolvido com ❤️ como TCC de Engenharia de Software</sub>
 </div>
