@@ -359,9 +359,9 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
+import { auth } from '@/stores/auth'
 
 import {
-  GuildsApi,
   MembersApi,
   EventsApi,
   FinanceApi,
@@ -395,8 +395,8 @@ async function load() {
   err.value = ''
 
   try {
-    const guilds = await GuildsApi.list()
-    guild.value = guilds?.[0] ?? null
+    // Usa a guilda do usuário autenticado ao invés de buscar todas as guildas
+    guild.value = auth.guild
 
     if (!guild.value) {
       members.value = []

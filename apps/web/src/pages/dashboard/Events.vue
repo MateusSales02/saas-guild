@@ -188,7 +188,8 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { GuildsApi, EventsApi } from '@/lib/api'
+import { auth } from '@/stores/auth'
+import { EventsApi } from '@/lib/api'
 
 type Participant = { id?: number; status?: 'confirmed' | 'declined' | 'pending'; user?: any }
 type EventItem = {
@@ -225,8 +226,8 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    const guilds = await GuildsApi.list()
-    guild.value = guilds?.[0] ?? null
+    // Usa a guilda do usuário autenticado
+    guild.value = auth.guild
     if (!guild.value) {
       events.value = []
       return

@@ -211,7 +211,8 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { GuildsApi, FinanceApi } from '@/lib/api'
+import { auth } from '@/stores/auth'
+import { FinanceApi } from '@/lib/api'
 
 const guild = ref<any>(null)
 const list = ref<any[]>([])
@@ -236,8 +237,8 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    const guilds = await GuildsApi.list()
-    guild.value = guilds?.[0] ?? null
+    // Usa a guilda do usuário autenticado
+    guild.value = auth.guild
     if (!guild.value) {
       list.value = []
       summary.value = { totalIn: 0, totalOut: 0, balance: 0 }

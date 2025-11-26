@@ -313,7 +313,6 @@ import {
   BuildPayload,
   BuildSpecsApi,
   BuildsApi,
-  GuildsApi,
   MembersApi,
 } from '@/lib/api'
 
@@ -388,8 +387,8 @@ async function loadItems() {
 }
 
 async function loadGuild() {
-  const guilds = await GuildsApi.list()
-  guild.value = guilds?.[0] ?? null
+  // Usa a guilda do usuário autenticado
+  guild.value = auth.guild
   if (guild.value) form.guildId = guild.value.id
   if (auth.user?.id) form.authorId = Number(auth.user.id)
 }
