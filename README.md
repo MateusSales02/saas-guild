@@ -1,5 +1,10 @@
 # 🛡️ SaaS para Gerenciamento de Clãs em MMORPGs
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MateusSales02_saas-guild&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=MateusSales02_saas-guild)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=MateusSales02_saas-guild&metric=coverage)](https://sonarcloud.io/summary/new_code?id=MateusSales02_saas-guild)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=MateusSales02_saas-guild&metric=bugs)](https://sonarcloud.io/summary/new_code?id=MateusSales02_saas-guild)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=MateusSales02_saas-guild&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=MateusSales02_saas-guild)
+
 Plataforma web desenvolvida como Trabalho de Conclusão de Curso (TCC) para o curso de Engenharia de Software. O projeto propõe uma solução SaaS (Software como Serviço) escalável, segura e moderna para a **gestão de clãs em jogos online**, com foco inicial no **Albion Online**.
 
 ## 📌 Objetivo
