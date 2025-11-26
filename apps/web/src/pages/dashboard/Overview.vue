@@ -18,6 +18,18 @@
       ⚠️ {{ err }}
     </div>
 
+    <!-- SEM GUILDA -->
+    <div
+      v-if="!loading && !guild"
+      class="rounded-xl border border-amber-500/50 bg-amber-950/20 p-8 text-center"
+    >
+      <div class="text-6xl mb-4">🏰</div>
+      <h2 class="text-2xl font-bold text-amber-400 mb-2">Nenhuma Guilda Encontrada</h2>
+      <p class="text-slate-400 mb-4">
+        Você ainda não faz parte de nenhuma guilda. Crie uma nova ou peça para ser convidado!
+      </p>
+    </div>
+
     <!-- LOADING -->
     <div v-if="loading" class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
       <div
