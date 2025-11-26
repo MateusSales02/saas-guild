@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common'
-import { Cron, CronExpression } from '@nestjs/schedule'
-import { AlbionService, AlbionActivity, AlbionServerStatus } from './albion.service'
-import { DiscordService, DiscordNotificationResult } from './discord.service'
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { AlbionService, AlbionActivity, AlbionServerStatus } from './albion.service';
+import { DiscordService, DiscordNotificationResult } from './discord.service';
 
 export type AlbionSnapshot = {
   servers: AlbionServerStatus[]
@@ -10,16 +10,20 @@ export type AlbionSnapshot = {
 }
 
 @Injectable()
-export class IntegrationsService {
-  private readonly logger = new Logger(IntegrationsService.name)
-  private statusCache: AlbionSnapshot = { servers: [], activities: [], lastUpdated: new Date().toISOString() }
-  private lastDiscordNotification?: DiscordNotificationResult
+export class IntegrationsService implements OnModuleInit {
+  private readonly logger = new Logger(IntegrationsService.name);
+  private statusCache: AlbionSnapshot = { servers: [], activities: [], lastUpdated: new Date().toISOString() };
+  private lastDiscordNotification?: DiscordNotificationResult;
 
   constructor(
     private readonly albionService: AlbionService,
     private readonly discordService: DiscordService,
-  ) {
-    this.refreshAlbion().catch((err) => this.logger.warn(`Falha inicial ao buscar status: ${err?.message}`))
+  ) {}
+
+  async onModuleInit() {
+    await this.refreshAlbion().catch((err) =>
+      this.logger.warn(`Falha inicial ao buscar status: ${err?.message}`),
+    );
   }
 
   getAlbionSnapshot(): AlbionSnapshot {

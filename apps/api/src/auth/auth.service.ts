@@ -165,8 +165,8 @@ export class AuthService {
   }
 
   private publicUser(u: User) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password_hash, ...rest } = u;
-    void password_hash;
     return rest;
   }
 }
