@@ -37,10 +37,9 @@ export class AuthController {
   /**
    * Cria um usuário "player" de forma simplificada (apenas nickname).
    * O backend gera email e senha automaticamente.
-   * Apenas líderes podem criar jogadores.
+   * Qualquer usuário autenticado pode criar jogadores para adicionar à guilda.
    */
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles('leader')
+  @UseGuards(AuthGuard('jwt'))
   @Post('create-player')
   createPlayerSimple(@Body() dto: { nickname: string }) {
     return this.auth.createPlayerSimple(dto.nickname);
