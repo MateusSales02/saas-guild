@@ -36,6 +36,8 @@ describe('GuildsService', () => {
 
     mockGmRepo = {
       find: jest.fn(),
+      create: jest.fn(),
+      save: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -169,6 +171,37 @@ describe('GuildsService', () => {
       const result = await service.findByMember(999);
 
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('createGuildWithLeader', () => {
+    it('should create a guild and assign user as leader', async () => {
+      const userId = 1;
+      const guildName = 'New Guild';
+      const savedGuild = { ...mockGuild, name: guildName };
+      const guildMember = {
+        id: 1,
+        user: { id: userId },
+        guild: savedGuild,
+        role: 'líder',
+      };
+
+      mockGuildsRepo.create.mockReturnValue(savedGuild);
+      mockGuildsRepo.save.mockResolvedValue(savedGuild);
+      mockGmRepo.create.mockReturnValue(guildMember);
+      mockGmRepo.save.mockResolvedValue(guildMember);
+
+      const result = await service.createGuildWithLeader(userId, guildName);
+
+      expect(mockGuildsRepo.create).toHaveBeenCalledWith({ name: guildName });
+      expect(mockGuildsRepo.save).toHaveBeenCalled();
+      expect(mockGmRepo.create).toHaveBeenCalledWith({
+        user: { id: userId },
+        guild: savedGuild,
+        role: 'líder',
+      });
+      expect(mockGmRepo.save).toHaveBeenCalled();
+      expect(result.name).toBe(guildName);
     });
   });
 });

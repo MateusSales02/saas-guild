@@ -188,6 +188,46 @@ describe('AuthService', () => {
     });
   });
 
+  describe('createPlayerSimple', () => {
+    it('should create a player with auto-generated email and password', async () => {
+      const nickname = 'TestPlayer';
+      const playerUser = { ...mockUser, email: 'testplayer@guild.local', role: 'player' };
+
+      mockUsersRepo.findOne.mockResolvedValue(null);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed_password');
+      mockUsersRepo.create.mockReturnValue(playerUser);
+      mockUsersRepo.save.mockResolvedValue(playerUser);
+
+      const result = await service.createPlayerSimple(nickname);
+
+      expect(mockUsersRepo.findOne).toHaveBeenCalled();
+      expect(bcrypt.hash).toHaveBeenCalled();
+      expect(result).not.toHaveProperty('password_hash');
+      expect(result.email).toContain('@guild.local');
+    });
+
+    it('should increment counter if generated email already exists', async () => {
+      const nickname = 'TestPlayer';
+      const playerUser = { ...mockUser, email: 'testplayer1@guild.local', role: 'player' };
+
+      // Primeira tentativa: email já existe no loop
+      // Segunda tentativa: email está livre (sai do loop)
+      // Terceira chamada: dentro de createPlayer() para verificar se email está disponível
+      mockUsersRepo.findOne
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(null);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed_password');
+      mockUsersRepo.create.mockReturnValue(playerUser);
+      mockUsersRepo.save.mockResolvedValue(playerUser);
+
+      const result = await service.createPlayerSimple(nickname);
+
+      expect(mockUsersRepo.findOne).toHaveBeenCalledTimes(3);
+      expect(result).not.toHaveProperty('password_hash');
+    });
+  });
+
   describe('findById', () => {
     it('should return user without password_hash', async () => {
       mockUsersRepo.findOne.mockResolvedValue(mockUser);
