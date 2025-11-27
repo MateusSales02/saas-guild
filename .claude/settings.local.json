@@ -40,7 +40,11 @@
       "Bash(timeout /t 6)",
       "Bash(npm run test:cov:*)",
       "Bash(gh secret set:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(wait)",
+      "Bash(pip install:*)",
+      "Bash(export FILTER_BRANCH_SQUELCH_WARNING=1)",
+      "Bash(git filter-branch --msg-filter 'sed \"\"\"\"/🤖 Generated with/d\"\"\"\" | sed \"\"\"\"/Co-Authored-By: Claude/d\"\"\"\" | sed -e :a -e \"\"\"\"/^\\n*$/{ $d; N; ba\"\"\"\" -e \"\"\"\"}\"\"\"\"' -- --all)"
     ],
     "deny": [],
     "ask": []
