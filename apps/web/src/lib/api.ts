@@ -23,16 +23,16 @@ api.interceptors.request.use((config) => {
 export const AuthApi = {
   async login(email: string, password: string) {
     const res = await api.post('/auth/login', { email, password })
-    const { token, user } = res.data
-    setSession(token, user)
+    const { token, user, guild } = res.data
+    setSession(token, user, guild)
     return res.data
   },
 
   // registro público -> sempre cria LEADER no backend
   async register(email: string, password: string, nickname: string) {
     const res = await api.post('/auth/register', { email, password, nickname })
-    const { token, user } = res.data
-    setSession(token, user)
+    const { token, user, guild } = res.data
+    setSession(token, user, guild)
     return res.data
   },
 
