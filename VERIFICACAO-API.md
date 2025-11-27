@@ -267,4 +267,4 @@ type TransactionType = 'in' | 'out'
 ---
 
 **Última atualização:** 2025-11-25
-**Responsável:** Claude Code Assistant
+**Autor:** Mateus Sales de Oliveira
