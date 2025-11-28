@@ -1,0 +1,176 @@
+@startuml Diagrama de Casos de Uso - SaaS Guild
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Líder da Guilda" as Leader
+actor "Oficial" as Officer
+actor "Jogador" as Player
+actor "Sistema Externo\n(Albion/Discord)" as External
+
+rectangle "Sistema SaaS Guild" {
+
+  package "Autenticação" {
+    usecase "Registrar usuário" as UC_Register
+    usecase "Fazer login" as UC_Login
+    usecase "Criar jogador" as UC_CreatePlayer
+    usecase "Consultar perfil" as UC_Profile
+  }
+
+  package "Gerenciamento de Guildas" {
+    usecase "Visualizar guildas" as UC_ViewGuilds
+    usecase "Consultar guilda" as UC_ViewGuild
+    usecase "Criar guilda" as UC_CreateGuild
+    usecase "Atualizar guilda" as UC_UpdateGuild
+    usecase "Remover guilda" as UC_DeleteGuild
+    usecase "Listar minhas guildas" as UC_MyGuilds
+  }
+
+  package "Gerenciamento de Membros" {
+    usecase "Listar membros" as UC_ListMembers
+    usecase "Consultar membro" as UC_ViewMember
+    usecase "Adicionar membro" as UC_AddMember
+    usecase "Atualizar membro" as UC_UpdateMember
+    usecase "Remover membro" as UC_RemoveMember
+  }
+
+  package "Gerenciamento de Eventos" {
+    usecase "Listar eventos" as UC_ListEvents
+    usecase "Consultar evento" as UC_ViewEvent
+    usecase "Criar evento" as UC_CreateEvent
+    usecase "Atualizar evento" as UC_UpdateEvent
+    usecase "Remover evento" as UC_DeleteEvent
+    usecase "Gerenciar participantes" as UC_ManageParticipants
+    usecase "Atualizar status participante" as UC_UpdateParticipantStatus
+  }
+
+  package "Gerenciamento Financeiro" {
+    usecase "Criar transação" as UC_CreateTransaction
+    usecase "Listar transações" as UC_ListTransactions
+    usecase "Consultar resumo financeiro" as UC_FinanceSummary
+    usecase "Remover transação" as UC_DeleteTransaction
+  }
+
+  package "Gerenciamento de Builds" {
+    usecase "Listar builds" as UC_ListBuilds
+    usecase "Consultar build" as UC_ViewBuild
+    usecase "Criar build" as UC_CreateBuild
+    usecase "Atualizar build" as UC_UpdateBuild
+    usecase "Remover build" as UC_DeleteBuild
+    usecase "Gerenciar classes" as UC_ManageClasses
+    usecase "Gerenciar especializações" as UC_ManageSpecs
+    usecase "Gerenciar itens" as UC_ManageItems
+  }
+
+  package "Relatórios e Estatísticas" {
+    usecase "Gerar relatório completo" as UC_FullReport
+    usecase "Estatísticas de eventos" as UC_EventStats
+    usecase "Estatísticas financeiras" as UC_FinanceStats
+    usecase "Estatísticas de membros" as UC_MemberStats
+  }
+
+  package "Exportação de Dados" {
+    usecase "Exportar membros (CSV)" as UC_ExportMembers
+    usecase "Exportar eventos (CSV)" as UC_ExportEvents
+    usecase "Exportar finanças (CSV)" as UC_ExportFinance
+    usecase "Exportar relatório completo (CSV)" as UC_ExportFull
+  }
+
+  package "Integrações Externas" {
+    usecase "Consultar status Albion" as UC_AlbionStatus
+    usecase "Atualizar dados Albion" as UC_RefreshAlbion
+    usecase "Enviar notificação Discord" as UC_NotifyDiscord
+    usecase "Consultar última notificação" as UC_LastNotification
+  }
+
+  package "Auditoria" {
+    usecase "Listar logs de auditoria" as UC_AuditLogs
+    usecase "Consultar logs por usuário" as UC_UserLogs
+    usecase "Consultar logs por entidade" as UC_EntityLogs
+  }
+}
+
+' Relacionamentos - Autenticação
+Player --> UC_Register
+Player --> UC_Login
+Leader --> UC_CreatePlayer
+Player --> UC_Profile
+
+' Relacionamentos - Guildas
+Player --> UC_ViewGuilds
+Player --> UC_ViewGuild
+Player --> UC_MyGuilds
+Leader --> UC_CreateGuild
+Leader --> UC_UpdateGuild
+Leader --> UC_DeleteGuild
+
+' Relacionamentos - Membros
+Player --> UC_ListMembers
+Player --> UC_ViewMember
+Leader --> UC_AddMember
+Leader --> UC_UpdateMember
+Leader --> UC_RemoveMember
+
+' Relacionamentos - Eventos
+Player --> UC_ListEvents
+Player --> UC_ViewEvent
+Leader --> UC_CreateEvent
+Leader --> UC_UpdateEvent
+Leader --> UC_DeleteEvent
+Leader --> UC_ManageParticipants
+Player --> UC_UpdateParticipantStatus
+
+' Relacionamentos - Finanças
+Player --> UC_CreateTransaction
+Player --> UC_ListTransactions
+Player --> UC_FinanceSummary
+Player --> UC_DeleteTransaction
+
+' Relacionamentos - Builds
+Player --> UC_ListBuilds
+Player --> UC_ViewBuild
+Player --> UC_CreateBuild
+Player --> UC_UpdateBuild
+Player --> UC_DeleteBuild
+Leader --> UC_ManageClasses
+Leader --> UC_ManageSpecs
+Leader --> UC_ManageItems
+
+' Relacionamentos - Relatórios
+Leader --> UC_FullReport
+Officer --> UC_FullReport
+Leader --> UC_EventStats
+Officer --> UC_EventStats
+Leader --> UC_FinanceStats
+Officer --> UC_FinanceStats
+Leader --> UC_MemberStats
+Officer --> UC_MemberStats
+
+' Relacionamentos - Exportação
+Leader --> UC_ExportMembers
+Officer --> UC_ExportMembers
+Leader --> UC_ExportEvents
+Officer --> UC_ExportEvents
+Leader --> UC_ExportFinance
+Officer --> UC_ExportFinance
+Leader --> UC_ExportFull
+Officer --> UC_ExportFull
+
+' Relacionamentos - Integrações
+Player --> UC_AlbionStatus
+Player --> UC_RefreshAlbion
+Player --> UC_NotifyDiscord
+Player --> UC_LastNotification
+External --> UC_AlbionStatus
+External --> UC_NotifyDiscord
+
+' Relacionamentos - Auditoria
+Leader --> UC_AuditLogs
+Leader --> UC_UserLogs
+Leader --> UC_EntityLogs
+
+' Herança de atores
+Leader --|> Officer
+Officer --|> Player
+
+@enduml
