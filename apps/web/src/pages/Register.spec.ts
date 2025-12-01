@@ -2,18 +2,23 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import Register from './Register.vue'
-import * as authStore from '@/stores/auth'
+import * as api from '@/lib/api'
 
-// Mock the auth store - need to provide auth object too
+// Mock the API
+vi.mock('@/lib/api', () => ({
+  AuthApi: {
+    register: vi.fn(),
+  },
+}))
+
+// Mock the auth store
 vi.mock('@/stores/auth', () => ({
   auth: {
     token: null,
     user: null,
     guild: null,
   },
-  AuthApi: {
-    register: vi.fn(),
-  },
+  setSession: vi.fn(),
 }))
 
 describe('Register.vue', () => {
@@ -89,7 +94,7 @@ describe('Register.vue', () => {
       resolveRegister = resolve
     })
 
-    vi.mocked(authStore.AuthApi.register).mockReturnValue(registerPromise as any)
+    vi.mocked(api.AuthApi.register).mockReturnValue(registerPromise as any)
 
     const wrapper = mount(Register, {
       global: {
