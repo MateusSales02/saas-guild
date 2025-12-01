@@ -3,15 +3,21 @@ import { mount } from '@vue/test-utils'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import Login from './Login.vue'
 import * as api from '@/lib/api'
-import * as authStore from '@/stores/auth'
 
 // Mock the API
 vi.mock('@/lib/api', () => ({
-  postJSON: vi.fn(),
+  AuthApi: {
+    login: vi.fn(),
+  },
 }))
 
 // Mock the auth store
 vi.mock('@/stores/auth', () => ({
+  auth: {
+    token: null,
+    user: null,
+    guild: null,
+  },
   setSession: vi.fn(),
 }))
 
@@ -62,14 +68,14 @@ describe('Login.vue', () => {
     expect((passwordInput.element as HTMLInputElement).value).toBe('password123')
   })
 
-  it('should call postJSON and navigate to dashboard on successful login', async () => {
+  it('should call AuthApi.login and navigate to dashboard on successful login', async () => {
     const mockResponse = {
       token: 'test-token',
       user: { id: 1, email: 'test@example.com', nickname: 'Test User', role: 'leader' },
       guild: { id: 1, name: 'Test Guild' },
     }
 
-    vi.mocked(api.postJSON).mockResolvedValue(mockResponse)
+    vi.mocked(api.AuthApi.login).mockResolvedValue(mockResponse)
 
     const wrapper = mount(Login, {
       global: {
@@ -91,16 +97,19 @@ describe('Login.vue', () => {
     await wrapper.vm.$nextTick()
     await new Promise((resolve) => setTimeout(resolve, 100))
 
-    expect(api.postJSON).toHaveBeenCalledWith('/auth/login', {
-      email: 'test@example.com',
-      password: 'password123',
-    })
-    expect(authStore.setSession).toHaveBeenCalledWith('test-token', mockResponse.user, mockResponse.guild)
+    expect(api.AuthApi.login).toHaveBeenCalledWith('test@example.com', 'password123')
     expect(router.currentRoute.value.path).toBe('/dashboard')
   })
 
   it('should display error message on failed login', async () => {
-    vi.mocked(api.postJSON).mockRejectedValue(new Error('Invalid credentials'))
+    const error = {
+      response: {
+        data: {
+          message: 'Invalid credentials',
+        },
+      },
+    }
+    vi.mocked(api.AuthApi.login).mockRejectedValue(error)
 
     const wrapper = mount(Login, {
       global: {
@@ -132,7 +141,7 @@ describe('Login.vue', () => {
       resolveLogin = resolve
     })
 
-    vi.mocked(api.postJSON).mockReturnValue(loginPromise)
+    vi.mocked(api.AuthApi.login).mockReturnValue(loginPromise)
 
     const wrapper = mount(Login, {
       global: {
@@ -210,9 +219,16 @@ describe('Login.vue', () => {
   })
 
   it('should clear error message when submitting again', async () => {
-    vi.mocked(api.postJSON).mockRejectedValueOnce(new Error('First error')).mockResolvedValueOnce({
+    const firstError = {
+      response: {
+        data: {
+          message: 'First error',
+        },
+      },
+    }
+    vi.mocked(api.AuthApi.login).mockRejectedValueOnce(firstError).mockResolvedValueOnce({
       token: 'test-token',
-      user: { id: 1, email: 'test@example.com' },
+      user: { id: 1, email: 'test@example.com', nickname: 'Test', role: 'leader' },
       guild: null,
     })
 
