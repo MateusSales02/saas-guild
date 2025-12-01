@@ -239,7 +239,7 @@ async function load() {
       .filter((e: any) => new Date(e.date).getTime() >= now)
       .sort((a: any, b: any) => +new Date(a.date) - +new Date(b.date))
   } catch (e: any) {
-    error.value = e.message || 'Falha ao carregar eventos'
+    error.value = e?.response?.data?.message ?? e?.message ?? 'Falha ao carregar eventos'
   } finally {
     loading.value = false
   }
@@ -274,7 +274,7 @@ async function createEvent() {
     form.value = { title: '', description: '', date: '', time: '', type: 'GATHERING', location: '' }
     await load()
   } catch (e: any) {
-    error.value = e.message || 'Falha ao criar evento'
+    error.value = e?.response?.data?.message ?? e?.message ?? 'Falha ao criar evento'
   } finally {
     creating.value = false
   }
@@ -289,7 +289,7 @@ async function finishEvent(eventId: number) {
     await EventsApi.remove(eventId)
     await load()
   } catch (e: any) {
-    error.value = e.message || 'Falha ao finalizar evento'
+    error.value = e?.response?.data?.message ?? e?.message ?? 'Falha ao finalizar evento'
   } finally {
     deleting.value = null
   }
