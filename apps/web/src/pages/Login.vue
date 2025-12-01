@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
-import { postJSON } from '@/lib/api'
-import { setSession } from '@/stores/auth'
+import { AuthApi } from '@/lib/api'
 
 const router = useRouter()
 const email = ref('')
@@ -19,14 +18,10 @@ async function login() {
   error.value = ''
   loading.value = true
   try {
-    const { token, user, guild } = await postJSON<{ token: string; user: any; guild?: { id: number; name: string } | null }>('/auth/login', {
-      email: email.value,
-      password: password.value,
-    })
-    setSession(token, user, guild)
+    await AuthApi.login(email.value, password.value)
     router.push('/dashboard')
   } catch (e: any) {
-    error.value = e.message || 'Falha no login'
+    error.value = e?.response?.data?.message ?? e?.message ?? 'Falha no login'
   } finally {
     loading.value = false
   }

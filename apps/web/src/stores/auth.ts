@@ -1,5 +1,4 @@
 import { reactive } from 'vue'
-import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios'
 
 /** Modelo básico do usuário autenticado */
 export interface AuthUser {
@@ -22,32 +21,10 @@ interface AuthState {
   guild: Guild | null
 }
 
-interface AuthResponse {
-  token: string
-  user: AuthUser
-  guild?: Guild | null
-}
-
 export const auth = reactive<AuthState>({
   token: null,
   user: null,
   guild: null,
-})
-
-const API_BASE_URL = import.meta.env.PROD
-  ? 'http://54.161.67.120' // produção (nginx servindo o front)
-  : 'http://localhost:3000'
-
-export const api: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-})
-
-// Interceptor de request adicionando o Bearer token
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  if (auth.token) {
-    config.headers.Authorization = `Bearer ${auth.token}`
-  }
-  return config
 })
 
 export function setSession(token: string, user: AuthUser, guild?: Guild | null): void {
@@ -59,8 +36,6 @@ export function setSession(token: string, user: AuthUser, guild?: Guild | null):
   if (guild) {
     localStorage.setItem('guild', JSON.stringify(guild))
   }
-
-  api.defaults.headers.common.Authorization = `Bearer ${token}`
 }
 
 function isAuthUser(value: unknown): value is AuthUser {
@@ -94,7 +69,6 @@ export function loadSession(): void {
           auth.guild = null
         }
       }
-      api.defaults.headers.common.Authorization = `Bearer ${t}`
     } else {
       clearSession()
     }
@@ -110,30 +84,4 @@ export function clearSession(): void {
   localStorage.removeItem('token')
   localStorage.removeItem('user')
   localStorage.removeItem('guild')
-  delete api.defaults.headers.common.Authorization
-}
-
-export const AuthApi = {
-  async register(email: string, password: string, nickname: string): Promise<AuthResponse> {
-    const res = await api.post<AuthResponse>('/auth/register', {
-      email,
-      password,
-      nickname,
-    })
-    const { token, user, guild } = res.data
-    setSession(token, user, guild)
-    return res.data
-  },
-
-  async login(email: string, password: string): Promise<AuthResponse> {
-    const res = await api.post<AuthResponse>('/auth/login', { email, password })
-    const { token, user, guild } = res.data
-    setSession(token, user, guild)
-    return res.data
-  },
-
-  async me(): Promise<AuthUser> {
-    const res = await api.get<AuthUser>('/auth/me')
-    return res.data
-  },
 }
