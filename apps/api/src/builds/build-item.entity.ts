@@ -14,6 +14,12 @@ export class BuildItem {
   @Column({ nullable: true })
   rarity?: string;
 
+  @Column({ nullable: true })
+  albion_id?: string;
+
+  @Column({ nullable: true })
+  item_id?: string;
+
   @CreateDateColumn()
   created_at: Date;
 }

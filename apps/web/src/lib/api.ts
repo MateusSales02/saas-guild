@@ -11,6 +11,11 @@ const API_BASE_URL =
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
+  headers: {
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    Pragma: 'no-cache',
+    Expires: '0',
+  },
 })
 
 api.interceptors.request.use((config) => {
@@ -18,6 +23,11 @@ api.interceptors.request.use((config) => {
     config.headers = config.headers ?? {}
     config.headers.Authorization = `Bearer ${auth.token}`
   }
+  // Force no cache headers on every request
+  config.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+  config.headers.Pragma = 'no-cache'
+  config.headers.Expires = '0'
+  // Note: We don't add _t parameter globally to avoid breaking endpoints that validate query params
   return config
 })
 
@@ -150,8 +160,28 @@ export const BuildSpecsApi = {
 }
 
 export const BuildItemsApi = {
-  list() {
-    return api.get('/build-items').then((r) => r.data)
+  async list() {
+    // Try direct axios call bypassing the global api instance to avoid any caching
+    const timestamp = Date.now()
+    console.log('🌐 [BuildItemsApi] Fetching /build-items with timestamp:', timestamp)
+
+    const response = await axios.get(`${API_BASE_URL}/build-items?_nocache=${timestamp}`, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        Pragma: 'no-cache',
+        Expires: '0',
+        ...(auth?.token ? { Authorization: `Bearer ${auth.token}` } : {}),
+      },
+    })
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    console.log('🌐 [BuildItemsApi] Response received:', response.data.length, 'items')
+    console.log(
+      '🌐 [BuildItemsApi] First 3 items from response:',
+      response.data.slice(0, 3).map((i: any) => i.name),
+    )
+
+    return response.data
   },
 }
 
@@ -166,6 +196,7 @@ export type BuildPayload = {
   authorId?: number
   memberId?: number
   is_public?: boolean
+  price?: number
 }
 
 export const BuildsApi = {

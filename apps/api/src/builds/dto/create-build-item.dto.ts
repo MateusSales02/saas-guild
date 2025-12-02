@@ -12,4 +12,12 @@ export class CreateBuildItemDto {
   @IsOptional()
   @IsString()
   rarity?: string;
+
+  @IsOptional()
+  @IsString()
+  albion_id?: string;
+
+  @IsOptional()
+  @IsString()
+  item_id?: string;
 }

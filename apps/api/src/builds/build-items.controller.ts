@@ -8,8 +8,12 @@ export class BuildItemsController {
   constructor(private readonly buildsService: BuildsService) {}
 
   @Get()
-  list() {
-    return this.buildsService.listItems();
+  async list() {
+    console.log('🔍 [BuildItemsController] GET /build-items called');
+    const items = await this.buildsService.listItems();
+    console.log(`✅ [BuildItemsController] Returning ${items.length} items`);
+    console.log(`📦 [BuildItemsController] First 3 items:`, items.slice(0, 3).map(i => ({ id: i.id, name: i.name, albion_id: i.albion_id })));
+    return items;
   }
 
   @Post()
@@ -25,5 +29,11 @@ export class BuildItemsController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.buildsService.removeItem(id);
+  }
+
+  @Post('reseed')
+  async reseed() {
+    console.log('🔄 [BuildItemsController] POST /build-items/reseed called');
+    return this.buildsService.reseedItems();
   }
 }

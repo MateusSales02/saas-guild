@@ -15,7 +15,7 @@
             Builds
           </h2>
           <p class="mt-2 text-sm text-slate-400">
-            Filtre por classe, spec ou palavra-chave
+            Filtre por classe, função ou palavra-chave
           </p>
         </div>
 
@@ -81,8 +81,8 @@
                   <span class="font-medium text-purple-300">{{ build.role || 'Sem função' }}</span>
                   <span class="text-slate-600">·</span>
                   <span>{{ build.class?.name || 'Classe indefinida' }}</span>
-                  <span v-if="build.spec" class="text-slate-600">·</span>
-                  <span v-if="build.spec">{{ build.spec.name }}</span>
+                  <span v-if="build.spec?.name" class="text-slate-600">·</span>
+                  <span v-if="build.spec?.name" class="text-emerald-300">{{ build.spec.name }}</span>
                 </p>
               </div>
               <span
@@ -114,6 +114,13 @@
               <p class="text-[11px] text-slate-500 mb-1">Itens:</p>
               <p class="text-xs text-slate-300">
                 {{ (build.items || []).map((i: any) => i.name).join(', ') || 'Nenhum' }}
+              </p>
+            </div>
+
+            <div v-if="build.price" class="p-2 rounded-lg bg-[#C6A95D]/10 border border-[#C6A95D]/30 mb-3">
+              <p class="text-[11px] text-slate-500 mb-0.5">Preço estimado:</p>
+              <p class="text-sm font-bold text-[#C6A95D]">
+                {{ build.price.toLocaleString('pt-BR') }} silver
               </p>
             </div>
 
@@ -198,11 +205,16 @@
 
         <label class="flex flex-col gap-2">
           <span class="text-sm font-semibold text-slate-300">Função / Papel</span>
-          <input
+          <select
             v-model="form.role"
-            placeholder="Tank, healer, DPS..."
-            class="px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all"
-          />
+            class="px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all"
+          >
+            <option value="">Selecione uma função</option>
+            <option value="DPS">DPS</option>
+            <option value="HEALER">HEALER</option>
+            <option value="TANK">TANK</option>
+            <option value="SUPPORT">SUPPORT</option>
+          </select>
         </label>
 
         <label class="flex flex-col gap-2">
@@ -214,56 +226,104 @@
           ></textarea>
         </label>
 
-        <div class="grid grid-cols-2 gap-3">
-          <label class="flex flex-col gap-2">
-            <span class="text-sm font-semibold text-slate-300">Classe</span>
-            <select
-              v-model.number="form.classId"
-              @change="onFormClassChange"
-              required
-              class="px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all"
-            >
-              <option :value="undefined" disabled>Selecione</option>
-              <option v-for="c in classes" :key="c.id" :value="c.id">
-                {{ c.name }}
-              </option>
-            </select>
-          </label>
+        <label class="flex flex-col gap-2">
+          <span class="text-sm font-semibold text-slate-300">Progresso</span>
+          <input
+            v-model="form.specProgress"
+            placeholder="Ex: 10/100, 50/100"
+            class="px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all"
+          />
+        </label>
 
-          <label class="flex flex-col gap-2">
-            <span class="text-sm font-semibold text-slate-300">Spec</span>
-            <select
-              v-model.number="form.specId"
-              class="px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all"
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-semibold text-slate-300">Itens</span>
+            <RouterLink
+              :to="{ name: 'items' }"
+              class="text-xs text-[#C6A95D] hover:text-amber-400 font-semibold transition-colors flex items-center gap-1"
             >
-              <option :value="undefined">Nenhuma</option>
-              <option
-                v-for="s in specsForForm"
-                :key="s.id"
-                :value="s.id"
-              >
-                {{ s.name }}
-              </option>
-            </select>
-          </label>
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"/>
+                <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"/>
+              </svg>
+              Ver todos os itens
+            </RouterLink>
+          </div>
+
+          <!-- Search filter for items -->
+          <div class="flex items-center gap-2">
+            <input
+              v-model="itemSearchQuery"
+              name="itemSearch"
+              type="text"
+              placeholder="Buscar itens..."
+              class="flex-1 px-3 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all"
+            />
+            <span class="text-xs text-slate-400 whitespace-nowrap">
+              {{ items.length }} total
+            </span>
+          </div>
+
+          <!-- Items list with checkboxes -->
+          <div class="max-h-64 overflow-y-auto rounded-xl bg-slate-800/50 border border-slate-700 p-3 space-y-1">
+            <label
+              v-for="item in filteredItemsForForm"
+              :key="item.id"
+              class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-700/50 cursor-pointer transition-colors group"
+            >
+              <input
+                type="checkbox"
+                :value="item.id"
+                v-model="form.itemIds"
+                class="w-4 h-4 rounded border-slate-600 text-[#C6A95D] focus:ring-[#C6A95D] focus:ring-offset-slate-900"
+              />
+              <span class="text-sm text-slate-300 group-hover:text-slate-100">
+                {{ item.name }}
+                <span v-if="item.item_id || item.albion_id" class="text-xs text-slate-500 font-mono">
+                  - {{ item.item_id || item.albion_id }}
+                </span>
+                <span v-if="item.slot" class="text-xs text-slate-500"> ({{ item.slot }})</span>
+              </span>
+            </label>
+            <p v-if="filteredItemsForForm.length === 0" class="text-sm text-slate-500 text-center py-4">
+              Nenhum item encontrado
+            </p>
+          </div>
+          <span class="text-[11px] text-slate-400">
+            {{ form.itemIds.length }} item(ns) selecionado(s)
+          </span>
         </div>
 
-        <label class="flex flex-col gap-2">
-          <span class="text-sm font-semibold text-slate-300">Itens</span>
-          <select
-            multiple
-            v-model="form.itemIds"
-            class="px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm h-28 transition-all"
-          >
-            <option v-for="item in items" :key="item.id" :value="item.id">
-              {{ item.name }}
-              <span v-if="item.slot"> ({{ item.slot }})</span>
-            </option>
-          </select>
-          <span class="text-[11px] text-slate-400">
-            Use Ctrl/Cmd + clique para selecionar vários.
-          </span>
-        </label>
+        <!-- Preço Automático -->
+        <div v-if="form.itemIds.length > 0" class="p-4 rounded-xl bg-[#C6A95D]/10 border border-[#C6A95D]/30">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-sm font-semibold text-slate-300">Preço Estimado</span>
+            <button
+              type="button"
+              @click="calculatePrice"
+              :disabled="calculatingPrice"
+              class="px-3 py-1.5 rounded-lg bg-[#C6A95D] text-slate-900 text-xs font-bold hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {{ calculatingPrice ? 'Calculando...' : 'Calcular Preço' }}
+            </button>
+          </div>
+
+          <div v-if="form.price" class="text-center">
+            <p class="text-2xl font-bold text-[#C6A95D]">
+              {{ form.price.toLocaleString('pt-BR') }} silver
+            </p>
+            <p class="text-xs text-slate-400 mt-1">
+              Baseado em {{ form.itemIds.length }} item(ns) selecionado(s)
+            </p>
+          </div>
+          <div v-else class="text-center text-sm text-slate-400">
+            Clique em "Calcular Preço" para obter o valor estimado
+          </div>
+
+          <div v-if="priceError" class="mt-2 text-xs text-red-400">
+            {{ priceError }}
+          </div>
+        </div>
 
         <label class="flex items-center gap-2">
           <input v-model="form.is_public" type="checkbox" class="accent-[#C6A95D] rounded w-4 h-4" />
@@ -314,11 +374,18 @@ import {
   BuildSpecsApi,
   BuildsApi,
   MembersApi,
+  AlbionDataApi,
 } from '@/lib/api'
 
 // Tipos simples usados no front
 type Option = { id: number; name: string; description?: string }
-type BuildItem = { id: number; name: string; slot?: string }
+type BuildItem = {
+  id: number
+  name: string
+  slot?: string
+  item_id?: string
+  albion_id?: string
+}
 
 // Filtros da lista
 const filters = reactive<{
@@ -347,25 +414,43 @@ const error = ref('')
 const message = ref('')
 const formError = ref('')
 const editingId = ref<number | null>(null)
+const calculatingPrice = ref(false)
+const priceError = ref('')
+const itemSearchQuery = ref('')
 
 // Formulário
-const form = reactive<BuildPayload & { itemIds: number[]; memberId?: number }>({
+const form = reactive<BuildPayload & { itemIds: number[]; memberId?: number; specProgress?: string; price?: number }>({
   name: '',
   description: '',
   role: '',
   classId: undefined as unknown as number,
   specId: undefined,
+  specProgress: '',
   itemIds: [],
   guildId: undefined,
   authorId: undefined,
   is_public: true,
   memberId: undefined,
+  price: undefined,
 })
 
 // Specs filtradas para o formulário (baseado no classId escolhido)
 const specsForForm = computed(() => {
   if (!form.classId) return specs.value
   return specs.value.filter((s: any) => s.classId === form.classId || s.class?.id === form.classId)
+})
+
+// Itens filtrados para o formulário (baseado na busca)
+const filteredItemsForForm = computed(() => {
+  if (!itemSearchQuery.value) return items.value
+  const query = itemSearchQuery.value.toLowerCase()
+  return items.value.filter((item: BuildItem) =>
+    item.id.toString().toLowerCase().includes(query) ||
+    item.name.toLowerCase().includes(query) ||
+    (item.slot && item.slot.toLowerCase().includes(query)) ||
+    (item.item_id && item.item_id.toLowerCase().includes(query)) ||
+    (item.albion_id && item.albion_id.toLowerCase().includes(query))
+  )
 })
 
 onMounted(async () => {
@@ -383,7 +468,27 @@ async function loadSpecs(classId?: number) {
 }
 
 async function loadItems() {
+  console.log('🔄 Loading items from API...')
+  console.log('📍 API URL:', import.meta.env.VITE_API_URL || 'http://localhost:3000')
+
   items.value = await BuildItemsApi.list()
+
+  console.log('✅ Items loaded from API:', items.value.length, 'items')
+  console.log('📦 First 5 items:', items.value.slice(0, 5).map(i => ({
+    id: i.id,
+    name: i.name,
+    albion_id: i.albion_id,
+    item_id: i.item_id,
+    slot: i.slot
+  })))
+
+  if (items.value.length === 0) {
+    console.warn('⚠️ No items loaded from API!')
+  } else if (items.value.length < 100) {
+    console.warn('⚠️ Only', items.value.length, 'items loaded. Expected 309+ items from Albion database.')
+  } else {
+    console.log('✅ Successfully loaded all items!')
+  }
 }
 
 async function loadGuild() {
@@ -451,12 +556,6 @@ async function onClassFilterChange() {
   await fetchBuilds()
 }
 
-// Quando mudar classe do formulário
-async function onFormClassChange() {
-  form.specId = undefined
-  await loadSpecs(form.classId)
-}
-
 // Resetar formulário
 function resetForm() {
   editingId.value = null
@@ -465,9 +564,11 @@ function resetForm() {
   form.role = ''
   form.classId = undefined as unknown as number
   form.specId = undefined
+  form.specProgress = ''
   form.itemIds = []
   form.is_public = true
   form.memberId = undefined
+  form.price = undefined
   message.value = ''
   formError.value = ''
 }
@@ -480,11 +581,13 @@ function editBuild(build: any) {
   form.role = build.role || ''
   form.classId = build.class?.id ?? build.classId
   form.specId = build.spec?.id ?? build.specId
+  form.specProgress = build.spec?.name || ''
   form.itemIds = (build.items || []).map((i: any) => i.id)
   form.is_public = build.is_public ?? true
   form.guildId = build.guild?.id ?? guild.value?.id
   form.authorId = build.author?.id ?? auth.user?.id
   form.memberId = build.member?.id ?? undefined
+  form.price = build.price ?? undefined
 }
 
 // Criar / atualizar
@@ -494,17 +597,32 @@ async function submit() {
   message.value = ''
 
   try {
+    // Se tiver specProgress, procurar ou criar um spec com esse nome
+    let specIdToUse = form.specId
+    if (form.specProgress) {
+      // Procurar spec existente com esse nome
+      const existingSpec = specs.value.find((s: any) => s.name === form.specProgress)
+      if (existingSpec) {
+        specIdToUse = existingSpec.id
+      } else {
+        // Se não existir, criar um novo spec
+        // Por enquanto, vamos apenas salvar como undefined e usar o campo description
+        specIdToUse = undefined
+      }
+    }
+
     const payload: BuildPayload = {
       name: form.name,
       description: form.description,
       role: form.role,
       classId: form.classId,
-      specId: form.specId,
+      specId: specIdToUse,
       itemIds: form.itemIds,
       guildId: guild.value?.id,
       authorId: Number(auth.user?.id),
       is_public: form.is_public,
       memberId: form.memberId,
+      price: form.price,
     }
 
     if (editingId.value) {
@@ -529,5 +647,68 @@ async function removeBuild(id: number) {
   await BuildsApi.remove(id)
   if (editingId.value === id) resetForm()
   await fetchBuilds()
+}
+
+async function calculatePrice() {
+  if (form.itemIds.length === 0) {
+    priceError.value = 'Selecione pelo menos um item'
+    return
+  }
+
+  calculatingPrice.value = true
+  priceError.value = ''
+  form.price = undefined
+
+  try {
+    // Buscar os itens selecionados para obter seus albion_ids
+    const selectedItems = items.value.filter(item => form.itemIds.includes(item.id))
+
+    // Extrair os IDs do Albion (assumindo que tem um campo albion_id ou similar)
+    // Se não tiver, usamos o próprio name como ID
+    const albionIds = selectedItems.map(item => {
+      // Tenta usar albion_id se existir, senão usa o name
+      return (item as any).albion_id || (item as any).item_id || item.name
+    })
+
+    if (albionIds.length === 0) {
+      priceError.value = 'Nenhum ID do Albion encontrado nos itens'
+      return
+    }
+
+    // Buscar preços na API do Albion (Caerleon como referência)
+    const pricesData = await AlbionDataApi.getPrices(albionIds, ['Caerleon'])
+
+    if (!pricesData || pricesData.length === 0) {
+      priceError.value = 'Não foi possível obter preços dos itens'
+      return
+    }
+
+    // Calcular preço total (soma dos preços mínimos de venda)
+    let totalPrice = 0
+    let itemsWithPrice = 0
+
+    for (const priceInfo of pricesData) {
+      if (priceInfo.sell_price_min > 0) {
+        totalPrice += priceInfo.sell_price_min
+        itemsWithPrice++
+      }
+    }
+
+    if (itemsWithPrice === 0) {
+      priceError.value = 'Nenhum preço disponível para os itens selecionados'
+      return
+    }
+
+    form.price = Math.round(totalPrice)
+
+    if (itemsWithPrice < selectedItems.length) {
+      priceError.value = `Atenção: Apenas ${itemsWithPrice} de ${selectedItems.length} itens têm preço disponível`
+    }
+  } catch (e: any) {
+    console.error('Erro ao calcular preço:', e)
+    priceError.value = e?.response?.data?.message || e?.message || 'Erro ao calcular preço'
+  } finally {
+    calculatingPrice.value = false
+  }
 }
 </script>

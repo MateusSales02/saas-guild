@@ -17,6 +17,7 @@ import { CreateBuildSpecDto } from './dto/create-build-spec.dto';
 import { UpdateBuildSpecDto } from './dto/update-build-spec.dto';
 import { CreateBuildItemDto } from './dto/create-build-item.dto';
 import { UpdateBuildItemDto } from './dto/update-build-item.dto';
+import * as albionItemsJson from '../data/albion-items.json';
 
 @Injectable()
 export class BuildsService {
@@ -191,9 +192,62 @@ export class BuildsService {
     return { deleted: true };
   }
 
+  async reseedItems() {
+    console.log('🗑️ Deleting all existing items...');
+    await this.itemRepo.clear();
+
+    console.log('📦 Loading Albion items from JSON...');
+    const albionItems = (albionItemsJson as any).default || albionItemsJson;
+    const itemsToCreate = albionItems.map((item: any) =>
+      this.itemRepo.create({
+        name: item.name,
+        slot: item.category,
+        albion_id: item.id,
+        item_id: item.id,
+      }),
+    );
+
+    console.log(`📦 Seeding ${itemsToCreate.length} items from albion-items.json...`);
+    await this.itemRepo.save(itemsToCreate);
+    console.log(`✅ Successfully seeded ${itemsToCreate.length} items!`);
+
+    return {
+      success: true,
+      message: `Successfully reseeded ${itemsToCreate.length} items from Albion database`,
+      count: itemsToCreate.length,
+    };
+  }
+
   async seedDefaults() {
-    const hasData = await this.classRepo.count();
-    if (hasData) return;
+    // Check and seed items from Albion separately
+    const hasItems = await this.itemRepo.count();
+    if (hasItems === 0) {
+      console.log('📦 No items found in database, seeding Albion items...');
+      const albionItems = (albionItemsJson as any).default || albionItemsJson;
+      const itemsToCreate = albionItems.map((item: any) =>
+        this.itemRepo.create({
+          name: item.name,
+          slot: item.category,
+          albion_id: item.id,
+          item_id: item.id,
+        })
+      );
+
+      console.log(`📦 Seeding ${itemsToCreate.length} items from albion-items.json...`);
+      await this.itemRepo.save(itemsToCreate);
+      console.log(`✅ Successfully seeded ${itemsToCreate.length} items from albion-items.json`);
+    } else {
+      console.log(`✅ Items already in database: ${hasItems} items`);
+    }
+
+    // Check and seed classes/specs/builds
+    const hasClasses = await this.classRepo.count();
+    if (hasClasses > 0) {
+      console.log(`✅ Classes already in database: ${hasClasses} classes`);
+      return;
+    }
+
+    console.log('📦 No classes found, seeding default classes, specs, and builds...');
 
     const classes = await this.classRepo.save([
       this.classRepo.create({ name: 'Guerreiro', description: 'Frente de batalha / tank' }),
@@ -208,13 +262,7 @@ export class BuildsService {
       this.specRepo.create({ name: 'Caçador', class: classes[2] }),
     ]);
 
-    const items = await this.itemRepo.save([
-      this.itemRepo.create({ name: 'Espada Longa', slot: 'Arma' }),
-      this.itemRepo.create({ name: 'Escudo de Aço', slot: 'Off-hand' }),
-      this.itemRepo.create({ name: 'Cajado de Fogo', slot: 'Arma' }),
-      this.itemRepo.create({ name: 'Armadura Pesada', slot: 'Peitoral' }),
-    ]);
-
+    const allItems = await this.itemRepo.find();
     await this.buildRepo.save(
       this.buildRepo.create({
         name: 'Tank inicial',
@@ -222,7 +270,7 @@ export class BuildsService {
         role: 'Tank',
         class: classes[0],
         spec: specs[0],
-        items: [items[0], items[1], items[3]],
+        items: [allItems[0], allItems[1], allItems[3]],
         is_public: true,
       }),
     );
