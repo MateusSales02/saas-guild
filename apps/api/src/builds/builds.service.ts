@@ -256,8 +256,8 @@ export class BuildsService {
   async reseedItems() {
     try {
       console.log('🗑️ Deleting all existing items...');
-      // Usar delete({}) em vez de clear() para respeitar foreign keys
-      await this.itemRepo.delete({});
+      // Usar createQueryBuilder para deletar todos os itens
+      await this.itemRepo.createQueryBuilder().delete().execute();
 
       console.log('📦 Loading Albion items from JSON...');
 
