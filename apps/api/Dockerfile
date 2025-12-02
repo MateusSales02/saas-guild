@@ -15,6 +15,9 @@ COPY . .
 # Compila TypeScript
 RUN npm run build
 
+# Garante que o diretório de dados existe após o build
+RUN ls -la /app/src/data || echo "ERRO: src/data não existe"
+
 # Stage 2: Production
 FROM node:20-alpine AS production
 
@@ -29,9 +32,8 @@ RUN npm ci --omit=dev
 # Copia código compilado do stage anterior
 COPY --from=builder /app/dist ./dist
 
-# Copia diretório de dados (albion-items.json) diretamente do contexto de build
-# Em vez de copiar do builder, copiamos diretamente do código fonte
-COPY src/data ./dist/data
+# Copia diretório de dados do builder (que já tem tudo do COPY . .)
+COPY --from=builder /app/src/data ./dist/data
 
 # Copia arquivo de configuração (se existir)
 COPY --from=builder /app/.env* ./
