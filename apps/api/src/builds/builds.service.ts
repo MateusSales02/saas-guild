@@ -33,22 +33,26 @@ function loadAlbionItems(): AlbionItem[] {
     console.log('🔍 [loadAlbionItems] __dirname:', __dirname);
     console.log('🔍 [loadAlbionItems] process.cwd():', process.cwd());
 
+    // Usar require.resolve para garantir que o módulo fs/path estão acessíveis
+    const fsModule = require('node:fs');
+    const pathModule = require('node:path');
+
     // Em produção, o arquivo está em dist/data/albion-items.json
     // Em desenvolvimento, está em src/data/albion-items.json
     const possiblePaths = [
-      path.join(process.cwd(), 'dist/data/albion-items.json'), // Produção primária
-      path.join(__dirname, '../data/albion-items.json'), // Produção (dist/builds -> dist/data)
-      path.join(__dirname, '../../data/albion-items.json'), // Produção alternativa 1
-      path.join(__dirname, 'data/albion-items.json'), // Produção alternativa 2
-      path.join(process.cwd(), 'src/data/albion-items.json'), // Desenvolvimento
+      pathModule.join(process.cwd(), 'dist/data/albion-items.json'), // Produção primária
+      pathModule.join(__dirname, '../data/albion-items.json'), // Produção (dist/builds -> dist/data)
+      pathModule.join(__dirname, '../../data/albion-items.json'), // Produção alternativa 1
+      pathModule.join(__dirname, 'data/albion-items.json'), // Produção alternativa 2
+      pathModule.join(process.cwd(), 'src/data/albion-items.json'), // Desenvolvimento
     ];
 
     console.log('🔍 [loadAlbionItems] Checking possible paths:');
     for (const filePath of possiblePaths) {
       console.log(`   🔎 Checking: ${filePath}`);
-      if (fs.existsSync(filePath)) {
+      if (fsModule.existsSync(filePath)) {
         console.log(`✅ Found albion-items.json at: ${filePath}`);
-        const fileContent = fs.readFileSync(filePath, 'utf8');
+        const fileContent = fsModule.readFileSync(filePath, 'utf8');
         const items = JSON.parse(fileContent) as AlbionItem[];
         console.log(`✅ Loaded ${items.length} items from albion-items.json`);
         return items;
