@@ -97,7 +97,7 @@
     ],
     "testEnvironment": "node",
     "moduleNameMapper": {
-      "^.*albion-items\\.json$": "<rootDir>/data/albion-items.json"
+      "^.*/albion-items\\.json$": "<rootDir>/../test/mocks/albion-items.mock.ts"
     }
   }
 }
