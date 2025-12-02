@@ -25,7 +25,9 @@ describe('IntegrationsService', () => {
     };
 
     mockDiscordService = {
-      sendWebhook: jest.fn().mockResolvedValue({ success: true, messageId: '123' }),
+      sendWebhook: jest
+        .fn()
+        .mockResolvedValue({ success: true, messageId: '123' }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -39,7 +41,7 @@ describe('IntegrationsService', () => {
     service = module.get<IntegrationsService>(IntegrationsService);
 
     // Wait for constructor async call to complete
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
   });
 
   afterEach(() => {
@@ -77,7 +79,9 @@ describe('IntegrationsService', () => {
     });
 
     it('should update cache after refresh', async () => {
-      const newServers = [{ server: 'New', status: 'online', population: 'Low' }];
+      const newServers = [
+        { server: 'New', status: 'online', population: 'Low' },
+      ];
       mockAlbionService.fetchStatus.mockResolvedValue(newServers);
 
       await service.refreshAlbion();
@@ -120,7 +124,11 @@ describe('IntegrationsService', () => {
     });
 
     it('should store last notification result', async () => {
-      const expectedResult = { success: true, messageId: '456', sentAt: new Date().toISOString() };
+      const expectedResult = {
+        success: true,
+        messageId: '456',
+        sentAt: new Date().toISOString(),
+      };
       mockDiscordService.sendWebhook.mockResolvedValue(expectedResult);
 
       await service.notifyDiscord('Test message');
@@ -130,9 +138,13 @@ describe('IntegrationsService', () => {
     });
 
     it('should handle webhook errors', async () => {
-      mockDiscordService.sendWebhook.mockRejectedValue(new Error('Webhook failed'));
+      mockDiscordService.sendWebhook.mockRejectedValue(
+        new Error('Webhook failed'),
+      );
 
-      await expect(service.notifyDiscord('Test')).rejects.toThrow('Webhook failed');
+      await expect(service.notifyDiscord('Test')).rejects.toThrow(
+        'Webhook failed',
+      );
     });
   });
 

@@ -1,7 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
-import { BadRequestException, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  UnauthorizedException,
+  NotFoundException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { User } from '../users/user.entity';
@@ -83,16 +87,28 @@ describe('AuthService', () => {
     it('should register a new user successfully', async () => {
       mockUsersRepo.findOne.mockResolvedValue(null);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed_password');
-      mockUsersRepo.create.mockReturnValue({ ...mockUser, email: registerDto.email });
-      mockUsersRepo.save.mockResolvedValue({ ...mockUser, email: registerDto.email, id: 1 });
+      mockUsersRepo.create.mockReturnValue({
+        ...mockUser,
+        email: registerDto.email,
+      });
+      mockUsersRepo.save.mockResolvedValue({
+        ...mockUser,
+        email: registerDto.email,
+        id: 1,
+      });
 
       const result = await service.register(registerDto);
 
-      expect(mockUsersRepo.findOne).toHaveBeenCalledWith({ where: { email: registerDto.email } });
+      expect(mockUsersRepo.findOne).toHaveBeenCalledWith({
+        where: { email: registerDto.email },
+      });
       expect(bcrypt.hash).toHaveBeenCalledWith(registerDto.password, 12);
       expect(mockUsersRepo.create).toHaveBeenCalled();
       expect(mockUsersRepo.save).toHaveBeenCalled();
-      expect(mockGuildsService.createGuildWithLeader).toHaveBeenCalledWith(1, registerDto.nickname);
+      expect(mockGuildsService.createGuildWithLeader).toHaveBeenCalledWith(
+        1,
+        registerDto.nickname,
+      );
       expect(result).toHaveProperty('token', 'mock_token');
       expect(result).toHaveProperty('guild');
       expect(result.guild).toHaveProperty('id', 1);
@@ -102,8 +118,12 @@ describe('AuthService', () => {
     it('should throw BadRequestException if email already exists', async () => {
       mockUsersRepo.findOne.mockResolvedValue(mockUser);
 
-      await expect(service.register(registerDto)).rejects.toThrow(BadRequestException);
-      await expect(service.register(registerDto)).rejects.toThrow('E-mail já cadastrado');
+      await expect(service.register(registerDto)).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.register(registerDto)).rejects.toThrow(
+        'E-mail já cadastrado',
+      );
     });
 
     it('should create user with leader role', async () => {
@@ -115,7 +135,7 @@ describe('AuthService', () => {
       await service.register(registerDto);
 
       expect(mockUsersRepo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ role: 'leader' })
+        expect.objectContaining({ role: 'leader' }),
       );
     });
   });
@@ -132,8 +152,13 @@ describe('AuthService', () => {
 
       const result = await service.login(loginDto);
 
-      expect(mockUsersRepo.findOne).toHaveBeenCalledWith({ where: { email: loginDto.email } });
-      expect(bcrypt.compare).toHaveBeenCalledWith(loginDto.password, mockUser.password_hash);
+      expect(mockUsersRepo.findOne).toHaveBeenCalledWith({
+        where: { email: loginDto.email },
+      });
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        loginDto.password,
+        mockUser.password_hash,
+      );
       expect(mockGuildsService.findByMember).toHaveBeenCalledWith(mockUser.id);
       expect(result).toHaveProperty('token', 'mock_token');
       expect(result).toHaveProperty('guild');
@@ -144,16 +169,24 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException if user not found', async () => {
       mockUsersRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
-      await expect(service.login(loginDto)).rejects.toThrow('Credenciais inválidas');
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(service.login(loginDto)).rejects.toThrow(
+        'Credenciais inválidas',
+      );
     });
 
     it('should throw UnauthorizedException if password is incorrect', async () => {
       mockUsersRepo.findOne.mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
-      await expect(service.login(loginDto)).rejects.toThrow('Credenciais inválidas');
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(service.login(loginDto)).rejects.toThrow(
+        'Credenciais inválidas',
+      );
     });
   });
 
@@ -164,17 +197,25 @@ describe('AuthService', () => {
         password: 'password123',
         nickname: 'Player1',
       };
-      const playerUser = { ...mockUser, email: playerData.email, role: 'player' };
+      const playerUser = {
+        ...mockUser,
+        email: playerData.email,
+        role: 'player',
+      };
 
       mockUsersRepo.findOne.mockResolvedValue(null);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed_password');
       mockUsersRepo.create.mockReturnValue(playerUser);
       mockUsersRepo.save.mockResolvedValue(playerUser);
 
-      const result = await service.createPlayer(playerData.email, playerData.password, playerData.nickname);
+      const result = await service.createPlayer(
+        playerData.email,
+        playerData.password,
+        playerData.nickname,
+      );
 
       expect(mockUsersRepo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ role: 'player' })
+        expect.objectContaining({ role: 'player' }),
       );
       expect(result).not.toHaveProperty('password_hash');
     });
@@ -183,7 +224,7 @@ describe('AuthService', () => {
       mockUsersRepo.findOne.mockResolvedValue(mockUser);
 
       await expect(
-        service.createPlayer('test@example.com', 'password', 'Player')
+        service.createPlayer('test@example.com', 'password', 'Player'),
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -191,7 +232,11 @@ describe('AuthService', () => {
   describe('createPlayerSimple', () => {
     it('should create a player with auto-generated email and password', async () => {
       const nickname = 'TestPlayer';
-      const playerUser = { ...mockUser, email: 'testplayer@guild.local', role: 'player' };
+      const playerUser = {
+        ...mockUser,
+        email: 'testplayer@guild.local',
+        role: 'player',
+      };
 
       mockUsersRepo.findOne.mockResolvedValue(null);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed_password');
@@ -208,7 +253,11 @@ describe('AuthService', () => {
 
     it('should increment counter if generated email already exists', async () => {
       const nickname = 'TestPlayer';
-      const playerUser = { ...mockUser, email: 'testplayer1@guild.local', role: 'player' };
+      const playerUser = {
+        ...mockUser,
+        email: 'testplayer1@guild.local',
+        role: 'player',
+      };
 
       // Primeira tentativa: email já existe no loop
       // Segunda tentativa: email está livre (sai do loop)
@@ -243,7 +292,9 @@ describe('AuthService', () => {
       mockUsersRepo.findOne.mockResolvedValue(null);
 
       await expect(service.findById(999)).rejects.toThrow(NotFoundException);
-      await expect(service.findById(999)).rejects.toThrow('Usuário não encontrado');
+      await expect(service.findById(999)).rejects.toThrow(
+        'Usuário não encontrado',
+      );
     });
   });
 });

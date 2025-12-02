@@ -18,6 +18,18 @@
             Gerencie as finanças da sua guilda
           </p>
         </div>
+
+        <!-- Export PDF Button -->
+        <button
+          @click="showExportModal = true"
+          :disabled="list.length === 0"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300"
+        >
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"/>
+          </svg>
+          Exportar PDF
+        </button>
       </div>
 
       <!-- FORM DE ENTRADA/SAÍDA -->
@@ -206,13 +218,93 @@
         </tbody>
       </table>
     </div>
+
+    <!-- EXPORT MODAL -->
+    <div
+      v-if="showExportModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm"
+      @click.self="showExportModal = false"
+    >
+      <div class="relative w-full max-w-md mx-4 p-6 rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/95 to-slate-950/95 shadow-2xl">
+        <button
+          @click="showExportModal = false"
+          class="absolute top-4 right-4 text-slate-400 hover:text-slate-100 transition-colors"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+
+        <h3 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent mb-4">
+          Exportar Relatório PDF
+        </h3>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-slate-300 mb-2">Período</label>
+            <select
+              v-model="exportFilter.period"
+              @change="onPeriodChange"
+              class="w-full px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all"
+            >
+              <option value="all">Todos os lançamentos</option>
+              <option value="today">Hoje</option>
+              <option value="week">Esta semana</option>
+              <option value="month">Este mês</option>
+              <option value="year">Este ano</option>
+              <option value="custom">Personalizado</option>
+            </select>
+          </div>
+
+          <div v-if="exportFilter.period === 'custom'" class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-2">Data Inicial</label>
+              <input
+                v-model="exportFilter.startDate"
+                type="date"
+                class="w-full px-3 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-2">Data Final</label>
+              <input
+                v-model="exportFilter.endDate"
+                type="date"
+                class="w-full px-3 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all"
+              />
+            </div>
+          </div>
+
+          <div class="flex gap-3 mt-6">
+            <button
+              @click="showExportModal = false"
+              class="flex-1 px-4 py-2.5 rounded-xl border border-slate-600 bg-slate-800/50 text-slate-200 font-semibold hover:bg-slate-700/50 hover:border-slate-500 transition-all"
+            >
+              Cancelar
+            </button>
+            <button
+              @click="generatePDF"
+              :disabled="generatingPDF"
+              class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300"
+            >
+              <span
+                v-if="generatingPDF"
+                class="h-4 w-4 rounded-full border-2 border-white/60 border-t-transparent animate-spin"
+              />
+              {{ generatingPDF ? 'Gerando...' : 'Gerar PDF' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { auth } from '@/stores/auth'
 import { FinanceApi } from '@/lib/api'
+import jsPDF from 'jspdf'
 
 const guild = ref<any>(null)
 const list = ref<any[]>([])
@@ -224,11 +316,19 @@ const summary = ref<{ totalIn: number; totalOut: number; balance: number }>({
 const loading = ref(true)
 const adding = ref(false)
 const error = ref('')
+const showExportModal = ref(false)
+const generatingPDF = ref(false)
 
 const form = ref<{ type: 'in' | 'out'; amount: number | null; note: string }>({
   type: 'in',
   amount: null,
   note: '',
+})
+
+const exportFilter = ref({
+  period: 'all',
+  startDate: '',
+  endDate: '',
 })
 
 onMounted(load)
@@ -311,4 +411,194 @@ const removeTx = async (id: number) => {
 }
 
 const toGold = (n: number) => new Intl.NumberFormat('pt-BR').format(n) + 'g'
+
+function onPeriodChange() {
+  const now = new Date()
+  const today = now.toISOString().split('T')[0]
+
+  switch (exportFilter.value.period) {
+    case 'today':
+      exportFilter.value.startDate = today
+      exportFilter.value.endDate = today
+      break
+    case 'week':
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+      exportFilter.value.startDate = weekAgo.toISOString().split('T')[0]
+      exportFilter.value.endDate = today
+      break
+    case 'month':
+      const monthAgo = new Date(now.getFullYear(), now.getMonth(), 1)
+      exportFilter.value.startDate = monthAgo.toISOString().split('T')[0]
+      exportFilter.value.endDate = today
+      break
+    case 'year':
+      const yearStart = new Date(now.getFullYear(), 0, 1)
+      exportFilter.value.startDate = yearStart.toISOString().split('T')[0]
+      exportFilter.value.endDate = today
+      break
+    case 'custom':
+      exportFilter.value.startDate = ''
+      exportFilter.value.endDate = ''
+      break
+    default:
+      exportFilter.value.startDate = ''
+      exportFilter.value.endDate = ''
+  }
+}
+
+const filteredTransactions = computed(() => {
+  if (exportFilter.value.period === 'all') return list.value
+
+  return list.value.filter((t) => {
+    const txDate = new Date(t.created_at)
+    const start = exportFilter.value.startDate ? new Date(exportFilter.value.startDate) : null
+    const end = exportFilter.value.endDate ? new Date(exportFilter.value.endDate + 'T23:59:59') : null
+
+    if (start && txDate < start) return false
+    if (end && txDate > end) return false
+    return true
+  })
+})
+
+function generatePDF() {
+  generatingPDF.value = true
+
+  try {
+    const doc = new jsPDF()
+    const pageWidth = doc.internal.pageSize.getWidth()
+    const pageHeight = doc.internal.pageSize.getHeight()
+    const margin = 15
+    let y = margin
+
+    // Título
+    doc.setFontSize(22)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Relatório Financeiro', margin, y)
+    y += 10
+
+    // Subtítulo com nome da guilda e período
+    doc.setFontSize(12)
+    doc.setFont('helvetica', 'normal')
+    doc.text(`Guilda: ${guild.value?.name || 'N/A'}`, margin, y)
+    y += 6
+
+    let periodText = 'Período: Todos os lançamentos'
+    if (exportFilter.value.period !== 'all') {
+      if (exportFilter.value.startDate && exportFilter.value.endDate) {
+        periodText = `Período: ${new Date(exportFilter.value.startDate).toLocaleDateString('pt-BR')} - ${new Date(exportFilter.value.endDate).toLocaleDateString('pt-BR')}`
+      }
+    }
+    doc.text(periodText, margin, y)
+    y += 6
+
+    doc.text(`Data de emissão: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`, margin, y)
+    y += 10
+
+    // Calcular resumo do período filtrado
+    const totalIn = filteredTransactions.value
+      .filter((t) => t.type === 'in')
+      .reduce((a, b) => a + Number(b.amount || 0), 0)
+    const totalOut = filteredTransactions.value
+      .filter((t) => t.type === 'out')
+      .reduce((a, b) => a + Number(b.amount || 0), 0)
+    const balance = totalIn - totalOut
+
+    // Resumo em caixas
+    doc.setFillColor(220, 252, 231) // Verde claro
+    doc.rect(margin, y, 55, 20, 'F')
+    doc.setFontSize(10)
+    doc.setTextColor(0, 100, 0)
+    doc.text('Entradas', margin + 2, y + 5)
+    doc.setFontSize(14)
+    doc.setFont('helvetica', 'bold')
+    doc.text(toGold(totalIn), margin + 2, y + 13)
+
+    doc.setFillColor(254, 226, 226) // Vermelho claro
+    doc.rect(margin + 60, y, 55, 20, 'F')
+    doc.setTextColor(139, 0, 0)
+    doc.text('Saídas', margin + 62, y + 5)
+    doc.text(toGold(totalOut), margin + 62, y + 13)
+
+    doc.setFillColor(255, 251, 235) // Amarelo claro
+    doc.rect(margin + 120, y, 55, 20, 'F')
+    doc.setTextColor(balance >= 0 ? 100 : 139, balance >= 0 ? 100 : 0, 0)
+    doc.text('Saldo', margin + 122, y + 5)
+    doc.text(toGold(balance), margin + 122, y + 13)
+
+    y += 28
+
+    // Resetar cor do texto
+    doc.setTextColor(0, 0, 0)
+    doc.setFont('helvetica', 'normal')
+
+    // Tabela de lançamentos
+    doc.setFontSize(14)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Lançamentos', margin, y)
+    y += 8
+
+    // Cabeçalho da tabela
+    doc.setFontSize(9)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Data', margin, y)
+    doc.text('Tipo', margin + 35, y)
+    doc.text('Valor', margin + 60, y)
+    doc.text('Observação', margin + 90, y)
+    y += 4
+    doc.setLineWidth(0.5)
+    doc.line(margin, y, pageWidth - margin, y)
+    y += 5
+
+    // Itens da tabela
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8)
+
+    const sortedTransactions = [...filteredTransactions.value].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
+
+    for (const tx of sortedTransactions) {
+      // Check if we need a new page
+      if (y > pageHeight - 20) {
+        doc.addPage()
+        y = margin
+      }
+
+      const date = new Date(tx.created_at).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit',
+      })
+      const type = tx.type === 'in' ? 'Entrada' : 'Saída'
+      const amount = toGold(tx.amount)
+      const note = tx.note || '—'
+
+      doc.setTextColor(tx.type === 'in' ? 0 : 139, tx.type === 'in' ? 100 : 0, 0)
+      doc.text(date, margin, y)
+      doc.text(type, margin + 35, y)
+      doc.text(amount, margin + 60, y)
+      doc.setTextColor(100, 100, 100)
+      doc.text(note.substring(0, 35), margin + 90, y)
+
+      doc.setTextColor(0, 0, 0)
+      y += 6
+    }
+
+    // Rodapé
+    doc.setFontSize(8)
+    doc.setTextColor(150, 150, 150)
+    doc.text(`Gerado em ${new Date().toLocaleString('pt-BR')}`, margin, pageHeight - 10)
+    doc.text('Powered by SaaS Guild', pageWidth - margin - 35, pageHeight - 10)
+
+    // Salvar PDF
+    const filename = `relatorio-financeiro-${guild.value?.name || 'guild'}-${new Date().toISOString().split('T')[0]}.pdf`
+    doc.save(filename)
+
+    showExportModal.value = false
+  } catch (e: any) {
+    error.value = 'Falha ao gerar PDF: ' + (e.message || 'Erro desconhecido')
+  } finally {
+    generatingPDF.value = false
+  }
+}
 </script>

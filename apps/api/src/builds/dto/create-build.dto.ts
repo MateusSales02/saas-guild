@@ -21,9 +21,10 @@ export class CreateBuildDto {
   @IsString()
   role?: string;
 
+  @IsOptional()
   @IsInt()
   @Type(() => Number)
-  classId: number;
+  classId?: number;
 
   @IsOptional()
   @IsInt()
@@ -53,4 +54,9 @@ export class CreateBuildDto {
   @IsOptional()
   @IsBoolean()
   is_public?: boolean;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  price?: number;
 }

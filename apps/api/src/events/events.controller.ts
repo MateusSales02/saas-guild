@@ -20,7 +20,9 @@ export class EventsController {
 
   // GET /events?guildId=123
   @Get()
-  findAll(@Query('guildId', new ParseIntPipe({ optional: true })) guildId?: number) {
+  findAll(
+    @Query('guildId', new ParseIntPipe({ optional: true })) guildId?: number,
+  ) {
     return this.eventsService.findAll(guildId);
   }
 

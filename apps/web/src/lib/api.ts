@@ -9,6 +9,10 @@ const API_BASE_URL =
   import.meta.env.VITE_API_URL ??
   (import.meta.env.PROD ? 'http://54.161.67.120:3000' : 'http://localhost:3000')
 
+console.log('🔧 [API CONFIG] VITE_API_URL:', import.meta.env.VITE_API_URL)
+console.log('🔧 [API CONFIG] import.meta.env.PROD:', import.meta.env.PROD)
+console.log('🔧 [API CONFIG] Final API_BASE_URL:', API_BASE_URL)
+
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -160,29 +164,8 @@ export const BuildSpecsApi = {
 }
 
 export const BuildItemsApi = {
-  async list() {
-    // Try direct axios call bypassing the global api instance to avoid any caching
-    const timestamp = Date.now()
-    console.log('🚀 [BuildItemsApi] NEW IMPLEMENTATION - Using direct axios with unique URL')
-    console.log('🌐 [BuildItemsApi] Fetching /build-items with timestamp:', timestamp)
-
-    const response = await axios.get(`${API_BASE_URL}/build-items?_nocache=${timestamp}`, {
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        Pragma: 'no-cache',
-        Expires: '0',
-        ...(auth?.token ? { Authorization: `Bearer ${auth.token}` } : {}),
-      },
-    })
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    console.log('🌐 [BuildItemsApi] Response received:', response.data.length, 'items')
-    console.log(
-      '🌐 [BuildItemsApi] First 3 items from response:',
-      response.data.slice(0, 3).map((i: any) => i.name),
-    )
-
-    return response.data
+  list() {
+    return api.get('/build-items').then((r) => r.data)
   },
 }
 

@@ -97,8 +97,13 @@ export class ReportsService {
       .groupBy('p.status')
       .getRawMany<{ status: string; count: string }>();
 
-    const confirmed = Number(participationData.find((p) => p.status === 'confirmed')?.count ?? 0);
-    const total = participationData.reduce((sum, p) => sum + Number(p.count), 0);
+    const confirmed = Number(
+      participationData.find((p) => p.status === 'confirmed')?.count ?? 0,
+    );
+    const total = participationData.reduce(
+      (sum, p) => sum + Number(p.count),
+      0,
+    );
     const participationRate = total > 0 ? (confirmed / total) * 100 : 0;
 
     // Eventos por mês (últimos 6 meses)
@@ -141,7 +146,9 @@ export class ReportsService {
       .getRawMany<{ type: 'in' | 'out'; total: string }>();
 
     const totalIncome = Number(totals.find((t) => t.type === 'in')?.total ?? 0);
-    const totalExpenses = Number(totals.find((t) => t.type === 'out')?.total ?? 0);
+    const totalExpenses = Number(
+      totals.find((t) => t.type === 'out')?.total ?? 0,
+    );
     const balance = totalIncome - totalExpenses;
 
     // Transações por mês (últimos 6 meses)
@@ -174,11 +181,13 @@ export class ReportsService {
       }
     }
 
-    const transactionsByMonth = Array.from(monthMap.entries()).map(([month, data]) => ({
-      month,
-      income: data.income,
-      expenses: data.expenses,
-    }));
+    const transactionsByMonth = Array.from(monthMap.entries()).map(
+      ([month, data]) => ({
+        month,
+        income: data.income,
+        expenses: data.expenses,
+      }),
+    );
 
     // Últimas 10 transações
     const recentTransactions = await this.financeRepo.find({

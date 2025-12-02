@@ -129,18 +129,24 @@ export class AuthService {
    */
   async createPlayerSimple(nickname: string) {
     // Gera email único baseado no nickname
-    const baseEmail = nickname.toLowerCase().replaceAll(/\s+/g, '') + '@guild.local';
+    const baseEmail =
+      nickname.toLowerCase().replaceAll(/\s+/g, '') + '@guild.local';
     let email = baseEmail;
     let counter = 1;
 
     // Verifica se email já existe e incrementa contador se necessário
     while (await this.usersRepo.findOne({ where: { email } })) {
-      email = nickname.toLowerCase().replaceAll(/\s+/g, '') + counter + '@guild.local';
+      email =
+        nickname.toLowerCase().replaceAll(/\s+/g, '') +
+        counter +
+        '@guild.local';
       counter++;
     }
 
     // Gera senha aleatória de 10 caracteres
-    const password = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10);
+    const password =
+      Math.random().toString(36).slice(-10) +
+      Math.random().toString(36).slice(-10);
 
     return this.createPlayer(email, password, nickname);
   }

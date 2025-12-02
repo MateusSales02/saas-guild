@@ -1,4 +1,10 @@
-import { Controller, Get, Query, UseGuards, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  UseGuards,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuditService, AuditLogFilter } from './audit.service';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -47,7 +53,10 @@ export class AuditController {
     @Query('userId', ParseIntPipe) userId: number,
     @Query('limit') limit?: string,
   ) {
-    return this.auditService.findByUser(userId, limit ? Number.parseInt(limit, 10) : 50);
+    return this.auditService.findByUser(
+      userId,
+      limit ? Number.parseInt(limit, 10) : 50,
+    );
   }
 
   /**

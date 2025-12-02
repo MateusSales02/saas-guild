@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { BuildsService } from './builds.service';
 import { CreateBuildClassDto } from './dto/create-build-class.dto';
 import { UpdateBuildClassDto } from './dto/update-build-class.dto';
@@ -18,7 +27,10 @@ export class BuildClassesController {
   }
 
   @Put(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateBuildClassDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateBuildClassDto,
+  ) {
     return this.buildsService.updateClass(id, dto);
   }
 

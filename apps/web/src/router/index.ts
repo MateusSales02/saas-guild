@@ -70,6 +70,21 @@ const router = createRouter({
           name: 'treasury',
           component: () => import('@/pages/dashboard/Treasury.vue'),
         },
+        {
+          path: 'mercado',
+          name: 'market',
+          component: () => import('@/pages/dashboard/Market.vue'),
+        },
+        {
+          path: 'itens',
+          name: 'items',
+          component: () => import('@/pages/dashboard/Items.vue'),
+        },
+        {
+          path: 'itens-test',
+          name: 'items-test',
+          component: () => import('@/pages/dashboard/Items-test.vue'),
+        },
       ],
     },
 

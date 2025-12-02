@@ -150,7 +150,11 @@ describe('GuildsService', () => {
     it('should return guilds for a specific user', async () => {
       const mockGuildMembers = [
         { id: 1, guild: mockGuild, user: { id: 1 } },
-        { id: 2, guild: { ...mockGuild, id: 2, name: 'Guild 2' }, user: { id: 1 } },
+        {
+          id: 2,
+          guild: { ...mockGuild, id: 2, name: 'Guild 2' },
+          user: { id: 1 },
+        },
       ];
       mockGmRepo.find.mockResolvedValue(mockGuildMembers);
 

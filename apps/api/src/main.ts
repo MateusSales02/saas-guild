@@ -25,7 +25,9 @@ async function bootstrap() {
 
   // Configuração de CORS
   const corsOrigins = config.get<string>('CORS_ORIGINS', '');
-  const origins = corsOrigins ? corsOrigins.split(',').map((o) => o.trim()) : true;
+  const origins = corsOrigins
+    ? corsOrigins.split(',').map((o) => o.trim())
+    : true;
 
   app.enableCors({
     origin: origins,
@@ -34,7 +36,10 @@ async function bootstrap() {
 
   await app.listen(port, '0.0.0.0');
   Logger.log(`API ouvindo em http://0.0.0.0:${port}`, 'Bootstrap');
-  Logger.log(`CORS habilitado para: ${Array.isArray(origins) ? origins.join(', ') : 'todos'}`, 'Bootstrap');
+  Logger.log(
+    `CORS habilitado para: ${Array.isArray(origins) ? origins.join(', ') : 'todos'}`,
+    'Bootstrap',
+  );
   Logger.log('Sistema de auditoria ativado', 'Bootstrap');
 }
 bootstrap();

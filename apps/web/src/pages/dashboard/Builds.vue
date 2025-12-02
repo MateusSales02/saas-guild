@@ -118,9 +118,9 @@
             </div>
 
             <div v-if="build.price" class="p-2 rounded-lg bg-[#C6A95D]/10 border border-[#C6A95D]/30 mb-3">
-              <p class="text-[11px] text-slate-500 mb-0.5">Preço estimado:</p>
+              <p class="text-[11px] text-[#C6A95D]/70 mb-1">Valor Estimado:</p>
               <p class="text-sm font-bold text-[#C6A95D]">
-                {{ build.price.toLocaleString('pt-BR') }} silver
+                {{ Number(build.price).toLocaleString('pt-BR') }} silver
               </p>
             </div>
 
@@ -204,12 +204,13 @@
         </label>
 
         <label class="flex flex-col gap-2">
-          <span class="text-sm font-semibold text-slate-300">Função / Papel</span>
+          <span class="text-sm font-semibold text-slate-300">Classe *</span>
           <select
             v-model="form.role"
+            required
             class="px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all"
           >
-            <option value="">Selecione uma função</option>
+            <option value="">Selecione uma classe</option>
             <option value="DPS">DPS</option>
             <option value="HEALER">HEALER</option>
             <option value="TANK">TANK</option>
@@ -360,7 +361,7 @@
         <div class="flex flex-col gap-3 mt-6">
           <button
             type="submit"
-            :disabled="saving || !form.name || !form.classId"
+            :disabled="saving || !form.name || !form.role"
             class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl
                    bg-gradient-to-r from-[#C6A95D] to-amber-500 text-slate-900 font-bold text-sm
                    shadow-lg shadow-[#C6A95D]/30 hover:shadow-[#C6A95D]/50 hover:scale-105
@@ -450,7 +451,7 @@ const form = reactive<BuildPayload & { itemIds: number[]; memberId?: number; spe
   name: '',
   description: '',
   role: '',
-  classId: undefined as unknown as number,
+  classId: 1, // Default class ID since we're using role-based selection
   specId: undefined,
   specProgress: '',
   itemIds: [],
@@ -623,6 +624,8 @@ async function submit() {
   formError.value = ''
   message.value = ''
 
+  let payload: BuildPayload | null = null
+
   try {
     // Se tiver specProgress, procurar ou criar um spec com esse nome
     let specIdToUse = form.specId
@@ -638,11 +641,11 @@ async function submit() {
       }
     }
 
-    const payload: BuildPayload = {
+    payload = {
       name: form.name,
       description: form.description,
       role: form.role,
-      classId: form.classId,
+      // classId is optional since we're using role-based selection
       specId: specIdToUse,
       itemIds: form.itemIds,
       guildId: guild.value?.id,
@@ -650,20 +653,35 @@ async function submit() {
       is_public: form.is_public,
       memberId: form.memberId,
       price: form.price,
+    } as any
+
+    // Remove undefined values and empty arrays to avoid validation errors
+    if (payload) {
+      Object.keys(payload).forEach(key => {
+        const value = payload![key as keyof BuildPayload]
+        if (value === undefined || (Array.isArray(value) && value.length === 0)) {
+          delete payload![key as keyof BuildPayload]
+        }
+      })
     }
 
+    console.log('📤 Sending payload:', payload)
+
     if (editingId.value) {
-      await BuildsApi.update(editingId.value, payload)
+      await BuildsApi.update(editingId.value, payload!)
       message.value = 'Build atualizada com sucesso'
     } else {
-      await BuildsApi.create(payload)
+      await BuildsApi.create(payload as BuildPayload)
       message.value = 'Build criada com sucesso'
     }
 
     await fetchBuilds()
     resetForm()
   } catch (e: any) {
-    formError.value = e.message || 'Erro ao salvar build'
+    console.error('❌ Error creating build:', e)
+    console.error('❌ Error response:', e?.response?.data)
+    console.error('❌ Payload sent:', payload)
+    formError.value = e?.response?.data?.message || e.message || 'Erro ao salvar build'
   } finally {
     saving.value = false
   }

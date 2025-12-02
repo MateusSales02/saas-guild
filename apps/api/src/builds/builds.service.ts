@@ -19,6 +19,12 @@ import { CreateBuildItemDto } from './dto/create-build-item.dto';
 import { UpdateBuildItemDto } from './dto/update-build-item.dto';
 import * as albionItemsJson from '../data/albion-items.json';
 
+interface AlbionItem {
+  id: string;
+  name: string;
+  category: string;
+}
+
 @Injectable()
 export class BuildsService {
   constructor(
@@ -36,7 +42,7 @@ export class BuildsService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(GuildMember)
     private readonly memberRepo: Repository<GuildMember>,
-  ) { }
+  ) {}
 
   async findAll(filters: FilterBuildsDto) {
     const qb = this.buildRepo
@@ -56,10 +62,16 @@ export class BuildsService {
       });
     }
 
-    if (filters.classId) qb.andWhere('class.id = :classId', { classId: filters.classId });
-    if (filters.specId) qb.andWhere('spec.id = :specId', { specId: filters.specId });
-    if (filters.guildId) qb.andWhere('(guild.id = :guildId OR build.is_public = true)', { guildId: filters.guildId });
-    if (filters.authorId) qb.andWhere('author.id = :authorId', { authorId: filters.authorId });
+    if (filters.classId)
+      qb.andWhere('class.id = :classId', { classId: filters.classId });
+    if (filters.specId)
+      qb.andWhere('spec.id = :specId', { specId: filters.specId });
+    if (filters.guildId)
+      qb.andWhere('(guild.id = :guildId OR build.is_public = true)', {
+        guildId: filters.guildId,
+      });
+    if (filters.authorId)
+      qb.andWhere('author.id = :authorId', { authorId: filters.authorId });
     if (filters.onlyPublic) qb.andWhere('build.is_public = true');
 
     return qb.getMany();
@@ -88,6 +100,7 @@ export class BuildsService {
       description: dto.description,
       role: dto.role,
       is_public: dto.is_public ?? true,
+      price: dto.price,
     });
 
     await this.applyRelations(build, dto);
@@ -96,12 +109,13 @@ export class BuildsService {
 
   async update(id: number, dto: UpdateBuildDto) {
     const build = await this.findOne(id);
-    Object.assign(build, {
-      name: dto.name ?? build.name,
-      description: dto.description ?? build.description,
-      role: dto.role ?? build.role,
-      is_public: dto.is_public ?? build.is_public,
-    });
+
+    if (dto.name !== undefined) build.name = dto.name;
+    if (dto.description !== undefined) build.description = dto.description;
+    if (dto.role !== undefined) build.role = dto.role;
+    if (dto.is_public !== undefined) build.is_public = dto.is_public;
+    if (dto.price !== undefined) build.price = dto.price as number;
+
     await this.applyRelations(build, dto);
     return this.buildRepo.save(build);
   }
@@ -197,8 +211,14 @@ export class BuildsService {
     await this.itemRepo.clear();
 
     console.log('📦 Loading Albion items from JSON...');
-    const albionItems = (albionItemsJson as any).default || albionItemsJson;
-    const itemsToCreate = albionItems.map((item: any) =>
+    const loadedData = albionItemsJson as
+      | { default?: AlbionItem[] }
+      | AlbionItem[];
+    const albionItems: AlbionItem[] = Array.isArray(loadedData)
+      ? loadedData
+      : loadedData.default || [];
+
+    const itemsToCreate = albionItems.map((item: AlbionItem) =>
       this.itemRepo.create({
         name: item.name,
         slot: item.category,
@@ -207,7 +227,9 @@ export class BuildsService {
       }),
     );
 
-    console.log(`📦 Seeding ${itemsToCreate.length} items from albion-items.json...`);
+    console.log(
+      `📦 Seeding ${itemsToCreate.length} items from albion-items.json...`,
+    );
     await this.itemRepo.save(itemsToCreate);
     console.log(`✅ Successfully seeded ${itemsToCreate.length} items!`);
 
@@ -223,19 +245,29 @@ export class BuildsService {
     const hasItems = await this.itemRepo.count();
     if (hasItems === 0) {
       console.log('📦 No items found in database, seeding Albion items...');
-      const albionItems = (albionItemsJson as any).default || albionItemsJson;
-      const itemsToCreate = albionItems.map((item: any) =>
+      const loadedData = albionItemsJson as
+        | { default?: AlbionItem[] }
+        | AlbionItem[];
+      const albionItems: AlbionItem[] = Array.isArray(loadedData)
+        ? loadedData
+        : loadedData.default || [];
+
+      const itemsToCreate = albionItems.map((item: AlbionItem) =>
         this.itemRepo.create({
           name: item.name,
           slot: item.category,
           albion_id: item.id,
           item_id: item.id,
-        })
+        }),
       );
 
-      console.log(`📦 Seeding ${itemsToCreate.length} items from albion-items.json...`);
+      console.log(
+        `📦 Seeding ${itemsToCreate.length} items from albion-items.json...`,
+      );
       await this.itemRepo.save(itemsToCreate);
-      console.log(`✅ Successfully seeded ${itemsToCreate.length} items from albion-items.json`);
+      console.log(
+        `✅ Successfully seeded ${itemsToCreate.length} items from albion-items.json`,
+      );
     } else {
       console.log(`✅ Items already in database: ${hasItems} items`);
     }
@@ -247,12 +279,23 @@ export class BuildsService {
       return;
     }
 
-    console.log('📦 No classes found, seeding default classes, specs, and builds...');
+    console.log(
+      '📦 No classes found, seeding default classes, specs, and builds...',
+    );
 
     const classes = await this.classRepo.save([
-      this.classRepo.create({ name: 'Guerreiro', description: 'Frente de batalha / tank' }),
-      this.classRepo.create({ name: 'Mago', description: 'Controle e dano mágico' }),
-      this.classRepo.create({ name: 'Arqueiro', description: 'Dano à distância' }),
+      this.classRepo.create({
+        name: 'Guerreiro',
+        description: 'Frente de batalha / tank',
+      }),
+      this.classRepo.create({
+        name: 'Mago',
+        description: 'Controle e dano mágico',
+      }),
+      this.classRepo.create({
+        name: 'Arqueiro',
+        description: 'Dano à distância',
+      }),
     ]);
 
     const specs = await this.specRepo.save([
@@ -263,17 +306,19 @@ export class BuildsService {
     ]);
 
     const allItems = await this.itemRepo.find();
-    await this.buildRepo.save(
-      this.buildRepo.create({
-        name: 'Tank inicial',
-        description: 'Build focada em defesa para iniciantes.',
-        role: 'Tank',
-        class: classes[0],
-        spec: specs[0],
-        items: [allItems[0], allItems[1], allItems[3]],
-        is_public: true,
-      }),
-    );
+    if (allItems.length >= 4) {
+      await this.buildRepo.save(
+        this.buildRepo.create({
+          name: 'Tank inicial',
+          description: 'Build focada em defesa para iniciantes.',
+          role: 'Tank',
+          class: classes[0],
+          spec: specs[0],
+          items: [allItems[0], allItems[1], allItems[3]],
+          is_public: true,
+        }),
+      );
+    }
   }
 
   private async applyRelations(build: Build, dto: Partial<CreateBuildDto>) {
@@ -290,12 +335,16 @@ export class BuildsService {
     }
 
     if (dto.guildId !== undefined) {
-      const guild = await this.guildRepo.findOne({ where: { id: dto.guildId } });
+      const guild = await this.guildRepo.findOne({
+        where: { id: dto.guildId },
+      });
       build.guild = guild ?? null;
     }
 
     if (dto.authorId !== undefined) {
-      const author = await this.userRepo.findOne({ where: { id: dto.authorId } });
+      const author = await this.userRepo.findOne({
+        where: { id: dto.authorId },
+      });
       build.author = author ?? null;
     }
 
@@ -307,7 +356,9 @@ export class BuildsService {
     }
 
     if (dto.itemIds) {
-      const items = await this.itemRepo.find({ where: { id: In(dto.itemIds) } });
+      const items = await this.itemRepo.find({
+        where: { id: In(dto.itemIds) },
+      });
       build.items = items;
     }
   }

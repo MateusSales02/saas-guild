@@ -39,8 +39,14 @@ describe('ReportsService', () => {
       providers: [
         ReportsService,
         { provide: getRepositoryToken(Event), useValue: mockEventRepo },
-        { provide: getRepositoryToken(EventParticipant), useValue: mockParticipantRepo },
-        { provide: getRepositoryToken(FinanceTransaction), useValue: mockFinanceRepo },
+        {
+          provide: getRepositoryToken(EventParticipant),
+          useValue: mockParticipantRepo,
+        },
+        {
+          provide: getRepositoryToken(FinanceTransaction),
+          useValue: mockFinanceRepo,
+        },
         { provide: getRepositoryToken(GuildMember), useValue: mockMemberRepo },
       ],
     }).compile();
@@ -205,7 +211,8 @@ describe('ReportsService', () => {
         groupBy: jest.fn().mockReturnThis(),
         addGroupBy: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
-        getRawMany: jest.fn()
+        getRawMany: jest
+          .fn()
           .mockResolvedValueOnce([
             { type: 'in', total: '5000' },
             { type: 'out', total: '2000' },
@@ -237,7 +244,8 @@ describe('ReportsService', () => {
         groupBy: jest.fn().mockReturnThis(),
         addGroupBy: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
-        getRawMany: jest.fn()
+        getRawMany: jest
+          .fn()
           .mockResolvedValueOnce([
             { type: 'in', total: '1000' },
             { type: 'out', total: '3000' },

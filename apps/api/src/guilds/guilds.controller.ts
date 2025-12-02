@@ -78,7 +78,9 @@ export class GuildsController {
   @UseGuards(RolesGuard)
   @Roles('leader')
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<{ deleted: boolean }> {
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<{ deleted: boolean }> {
     await this.guildsService.remove(id);
     return { deleted: true };
   }

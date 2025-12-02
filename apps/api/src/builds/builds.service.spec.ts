@@ -157,7 +157,7 @@ describe('BuildsService', () => {
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         '(build.name ILIKE :q OR build.description ILIKE :q)',
-        { q: '%Tank%' }
+        { q: '%Tank%' },
       );
     });
 
@@ -172,7 +172,10 @@ describe('BuildsService', () => {
 
       await service.findAll({ classId: 1 });
 
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('class.id = :classId', { classId: 1 });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'class.id = :classId',
+        { classId: 1 },
+      );
     });
   });
 
@@ -201,7 +204,9 @@ describe('BuildsService', () => {
       mockBuildRepo.findOne.mockResolvedValue(null);
 
       await expect(service.findOne(999)).rejects.toThrow(NotFoundException);
-      await expect(service.findOne(999)).rejects.toThrow('Build não encontrada');
+      await expect(service.findOne(999)).rejects.toThrow(
+        'Build não encontrada',
+      );
     });
   });
 
@@ -236,7 +241,9 @@ describe('BuildsService', () => {
       mockBuildRepo.create.mockReturnValue({});
       mockClassRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.create(createDto)).rejects.toThrow(NotFoundException);
+      await expect(service.create(createDto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -259,7 +266,9 @@ describe('BuildsService', () => {
 
         const result = await service.listClasses();
 
-        expect(mockClassRepo.find).toHaveBeenCalledWith({ order: { name: 'ASC' } });
+        expect(mockClassRepo.find).toHaveBeenCalledWith({
+          order: { name: 'ASC' },
+        });
         expect(result).toHaveLength(1);
       });
     });
@@ -269,7 +278,10 @@ describe('BuildsService', () => {
         mockClassRepo.create.mockReturnValue(mockClass);
         mockClassRepo.save.mockResolvedValue(mockClass);
 
-        const result = await service.createClass({ name: 'Guerreiro', description: 'Tank' });
+        const result = await service.createClass({
+          name: 'Guerreiro',
+          description: 'Tank',
+        });
 
         expect(mockClassRepo.create).toHaveBeenCalled();
         expect(result).toEqual(mockClass);
@@ -279,7 +291,10 @@ describe('BuildsService', () => {
     describe('updateClass', () => {
       it('should update a class', async () => {
         mockClassRepo.update.mockResolvedValue({ affected: 1 });
-        mockClassRepo.findOne.mockResolvedValue({ ...mockClass, name: 'Updated' });
+        mockClassRepo.findOne.mockResolvedValue({
+          ...mockClass,
+          name: 'Updated',
+        });
 
         const result = await service.updateClass(1, { name: 'Updated' });
 
@@ -290,7 +305,9 @@ describe('BuildsService', () => {
         mockClassRepo.update.mockResolvedValue({ affected: 0 });
         mockClassRepo.findOne.mockResolvedValue(null);
 
-        await expect(service.updateClass(999, { name: 'Test' })).rejects.toThrow(NotFoundException);
+        await expect(
+          service.updateClass(999, { name: 'Test' }),
+        ).rejects.toThrow(NotFoundException);
       });
     });
 
@@ -337,7 +354,10 @@ describe('BuildsService', () => {
         mockSpecRepo.create.mockReturnValue(mockSpec);
         mockSpecRepo.save.mockResolvedValue(mockSpec);
 
-        const result = await service.createSpec({ name: 'Defensor', classId: 1 });
+        const result = await service.createSpec({
+          name: 'Defensor',
+          classId: 1,
+        });
 
         expect(result).toEqual(mockSpec);
       });
@@ -345,7 +365,9 @@ describe('BuildsService', () => {
       it('should throw NotFoundException if class not found', async () => {
         mockClassRepo.findOne.mockResolvedValue(null);
 
-        await expect(service.createSpec({ name: 'Spec', classId: 999 })).rejects.toThrow(NotFoundException);
+        await expect(
+          service.createSpec({ name: 'Spec', classId: 999 }),
+        ).rejects.toThrow(NotFoundException);
       });
     });
 
@@ -367,7 +389,9 @@ describe('BuildsService', () => {
 
         const result = await service.listItems();
 
-        expect(mockItemRepo.find).toHaveBeenCalledWith({ order: { name: 'ASC' } });
+        expect(mockItemRepo.find).toHaveBeenCalledWith({
+          order: { name: 'ASC' },
+        });
         expect(result).toHaveLength(1);
       });
     });
@@ -377,7 +401,10 @@ describe('BuildsService', () => {
         mockItemRepo.create.mockReturnValue(mockItem);
         mockItemRepo.save.mockResolvedValue(mockItem);
 
-        const result = await service.createItem({ name: 'Espada', slot: 'Arma' });
+        const result = await service.createItem({
+          name: 'Espada',
+          slot: 'Arma',
+        });
 
         expect(result).toEqual(mockItem);
       });

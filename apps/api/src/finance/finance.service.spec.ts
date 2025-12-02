@@ -31,7 +31,13 @@ describe('FinanceService', () => {
 
   const mockTransactions: FinanceTransaction[] = [
     mockTransaction,
-    { ...mockTransaction, id: 2, type: 'out', amount: 500, note: 'Test withdrawal' },
+    {
+      ...mockTransaction,
+      id: 2,
+      type: 'out',
+      amount: 500,
+      note: 'Test withdrawal',
+    },
   ];
 
   beforeEach(async () => {
@@ -83,7 +89,9 @@ describe('FinanceService', () => {
 
       const result = await service.create(createDto);
 
-      expect(mockGuildsRepo.findOne).toHaveBeenCalledWith({ where: { id: createDto.guildId } });
+      expect(mockGuildsRepo.findOne).toHaveBeenCalledWith({
+        where: { id: createDto.guildId },
+      });
       expect(mockRepo.create).toHaveBeenCalledWith({
         guild: mockGuild,
         type: createDto.type,
@@ -97,8 +105,12 @@ describe('FinanceService', () => {
     it('should throw NotFoundException if guild not found', async () => {
       mockGuildsRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.create(createDto)).rejects.toThrow(NotFoundException);
-      await expect(service.create(createDto)).rejects.toThrow('Guild não encontrada');
+      await expect(service.create(createDto)).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.create(createDto)).rejects.toThrow(
+        'Guild não encontrada',
+      );
     });
   });
 
@@ -194,9 +206,9 @@ describe('FinanceService', () => {
         addSelect: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
         groupBy: jest.fn().mockReturnThis(),
-        getRawMany: jest.fn().mockResolvedValue([
-          { type: 'in', total: '5000' },
-        ]),
+        getRawMany: jest
+          .fn()
+          .mockResolvedValue([{ type: 'in', total: '5000' }]),
       };
       mockRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 

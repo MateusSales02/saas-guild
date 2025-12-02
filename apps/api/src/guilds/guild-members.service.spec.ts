@@ -163,7 +163,9 @@ describe('GuildMembersService', () => {
       mockUsersRepo.findOneBy.mockResolvedValue(null);
       mockGuildsRepo.findOneBy.mockResolvedValue(mockGuild);
 
-      await expect(service.create(createData)).rejects.toThrow('User or Guild not found');
+      await expect(service.create(createData)).rejects.toThrow(
+        'User or Guild not found',
+      );
     });
 
     it('should throw error if guild not found', async () => {
@@ -176,7 +178,9 @@ describe('GuildMembersService', () => {
       mockUsersRepo.findOneBy.mockResolvedValue(mockUser);
       mockGuildsRepo.findOneBy.mockResolvedValue(null);
 
-      await expect(service.create(createData)).rejects.toThrow('User or Guild not found');
+      await expect(service.create(createData)).rejects.toThrow(
+        'User or Guild not found',
+      );
     });
   });
 
@@ -184,7 +188,10 @@ describe('GuildMembersService', () => {
     it('should update a guild member', async () => {
       const updateData = { role: 'oficial' };
       mockGuildMembersRepo.update.mockResolvedValue({ affected: 1 });
-      mockGuildMembersRepo.findOneBy.mockResolvedValue({ ...mockGuildMember, role: 'oficial' });
+      mockGuildMembersRepo.findOneBy.mockResolvedValue({
+        ...mockGuildMember,
+        role: 'oficial',
+      });
 
       const result = await service.update(1, updateData);
 

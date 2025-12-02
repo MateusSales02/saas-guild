@@ -21,7 +21,9 @@ import { GuildsModule } from '../guilds/guilds.module';
       useFactory: (config: ConfigService) => {
         const secret = config.get<string>('JWT_SECRET');
         if (!secret) {
-          throw new Error('JWT_SECRET não configurado. Defina a variável de ambiente.');
+          throw new Error(
+            'JWT_SECRET não configurado. Defina a variável de ambiente.',
+          );
         }
         return {
           secret,

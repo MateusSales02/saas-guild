@@ -1,4 +1,10 @@
-import { IsString, IsDateString, IsOptional, IsEnum, IsInt } from 'class-validator';
+import {
+  IsString,
+  IsDateString,
+  IsOptional,
+  IsEnum,
+  IsInt,
+} from 'class-validator';
 
 export enum EventType {
   RAID = 'RAID',

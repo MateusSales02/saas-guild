@@ -14,9 +14,24 @@ import { User } from '../users/user.entity';
 import { GuildMember } from '../guilds/guild-member.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Build, BuildClass, BuildSpec, BuildItem, Guild, User, GuildMember])],
+  imports: [
+    TypeOrmModule.forFeature([
+      Build,
+      BuildClass,
+      BuildSpec,
+      BuildItem,
+      Guild,
+      User,
+      GuildMember,
+    ]),
+  ],
   providers: [BuildsService],
-  controllers: [BuildsController, BuildClassesController, BuildSpecsController, BuildItemsController],
+  controllers: [
+    BuildsController,
+    BuildClassesController,
+    BuildSpecsController,
+    BuildItemsController,
+  ],
 })
 export class BuildsModule implements OnModuleInit {
   constructor(private readonly buildsService: BuildsService) {}

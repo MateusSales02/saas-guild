@@ -62,7 +62,14 @@ export class ExportService {
       joined_at: m.id, // Usando ID como proxy para data de entrada
     }));
 
-    return this.toCSV(data, ['id', 'user_id', 'nickname', 'email', 'role', 'joined_at']);
+    return this.toCSV(data, [
+      'id',
+      'user_id',
+      'nickname',
+      'email',
+      'role',
+      'joined_at',
+    ]);
   }
 
   /**
@@ -83,7 +90,8 @@ export class ExportService {
       type: e.type,
       location: e.location ?? '',
       participants_count: e.participants?.length ?? 0,
-      confirmed_count: e.participants?.filter((p) => p.status === 'confirmed').length ?? 0,
+      confirmed_count:
+        e.participants?.filter((p) => p.status === 'confirmed').length ?? 0,
     }));
 
     return this.toCSV(data, [

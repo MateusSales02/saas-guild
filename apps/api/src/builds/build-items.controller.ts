@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { BuildsService } from './builds.service';
 import { CreateBuildItemDto } from './dto/create-build-item.dto';
 import { UpdateBuildItemDto } from './dto/update-build-item.dto';
@@ -7,12 +16,36 @@ import { UpdateBuildItemDto } from './dto/update-build-item.dto';
 export class BuildItemsController {
   constructor(private readonly buildsService: BuildsService) {}
 
+  // IMPORTANTE: Rotas específicas devem vir ANTES de rotas genéricas
+  @Get('fresh')
+  async listFresh() {
+    console.log(
+      '🔥 [BuildItemsController] GET /build-items/fresh called - NEW ENDPOINT',
+    );
+    const items = await this.buildsService.listItems();
+    console.log(
+      `✅✅ [BuildItemsController/fresh] Returning ${items.length} items`,
+    );
+    console.log(
+      `📦📦 [BuildItemsController/fresh] First 5 items:`,
+      items
+        .slice(0, 5)
+        .map((i) => ({ id: i.id, name: i.name, albion_id: i.albion_id })),
+    );
+    return items;
+  }
+
   @Get()
   async list() {
     console.log('🔍 [BuildItemsController] GET /build-items called');
     const items = await this.buildsService.listItems();
     console.log(`✅ [BuildItemsController] Returning ${items.length} items`);
-    console.log(`📦 [BuildItemsController] First 3 items:`, items.slice(0, 3).map(i => ({ id: i.id, name: i.name, albion_id: i.albion_id })));
+    console.log(
+      `📦 [BuildItemsController] First 3 items:`,
+      items
+        .slice(0, 3)
+        .map((i) => ({ id: i.id, name: i.name, albion_id: i.albion_id })),
+    );
     return items;
   }
 
@@ -22,7 +55,10 @@ export class BuildItemsController {
   }
 
   @Put(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateBuildItemDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateBuildItemDto,
+  ) {
     return this.buildsService.updateItem(id, dto);
   }
 

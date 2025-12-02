@@ -219,17 +219,17 @@
               class="flex h-12 w-12 flex-col items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/30 to-teal-500/30 border border-emerald-500/40 group-hover:border-emerald-400 group-hover:shadow-lg group-hover:shadow-emerald-500/20 transition-all"
             >
               <span class="text-sm font-bold text-emerald-300">
-                {{ dayOfMonth(ev.event_date) }}
+                {{ dayOfMonth(ev.date) }}
               </span>
               <span class="text-[10px] text-slate-400 uppercase">
-                {{ new Date(ev.event_date).toLocaleDateString('pt-BR', { month: 'short' }) }}
+                {{ new Date(ev.date).toLocaleDateString('pt-BR', { month: 'short' }) }}
               </span>
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-slate-50 truncate">{{ ev.name }}</p>
+              <p class="text-sm font-semibold text-slate-50 truncate">{{ ev.title }}</p>
               <p class="text-xs text-slate-400">
-                {{ shortTime(ev.event_date) }}
-                <span v-if="ev.lead" class="ml-2">• {{ ev.lead }}</span>
+                {{ shortTime(ev.date) }}
+                <span v-if="ev.location" class="ml-2">• {{ ev.location }}</span>
               </p>
             </div>
           </div>
@@ -383,11 +383,11 @@ import {
 type Member = { id: number; role: string; user: { id: number; email: string; nickname?: string } }
 type EventItem = {
   id: number
-  name: string
-  event_date: string
-  recurring: boolean
+  title: string
+  date: string
   description?: string
-  lead?: string
+  location?: string
+  type?: string
 }
 
 const range = ref<'7d' | '30d'>('7d')
@@ -459,7 +459,7 @@ function shortTime(iso: string) {
 function countEventsInLastDays(list: EventItem[], days: number) {
   const now = Date.now()
   const cutoff = now - days * 24 * 3600 * 1000
-  return list.filter((e) => new Date(e.event_date).getTime() >= cutoff).length
+  return list.filter((e) => new Date(e.date).getTime() >= cutoff).length
 }
 
 function roleLabel(role: string) {
@@ -484,8 +484,8 @@ function statusLabel(status: string) {
 const upcoming = computed(() => {
   const now = Date.now()
   return [...events.value]
-    .filter((e) => new Date(e.event_date).getTime() >= now)
-    .sort((a, b) => +new Date(a.event_date) - +new Date(b.event_date))
+    .filter((e) => new Date(e.date).getTime() >= now)
+    .sort((a, b) => +new Date(a.date) - +new Date(b.date))
     .slice(0, 5)
 })
 
@@ -527,8 +527,8 @@ function buildDailySeries(list: EventItem[], days: number) {
   }
 
   for (const ev of list) {
-    if (!ev.event_date) continue
-    const date = new Date(ev.event_date)
+    if (!ev.date) continue
+    const date = new Date(ev.date)
     if (isNaN(date.getTime())) continue
     const key = date.toISOString().slice(0, 10)
     if (key in buckets) buckets[key]++

@@ -124,7 +124,7 @@ describe('AuditService', () => {
         expect.objectContaining({
           old_values: dto.oldValues,
           new_values: dto.newValues,
-        })
+        }),
       );
     });
   });
@@ -153,7 +153,7 @@ describe('AuditService', () => {
       expect(mockAuditRepo.findAndCount).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { user_id: 1 },
-        })
+        }),
       );
     });
 
@@ -165,7 +165,7 @@ describe('AuditService', () => {
       expect(mockAuditRepo.findAndCount).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { entity_type: 'guild', entity_id: 5 },
-        })
+        }),
       );
     });
 
@@ -177,7 +177,7 @@ describe('AuditService', () => {
       expect(mockAuditRepo.findAndCount).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { action: 'DELETE' },
-        })
+        }),
       );
     });
 
@@ -191,7 +191,7 @@ describe('AuditService', () => {
       expect(mockAuditRepo.findAndCount).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { created_at: Between(startDate, endDate) },
-        })
+        }),
       );
     });
 
@@ -204,7 +204,7 @@ describe('AuditService', () => {
       expect(mockAuditRepo.findAndCount).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { created_at: MoreThanOrEqual(startDate) },
-        })
+        }),
       );
     });
 
@@ -217,7 +217,7 @@ describe('AuditService', () => {
       expect(mockAuditRepo.findAndCount).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { created_at: LessThanOrEqual(endDate) },
-        })
+        }),
       );
     });
 
@@ -230,7 +230,7 @@ describe('AuditService', () => {
         expect.objectContaining({
           take: 10,
           skip: 20,
-        })
+        }),
       );
     });
   });

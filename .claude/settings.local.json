@@ -48,7 +48,15 @@
       "Bash(git for-each-ref:*)",
       "Bash(xargs -r -n 1 git update-ref -d)",
       "Bash(git reflog:*)",
-      "Bash(git gc:*)"
+      "Bash(git gc:*)",
+      "Bash(git restore:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(if not exist \"c:\\dev\\saas-guild\\apps\\api\\src\\data\" mkdir \"c:\\dev\\saas-guild\\apps\\api\\src\\data\")",
+      "Bash(copy:*)",
+      "Bash(where:*)",
+      "Bash(if exist dist rmdir /s /q dist)",
+      "Bash(del temp_items.json)",
+      "Bash(npm run format:*)"
     ],
     "deny": [],
     "ask": []

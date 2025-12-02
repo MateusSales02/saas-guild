@@ -43,6 +43,11 @@
         <path d="M2 21h4l9-9-4-4-9 9v4z" />
         <path d="m14.5 5.5 2-2 3 3-2 2z" />
       </template>
+      <template v-else-if="icon === 'market'">
+        <circle cx="12" cy="12" r="8" />
+        <path d="M12 2v20M2 12h20" />
+        <path d="M12 6a6 6 0 0 0 0 12M12 6a6 6 0 0 1 0 12" />
+      </template>
       <template v-else>
         <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
         <path
@@ -56,6 +61,6 @@
 
 <script setup lang="ts">
 import { RouterLink, type RouteLocationRaw } from 'vue-router'
-type IconName = 'chart' | 'users' | 'swords' | 'calendar' | 'treasure' | 'settings' | 'hammer'
+type IconName = 'chart' | 'users' | 'swords' | 'calendar' | 'treasure' | 'settings' | 'hammer' | 'market'
 defineProps<{ icon: IconName; label: string; to: RouteLocationRaw }>()
 </script>

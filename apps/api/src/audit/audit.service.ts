@@ -57,7 +57,9 @@ export class AuditService {
   /**
    * Busca logs de auditoria com filtros
    */
-  async findAll(filter: AuditLogFilter = {}): Promise<{ logs: AuditLog[]; total: number }> {
+  async findAll(
+    filter: AuditLogFilter = {},
+  ): Promise<{ logs: AuditLog[]; total: number }> {
     const where: Record<string, unknown> = {};
 
     if (filter.userId) where.user_id = filter.userId;
@@ -97,7 +99,10 @@ export class AuditService {
   /**
    * Busca logs de uma entidade específica
    */
-  async findByEntity(entityType: string, entityId: number): Promise<AuditLog[]> {
+  async findByEntity(
+    entityType: string,
+    entityId: number,
+  ): Promise<AuditLog[]> {
     return this.auditRepo.find({
       where: { entity_type: entityType, entity_id: entityId },
       order: { created_at: 'DESC' },

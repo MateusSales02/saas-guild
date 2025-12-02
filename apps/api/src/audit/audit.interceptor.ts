@@ -26,7 +26,11 @@ export class AuditInterceptor implements NestInterceptor {
     const user = request.user;
 
     // Ignora métodos GET (apenas leitura) e rotas de health/status
-    if (method === 'GET' || url.includes('/health') || url.includes('/integrations/albion')) {
+    if (
+      method === 'GET' ||
+      url.includes('/health') ||
+      url.includes('/integrations/albion')
+    ) {
       return next.handle();
     }
 
@@ -45,7 +49,10 @@ export class AuditInterceptor implements NestInterceptor {
             entityType,
             entityId: entityId ?? (response as { id?: number })?.id,
             description: `${method} ${url}`,
-            newValues: method === 'DELETE' ? undefined : (request.body as Record<string, unknown>),
+            newValues:
+              method === 'DELETE'
+                ? undefined
+                : (request.body as Record<string, unknown>),
             ipAddress: this.getClientIp(request),
             userAgent: request.headers['user-agent'],
           });

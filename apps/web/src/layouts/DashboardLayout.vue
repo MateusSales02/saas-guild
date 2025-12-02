@@ -23,6 +23,7 @@
           <SidebarLink icon="calendar" label="Eventos" :to="{ name: 'events' }" />
           <SidebarLink icon="treasure" label="Tesouraria" :to="{ name: 'treasury' }" />
           <SidebarLink icon="hammer" label="Builds" :to="{ name: 'builds' }" />
+          <SidebarLink icon="market" label="Mercado" :to="{ name: 'market' }" />
         </nav>
 
         <!-- Logout Button -->

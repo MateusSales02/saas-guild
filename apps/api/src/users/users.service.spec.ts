@@ -59,7 +59,7 @@ describe('UsersService', () => {
 
       expect(mockUsersRepo.find).toHaveBeenCalled();
       expect(result).toHaveLength(2);
-      result.forEach(user => {
+      result.forEach((user) => {
         expect(user).not.toHaveProperty('password_hash');
       });
     });
@@ -147,14 +147,11 @@ describe('UsersService', () => {
       const result = await service.search('test');
 
       expect(mockUsersRepo.find).toHaveBeenCalledWith({
-        where: [
-          { email: ILike('%test%') },
-          { nickname: ILike('%test%') },
-        ],
+        where: [{ email: ILike('%test%') }, { nickname: ILike('%test%') }],
         order: { id: 'ASC' },
       });
       expect(result).toHaveLength(2);
-      result.forEach(user => {
+      result.forEach((user) => {
         expect(user).not.toHaveProperty('password_hash');
       });
     });
@@ -180,7 +177,9 @@ describe('UsersService', () => {
 
       const result = await service.findByEmail('test@example.com');
 
-      expect(mockUsersRepo.findOne).toHaveBeenCalledWith({ where: { email: 'test@example.com' } });
+      expect(mockUsersRepo.findOne).toHaveBeenCalledWith({
+        where: { email: 'test@example.com' },
+      });
       expect(result).toHaveProperty('password_hash');
     });
 

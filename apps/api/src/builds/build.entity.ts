@@ -29,11 +29,19 @@ export class Build {
   @Column({ nullable: true })
   role?: string;
 
-  @ManyToOne(() => BuildClass, { eager: true, onDelete: 'SET NULL', nullable: true })
+  @ManyToOne(() => BuildClass, {
+    eager: true,
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
   @JoinColumn({ name: 'class_id' })
   class?: BuildClass | null;
 
-  @ManyToOne(() => BuildSpec, { eager: true, onDelete: 'SET NULL', nullable: true })
+  @ManyToOne(() => BuildSpec, {
+    eager: true,
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
   @JoinColumn({ name: 'spec_id' })
   spec?: BuildSpec | null;
 
@@ -53,12 +61,19 @@ export class Build {
   @JoinColumn({ name: 'author_id' })
   author?: User | null;
 
-  @ManyToOne(() => GuildMember, { eager: true, onDelete: 'SET NULL', nullable: true })
+  @ManyToOne(() => GuildMember, {
+    eager: true,
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
   @JoinColumn({ name: 'member_id' })
   member?: GuildMember | null;
 
   @Column({ default: true })
   is_public: boolean;
+
+  @Column({ type: 'int', nullable: true })
+  price?: number;
 
   @CreateDateColumn()
   created_at: Date;

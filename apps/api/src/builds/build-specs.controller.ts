@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { BuildsService } from './builds.service';
 import { CreateBuildSpecDto } from './dto/create-build-spec.dto';
 import { UpdateBuildSpecDto } from './dto/update-build-spec.dto';
@@ -18,7 +28,10 @@ export class BuildSpecsController {
   }
 
   @Put(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateBuildSpecDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateBuildSpecDto,
+  ) {
     return this.buildsService.updateSpec(id, dto);
   }
 

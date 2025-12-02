@@ -50,9 +50,7 @@ describe('GuildsController (e2e)', () => {
     });
 
     it('should fail without authentication', () => {
-      return request(app.getHttpServer())
-        .get(`/guilds/${guildId}`)
-        .expect(401);
+      return request(app.getHttpServer()).get(`/guilds/${guildId}`).expect(401);
     });
 
     it('should fail with non-existent guild', () => {
