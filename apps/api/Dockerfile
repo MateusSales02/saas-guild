@@ -32,11 +32,11 @@ RUN npm ci --omit=dev
 # Copia código compilado do stage anterior
 COPY --from=builder /app/dist ./dist
 
-# Copia diretório de dados do builder (que já tem tudo do COPY . .)
-COPY --from=builder /app/src/data ./dist/data
+# Cria diretório de dados e copia o arquivo JSON
+RUN mkdir -p ./dist/data
+COPY --from=builder /app/src/data/albion-items.json ./dist/data/
 
-# Copia arquivo de configuração (se existir)
-COPY --from=builder /app/.env* ./
+# Copia package.json para produção (não precisa copiar .env pois usamos variáveis de ambiente)
 
 # Usuário não-root para segurança
 RUN addgroup -g 1001 -S nodejs && \
