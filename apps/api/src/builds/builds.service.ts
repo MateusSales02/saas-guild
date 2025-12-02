@@ -36,10 +36,10 @@ function loadAlbionItems(): AlbionItem[] {
     // Em produção, o arquivo está em dist/data/albion-items.json
     // Em desenvolvimento, está em src/data/albion-items.json
     const possiblePaths = [
-      path.join(__dirname, '../data/albion-items.json'), // Produção (dist/)
+      path.join(process.cwd(), 'dist/data/albion-items.json'), // Produção primária
+      path.join(__dirname, '../data/albion-items.json'), // Produção (dist/builds -> dist/data)
       path.join(__dirname, '../../data/albion-items.json'), // Produção alternativa 1
       path.join(__dirname, 'data/albion-items.json'), // Produção alternativa 2
-      path.join(process.cwd(), 'dist/data/albion-items.json'), // Produção alternativa 3
       path.join(process.cwd(), 'src/data/albion-items.json'), // Desenvolvimento
     ];
 
