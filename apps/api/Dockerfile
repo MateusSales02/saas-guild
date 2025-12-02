@@ -15,6 +15,9 @@ COPY . .
 # Compila TypeScript
 RUN npm run build
 
+# Copia arquivo JSON para o diretório dist após build
+RUN mkdir -p dist/data && cp src/data/albion-items.json dist/data/
+
 # Stage 2: Production
 FROM node:20-alpine AS production
 
@@ -26,12 +29,8 @@ COPY package.json package-lock.json ./
 # Instala apenas dependências de produção
 RUN npm ci --omit=dev
 
-# Copia código compilado do stage anterior
+# Copia código compilado do stage anterior (incluindo dist/data/)
 COPY --from=builder /app/dist ./dist
-
-# Cria diretório de dados e copia o arquivo JSON diretamente do source
-RUN mkdir -p ./dist/data
-COPY src/data/albion-items.json ./dist/data/
 
 # Copia package.json para produção (não precisa copiar .env pois usamos variáveis de ambiente)
 
