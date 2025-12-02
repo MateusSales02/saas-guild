@@ -323,9 +323,19 @@ export class BuildsService {
 
   async seedDefaults() {
     // Check and seed items from Albion separately
-    const hasItems = await this.itemRepo.count();
-    if (hasItems === 0) {
-      console.log('📦 No items found in database, seeding Albion items...');
+    const itemCount = await this.itemRepo.count();
+    console.log(`📊 Current item count in database: ${itemCount}`);
+
+    // If we have fewer than 100 items, reseed with all Albion items
+    if (itemCount < 100) {
+      console.log('📦 Few items found in database (< 100), reseeding Albion items...');
+
+      // Clear existing items first
+      if (itemCount > 0) {
+        console.log(`🗑️ Clearing ${itemCount} existing items...`);
+        await this.itemRepo.clear();
+      }
+
       const albionItems = loadAlbionItems();
 
       const itemsToCreate = albionItems.map((item: AlbionItem) =>
