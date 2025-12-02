@@ -235,63 +235,90 @@
           />
         </label>
 
-        <div class="flex flex-col gap-2">
+        <!-- SEÇÃO DE ITENS COMPLETAMENTE NOVA -->
+        <div class="flex flex-col gap-3">
+          <!-- Header -->
           <div class="flex items-center justify-between">
-            <span class="text-sm font-semibold text-slate-300">Itens</span>
-            <RouterLink
-              :to="{ name: 'items' }"
-              class="text-xs text-[#C6A95D] hover:text-amber-400 font-semibold transition-colors flex items-center gap-1"
-            >
-              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"/>
-                <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"/>
-              </svg>
-              Ver todos os itens
-            </RouterLink>
+            <span class="text-sm font-semibold text-slate-300">Itens do Albion</span>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-400">
+                {{ items.length }} disponíveis
+              </span>
+            </div>
           </div>
 
-          <!-- Search filter for items -->
-          <div class="flex items-center gap-2">
+          <!-- Status dos itens -->
+          <div v-if="items.length === 0" class="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
+            <p class="text-xs text-amber-300 flex items-center gap-2">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              Carregando itens do Albion...
+            </p>
+          </div>
+
+          <!-- Campo de busca -->
+          <div class="relative">
             <input
               v-model="itemSearchQuery"
-              name="itemSearch"
               type="text"
-              placeholder="Buscar itens..."
-              class="flex-1 px-3 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all"
+              placeholder="Buscar por nome, ID ou slot..."
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-sm transition-all"
             />
-            <span class="text-xs text-slate-400 whitespace-nowrap">
-              {{ items.length }} total
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+            </svg>
+            <span v-if="itemSearchQuery" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
+              {{ filteredItemsForForm.length }} resultados
             </span>
           </div>
 
-          <!-- Items list with checkboxes -->
-          <div class="max-h-64 overflow-y-auto rounded-xl bg-slate-800/50 border border-slate-700 p-3 space-y-1">
-            <label
-              v-for="item in filteredItemsForForm"
-              :key="item.id"
-              class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-700/50 cursor-pointer transition-colors group"
-            >
-              <input
-                type="checkbox"
-                :value="item.id"
-                v-model="form.itemIds"
-                class="w-4 h-4 rounded border-slate-600 text-[#C6A95D] focus:ring-[#C6A95D] focus:ring-offset-slate-900"
-              />
-              <span class="text-sm text-slate-300 group-hover:text-slate-100">
-                {{ item.name }}
-                <span v-if="item.item_id || item.albion_id" class="text-xs text-slate-500 font-mono">
-                  - {{ item.item_id || item.albion_id }}
-                </span>
-                <span v-if="item.slot" class="text-xs text-slate-500"> ({{ item.slot }})</span>
-              </span>
-            </label>
-            <p v-if="filteredItemsForForm.length === 0" class="text-sm text-slate-500 text-center py-4">
-              Nenhum item encontrado
-            </p>
+          <!-- Lista de itens com scroll -->
+          <div class="rounded-xl border border-slate-700 bg-slate-900/50 overflow-hidden">
+            <div class="max-h-72 overflow-y-auto custom-scrollbar">
+              <div v-if="filteredItemsForForm.length === 0" class="p-8 text-center">
+                <svg class="w-12 h-12 mx-auto text-slate-600 mb-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+                </svg>
+                <p class="text-sm text-slate-400">Nenhum item encontrado</p>
+                <p class="text-xs text-slate-500 mt-1">Tente uma busca diferente</p>
+              </div>
+
+              <label
+                v-for="item in filteredItemsForForm"
+                :key="item.id"
+                class="flex items-center gap-3 px-4 py-3 hover:bg-slate-800/50 cursor-pointer transition-colors border-b border-slate-800/50 last:border-0 group"
+              >
+                <input
+                  type="checkbox"
+                  :value="item.id"
+                  v-model="form.itemIds"
+                  class="w-4 h-4 rounded border-slate-600 text-[#C6A95D] focus:ring-[#C6A95D] focus:ring-offset-0 transition-all"
+                />
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium text-slate-200 group-hover:text-white transition-colors">
+                      {{ item.name }}
+                    </span>
+                    <span v-if="item.slot" class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      {{ item.slot }}
+                    </span>
+                  </div>
+                  <div v-if="item.item_id || item.albion_id" class="text-xs text-slate-500 font-mono mt-0.5">
+                    {{ item.item_id || item.albion_id }}
+                  </div>
+                </div>
+              </label>
+            </div>
           </div>
-          <span class="text-[11px] text-slate-400">
-            {{ form.itemIds.length }} item(ns) selecionado(s)
-          </span>
+
+          <!-- Contador de selecionados -->
+          <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-800/30 border border-slate-700/50">
+            <span class="text-xs text-slate-400">Itens selecionados</span>
+            <span class="text-sm font-bold text-[#C6A95D]">
+              {{ form.itemIds.length }}
+            </span>
+          </div>
         </div>
 
         <!-- Preço Automático -->
@@ -712,3 +739,24 @@ async function calculatePrice() {
   }
 }
 </script>
+
+<style scoped>
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(198, 169, 93, 0.5);
+}
+</style>
