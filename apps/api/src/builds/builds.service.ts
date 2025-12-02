@@ -256,7 +256,8 @@ export class BuildsService {
   async reseedItems() {
     try {
       console.log('🗑️ Deleting all existing items...');
-      await this.itemRepo.clear();
+      // Usar delete({}) em vez de clear() para respeitar foreign keys
+      await this.itemRepo.delete({});
 
       console.log('📦 Loading Albion items from JSON...');
 
@@ -315,7 +316,8 @@ export class BuildsService {
   async clearAllItems() {
     console.log('🗑️ Clearing all items from database...');
     const count = await this.itemRepo.count();
-    await this.itemRepo.clear();
+    // Usar delete({}) em vez de clear() para respeitar foreign keys
+    await this.itemRepo.delete({});
     console.log(`✅ Cleared ${count} items from database`);
 
     return {
@@ -391,7 +393,8 @@ export class BuildsService {
         // Clear existing items first
         if (itemCount > 0) {
           console.log(`🗑️ Clearing ${itemCount} existing items...`);
-          await this.itemRepo.clear();
+          // Usar delete({}) em vez de clear() para respeitar foreign keys
+          await this.itemRepo.delete({});
         }
 
         const albionItems = loadAlbionItems();
