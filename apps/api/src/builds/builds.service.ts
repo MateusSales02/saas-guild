@@ -355,7 +355,7 @@ export class BuildsService {
         `✅ Successfully seeded ${itemsToCreate.length} items from albion-items.json`,
       );
     } else {
-      console.log(`✅ Items already in database: ${hasItems} items`);
+      console.log(`✅ Items already in database: ${itemCount} items`);
     }
 
     // Check and seed classes/specs/builds
