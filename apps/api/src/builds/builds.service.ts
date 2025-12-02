@@ -250,32 +250,47 @@ export class BuildsService {
   }
 
   async reseedItems() {
-    console.log('🗑️ Deleting all existing items...');
-    await this.itemRepo.clear();
+    try {
+      console.log('🗑️ Deleting all existing items...');
+      await this.itemRepo.clear();
 
-    console.log('📦 Loading Albion items from JSON...');
-    const albionItems = loadAlbionItems();
+      console.log('📦 Loading Albion items from JSON...');
+      const albionItems = loadAlbionItems();
 
-    const itemsToCreate = albionItems.map((item: AlbionItem) =>
-      this.itemRepo.create({
-        name: item.name,
-        slot: item.category,
-        albion_id: item.id,
-        item_id: item.id,
-      }),
-    );
+      if (!albionItems || albionItems.length === 0) {
+        const errorMsg = 'Failed to load items from albion-items.json. File may be missing or empty.';
+        console.error('❌', errorMsg);
+        throw new Error(errorMsg);
+      }
 
-    console.log(
-      `📦 Seeding ${itemsToCreate.length} items from albion-items.json...`,
-    );
-    await this.itemRepo.save(itemsToCreate);
-    console.log(`✅ Successfully seeded ${itemsToCreate.length} items!`);
+      const itemsToCreate = albionItems.map((item: AlbionItem) =>
+        this.itemRepo.create({
+          name: item.name,
+          slot: item.category,
+          albion_id: item.id,
+          item_id: item.id,
+        }),
+      );
 
-    return {
-      success: true,
-      message: `Successfully reseeded ${itemsToCreate.length} items from Albion database`,
-      count: itemsToCreate.length,
-    };
+      console.log(
+        `📦 Seeding ${itemsToCreate.length} items from albion-items.json...`,
+      );
+
+      if (itemsToCreate.length > 0) {
+        await this.itemRepo.save(itemsToCreate);
+      }
+
+      console.log(`✅ Successfully seeded ${itemsToCreate.length} items!`);
+
+      return {
+        success: true,
+        message: `Successfully reseeded ${itemsToCreate.length} items from Albion database`,
+        count: itemsToCreate.length,
+      };
+    } catch (error) {
+      console.error('❌ Error in reseedItems():', error);
+      throw error;
+    }
   }
 
   debugFileCheck() {
