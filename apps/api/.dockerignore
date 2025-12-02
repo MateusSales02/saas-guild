@@ -4,3 +4,7 @@ dist
 .env
 npm-debug.log
 Dockerfile
+test
+coverage
+*.spec.ts
+*.test.ts
