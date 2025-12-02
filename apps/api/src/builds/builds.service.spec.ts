@@ -94,6 +94,8 @@ describe('BuildsService', () => {
       save: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      count: jest.fn(),
+      clear: jest.fn(),
     };
 
     mockGuildRepo = {
@@ -423,6 +425,7 @@ describe('BuildsService', () => {
 
   describe('seedDefaults', () => {
     it('should seed default data if empty', async () => {
+      mockItemRepo.count.mockResolvedValue(0);
       mockClassRepo.count.mockResolvedValue(0);
       mockClassRepo.create.mockImplementation((data) => data);
       mockClassRepo.save.mockResolvedValue([mockClass]);
@@ -430,15 +433,18 @@ describe('BuildsService', () => {
       mockSpecRepo.save.mockResolvedValue([mockSpec]);
       mockItemRepo.create.mockImplementation((data) => data);
       mockItemRepo.save.mockResolvedValue([mockItem]);
+      mockItemRepo.find.mockResolvedValue([mockItem, mockItem, mockItem, mockItem]);
       mockBuildRepo.create.mockReturnValue(mockBuild);
       mockBuildRepo.save.mockResolvedValue(mockBuild);
 
       await service.seedDefaults();
 
       expect(mockClassRepo.save).toHaveBeenCalled();
+      expect(mockItemRepo.save).toHaveBeenCalled();
     });
 
     it('should not seed if data already exists', async () => {
+      mockItemRepo.count.mockResolvedValue(10);
       mockClassRepo.count.mockResolvedValue(5);
 
       await service.seedDefaults();

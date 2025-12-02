@@ -95,6 +95,9 @@
       "lcov",
       "html"
     ],
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^.*albion-items\\.json$": "<rootDir>/data/albion-items.json"
+    }
   }
 }
