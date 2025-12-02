@@ -259,7 +259,22 @@ export class BuildsService {
       await this.itemRepo.clear();
 
       console.log('📦 Loading Albion items from JSON...');
-      const albionItems = loadAlbionItems();
+
+      // Carregar arquivo JSON diretamente aqui (sem depender de função externa)
+      const fsModule = require('node:fs');
+      const pathModule = require('node:path');
+      const filePath = pathModule.join(process.cwd(), 'dist/data/albion-items.json');
+
+      console.log(`📂 Tentando ler arquivo: ${filePath}`);
+      console.log(`📂 Arquivo existe? ${fsModule.existsSync(filePath)}`);
+
+      if (!fsModule.existsSync(filePath)) {
+        throw new Error(`Arquivo não encontrado: ${filePath}`);
+      }
+
+      const fileContent = fsModule.readFileSync(filePath, 'utf8');
+      const albionItems = JSON.parse(fileContent) as AlbionItem[];
+      console.log(`✅ Loaded ${albionItems.length} items from file`);
 
       if (!albionItems || albionItems.length === 0) {
         const errorMsg = 'Failed to load items from albion-items.json. File may be missing or empty.';
