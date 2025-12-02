@@ -527,7 +527,10 @@ function buildDailySeries(list: EventItem[], days: number) {
   }
 
   for (const ev of list) {
-    const key = new Date(ev.event_date).toISOString().slice(0, 10)
+    if (!ev.event_date) continue
+    const date = new Date(ev.event_date)
+    if (isNaN(date.getTime())) continue
+    const key = date.toISOString().slice(0, 10)
     if (key in buckets) buckets[key]++
   }
 
