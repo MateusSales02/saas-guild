@@ -6,7 +6,8 @@ import axios from 'axios'
 import { auth, setSession } from '@/stores/auth'
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL ?? (import.meta.env.PROD ? 'http://54.161.67.120:3000' : 'http://localhost:3000')
+  import.meta.env.VITE_API_URL ??
+  (import.meta.env.PROD ? 'http://54.161.67.120:3000' : 'http://localhost:3000')
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -200,5 +201,130 @@ export const IntegrationsApi = {
 
   lastNotification() {
     return api.get('/integrations/notify/last').then((r) => r.data)
+  },
+}
+
+// Albion Online Data API
+// Documentação: https://www.albion-online-data.com/api-site/api.html
+const ALBION_DATA_API = 'https://www.albion-online-data.com/api/v2/stats'
+
+export interface AlbionPriceData {
+  item_id: string
+  city: string
+  quality: number
+  sell_price_min: number
+  sell_price_min_date: string
+  sell_price_max: number
+  sell_price_max_date: string
+  buy_price_min: number
+  buy_price_min_date: string
+  buy_price_max: number
+  buy_price_max_date: string
+}
+
+export interface AlbionHistoryData {
+  item_id: string
+  location: string
+  quality: number
+  data: Array<{
+    timestamp: string
+    avg_price: number
+    item_count: number
+  }>
+}
+
+export const AlbionDataApi = {
+  /**
+   * Obtém preços atuais de itens no mercado
+   * @param items - Lista de IDs de itens (ex: ['T4_BAG', 'T5_BAG'])
+   * @param locations - Lista de cidades (ex: ['Caerleon', 'Bridgewatch'])
+   * @param qualities - Lista de qualidades (0-5, onde 0=normal, 1=good, 2=outstanding, etc)
+   */
+  async getPrices(
+    items: string[],
+    locations?: string[],
+    qualities?: number[],
+  ): Promise<AlbionPriceData[]> {
+    const itemsParam = items.join(',')
+    const params = new URLSearchParams()
+
+    if (locations && locations.length > 0) {
+      params.append('locations', locations.join(','))
+    }
+    if (qualities && qualities.length > 0) {
+      params.append('qualities', qualities.join(','))
+    }
+
+    const url = `${ALBION_DATA_API}/prices/${itemsParam}.json${params.toString() ? '?' + params.toString() : ''}`
+    const response = await axios.get<AlbionPriceData[]>(url)
+    return response.data
+  },
+
+  /**
+   * Obtém histórico de preços de itens
+   * @param items - Lista de IDs de itens
+   * @param options - Opções de filtro (date, end_date, locations, qualities, time-scale)
+   */
+  async getHistory(
+    items: string[],
+    options?: {
+      date?: string // formato: MM-DD-YYYY
+      end_date?: string
+      locations?: string[]
+      qualities?: number[]
+      timeScale?: number // 1=hourly, 6=6hours, 24=daily
+    },
+  ): Promise<AlbionHistoryData[]> {
+    const itemsParam = items.join(',')
+    const params = new URLSearchParams()
+
+    if (options?.date) params.append('date', options.date)
+    if (options?.end_date) params.append('end_date', options.end_date)
+    if (options?.locations && options.locations.length > 0) {
+      params.append('locations', options.locations.join(','))
+    }
+    if (options?.qualities && options.qualities.length > 0) {
+      params.append('qualities', options.qualities.join(','))
+    }
+    if (options?.timeScale) {
+      params.append('time-scale', options.timeScale.toString())
+    }
+
+    const url = `${ALBION_DATA_API}/history/${itemsParam}.json${params.toString() ? '?' + params.toString() : ''}`
+    const response = await axios.get<AlbionHistoryData[]>(url)
+    return response.data
+  },
+
+  /**
+   * Obtém dados de gráfico para visualização
+   */
+  async getCharts(
+    items: string[],
+    options?: {
+      date?: string
+      end_date?: string
+      locations?: string[]
+      qualities?: number[]
+      timeScale?: number
+    },
+  ) {
+    const itemsParam = items.join(',')
+    const params = new URLSearchParams()
+
+    if (options?.date) params.append('date', options.date)
+    if (options?.end_date) params.append('end_date', options.end_date)
+    if (options?.locations && options.locations.length > 0) {
+      params.append('locations', options.locations.join(','))
+    }
+    if (options?.qualities && options.qualities.length > 0) {
+      params.append('qualities', options.qualities.join(','))
+    }
+    if (options?.timeScale) {
+      params.append('time-scale', options.timeScale.toString())
+    }
+
+    const url = `${ALBION_DATA_API}/charts/${itemsParam}.json${params.toString() ? '?' + params.toString() : ''}`
+    const response = await axios.get(url)
+    return response.data
   },
 }
