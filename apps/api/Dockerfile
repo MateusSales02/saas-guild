@@ -12,9 +12,6 @@ RUN npm ci
 # Copia código fonte
 COPY . .
 
-# Verifica se src/data existe no contexto
-RUN echo "Verificando src/data após COPY:" && ls -la /app/src/ | grep -E "^d" || echo "Listando src completo:" && ls -la /app/src/
-
 # Compila TypeScript
 RUN npm run build
 
