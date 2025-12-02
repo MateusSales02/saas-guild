@@ -22,7 +22,18 @@ async function register() {
     await AuthApi.register(email.value, password.value, nickname.value)
     router.push('/dashboard')
   } catch (e: any) {
-    error.value = e?.response?.data?.message ?? e?.message ?? 'Falha no registro'
+    console.error('🚨 Erro no registro:', e)
+    console.error('📋 Resposta do servidor:', e?.response)
+    console.error('💬 Mensagem:', e?.response?.data)
+
+    // Trata diferentes tipos de erro
+    if (e?.response?.status === 400) {
+      error.value = e?.response?.data?.message ?? 'E-mail já cadastrado ou dados inválidos'
+    } else if (e?.response?.status === 500) {
+      error.value = 'Erro no servidor. Por favor, tente novamente em alguns instantes.'
+    } else {
+      error.value = e?.response?.data?.message ?? e?.message ?? 'Falha no registro'
+    }
   } finally {
     loading.value = false
   }
