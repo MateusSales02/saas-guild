@@ -29,19 +29,31 @@ interface AlbionItem {
 // Função helper para carregar albion-items.json
 function loadAlbionItems(): AlbionItem[] {
   try {
+    console.log('🔍 [loadAlbionItems] Starting to load Albion items...');
+    console.log('🔍 [loadAlbionItems] __dirname:', __dirname);
+    console.log('🔍 [loadAlbionItems] process.cwd():', process.cwd());
+
     // Em produção, o arquivo está em dist/data/albion-items.json
     // Em desenvolvimento, está em src/data/albion-items.json
     const possiblePaths = [
       path.join(__dirname, '../data/albion-items.json'), // Produção (dist/)
-      path.join(process.cwd(), 'dist/data/albion-items.json'), // Produção alternativa
+      path.join(__dirname, '../../data/albion-items.json'), // Produção alternativa 1
+      path.join(__dirname, 'data/albion-items.json'), // Produção alternativa 2
+      path.join(process.cwd(), 'dist/data/albion-items.json'), // Produção alternativa 3
       path.join(process.cwd(), 'src/data/albion-items.json'), // Desenvolvimento
     ];
 
+    console.log('🔍 [loadAlbionItems] Checking possible paths:');
     for (const filePath of possiblePaths) {
+      console.log(`   🔎 Checking: ${filePath}`);
       if (fs.existsSync(filePath)) {
         console.log(`✅ Found albion-items.json at: ${filePath}`);
         const fileContent = fs.readFileSync(filePath, 'utf8');
-        return JSON.parse(fileContent) as AlbionItem[];
+        const items = JSON.parse(fileContent) as AlbionItem[];
+        console.log(`✅ Loaded ${items.length} items from albion-items.json`);
+        return items;
+      } else {
+        console.log(`   ❌ Not found at: ${filePath}`);
       }
     }
 
