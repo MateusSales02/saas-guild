@@ -1,0 +1,1706 @@
+[
+  {
+    "id": "T4_SWORD",
+    "name": "Espada T4",
+    "category": "Espadas",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_SWORD",
+    "name": "Espada T5",
+    "category": "Espadas",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_SWORD",
+    "name": "Espada T6",
+    "category": "Espadas",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_SWORD",
+    "name": "Espada T7",
+    "category": "Espadas",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_SWORD",
+    "name": "Espada T8",
+    "category": "Espadas",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_2H_CLAYMORE",
+    "name": "Claymore T4",
+    "category": "Espadas",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_CLAYMORE",
+    "name": "Claymore T5",
+    "category": "Espadas",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_CLAYMORE",
+    "name": "Claymore T6",
+    "category": "Espadas",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_CLAYMORE",
+    "name": "Claymore T7",
+    "category": "Espadas",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_CLAYMORE",
+    "name": "Claymore T8",
+    "category": "Espadas",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_2H_DUALSWORD",
+    "name": "Espadas Duplas T4",
+    "category": "Espadas",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_DUALSWORD",
+    "name": "Espadas Duplas T5",
+    "category": "Espadas",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_DUALSWORD",
+    "name": "Espadas Duplas T6",
+    "category": "Espadas",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_DUALSWORD",
+    "name": "Espadas Duplas T7",
+    "category": "Espadas",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_DUALSWORD",
+    "name": "Espadas Duplas T8",
+    "category": "Espadas",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_MAIN_RAPIER",
+    "name": "Florete T4",
+    "category": "Espadas",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_MAIN_RAPIER",
+    "name": "Florete T5",
+    "category": "Espadas",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_MAIN_RAPIER",
+    "name": "Florete T6",
+    "category": "Espadas",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_MAIN_RAPIER",
+    "name": "Florete T7",
+    "category": "Espadas",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_MAIN_RAPIER",
+    "name": "Florete T8",
+    "category": "Espadas",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_2H_CLAYMORE_AVALON",
+    "name": "Carving Sword T4",
+    "category": "Espadas",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_CLAYMORE_AVALON",
+    "name": "Carving Sword T5",
+    "category": "Espadas",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_CLAYMORE_AVALON",
+    "name": "Carving Sword T6",
+    "category": "Espadas",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_CLAYMORE_AVALON",
+    "name": "Carving Sword T7",
+    "category": "Espadas",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_CLAYMORE_AVALON",
+    "name": "Carving Sword T8",
+    "category": "Espadas",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_AXE",
+    "name": "Machado T4",
+    "category": "Machados",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_AXE",
+    "name": "Machado T5",
+    "category": "Machados",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_AXE",
+    "name": "Machado T6",
+    "category": "Machados",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_AXE",
+    "name": "Machado T7",
+    "category": "Machados",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_AXE",
+    "name": "Machado T8",
+    "category": "Machados",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_2H_AXE",
+    "name": "Grande Machado T4",
+    "category": "Machados",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_AXE",
+    "name": "Grande Machado T5",
+    "category": "Machados",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_AXE",
+    "name": "Grande Machado T6",
+    "category": "Machados",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_AXE",
+    "name": "Grande Machado T7",
+    "category": "Machados",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_AXE",
+    "name": "Grande Machado T8",
+    "category": "Machados",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_2H_HALBERD",
+    "name": "Alabarda T4",
+    "category": "Machados",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_HALBERD",
+    "name": "Alabarda T5",
+    "category": "Machados",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_HALBERD",
+    "name": "Alabarda T6",
+    "category": "Machados",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_HALBERD",
+    "name": "Alabarda T7",
+    "category": "Machados",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_HALBERD",
+    "name": "Alabarda T8",
+    "category": "Machados",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_2H_DUALAXE",
+    "name": "Machados Duplos T4",
+    "category": "Machados",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_DUALAXE",
+    "name": "Machados Duplos T5",
+    "category": "Machados",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_DUALAXE",
+    "name": "Machados Duplos T6",
+    "category": "Machados",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_DUALAXE",
+    "name": "Machados Duplos T7",
+    "category": "Machados",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_DUALAXE",
+    "name": "Machados Duplos T8",
+    "category": "Machados",
+    "tier": "T8"
+  },
+  { "id": "T4_BOW", "name": "Arco T4", "category": "Arcos", "tier": "T4" },
+  { "id": "T5_BOW", "name": "Arco T5", "category": "Arcos", "tier": "T5" },
+  { "id": "T6_BOW", "name": "Arco T6", "category": "Arcos", "tier": "T6" },
+  { "id": "T7_BOW", "name": "Arco T7", "category": "Arcos", "tier": "T7" },
+  { "id": "T8_BOW", "name": "Arco T8", "category": "Arcos", "tier": "T8" },
+  {
+    "id": "T4_2H_BOW",
+    "name": "Arco Longo T4",
+    "category": "Arcos",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_BOW",
+    "name": "Arco Longo T5",
+    "category": "Arcos",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_BOW",
+    "name": "Arco Longo T6",
+    "category": "Arcos",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_BOW",
+    "name": "Arco Longo T7",
+    "category": "Arcos",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_BOW",
+    "name": "Arco Longo T8",
+    "category": "Arcos",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_2H_WARBOW",
+    "name": "Arco de Guerra T4",
+    "category": "Arcos",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_WARBOW",
+    "name": "Arco de Guerra T5",
+    "category": "Arcos",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_WARBOW",
+    "name": "Arco de Guerra T6",
+    "category": "Arcos",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_WARBOW",
+    "name": "Arco de Guerra T7",
+    "category": "Arcos",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_WARBOW",
+    "name": "Arco de Guerra T8",
+    "category": "Arcos",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_CROSSBOW",
+    "name": "Besta T4",
+    "category": "Bestas",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_CROSSBOW",
+    "name": "Besta T5",
+    "category": "Bestas",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_CROSSBOW",
+    "name": "Besta T6",
+    "category": "Bestas",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_CROSSBOW",
+    "name": "Besta T7",
+    "category": "Bestas",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_CROSSBOW",
+    "name": "Besta T8",
+    "category": "Bestas",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_2H_CROSSBOW",
+    "name": "Besta Pesada T4",
+    "category": "Bestas",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_CROSSBOW",
+    "name": "Besta Pesada T5",
+    "category": "Bestas",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_CROSSBOW",
+    "name": "Besta Pesada T6",
+    "category": "Bestas",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_CROSSBOW",
+    "name": "Besta Pesada T7",
+    "category": "Bestas",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_CROSSBOW",
+    "name": "Besta Pesada T8",
+    "category": "Bestas",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_FIRESTAFF",
+    "name": "Cajado de Fogo T4",
+    "category": "Cajados de Fogo",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_FIRESTAFF",
+    "name": "Cajado de Fogo T5",
+    "category": "Cajados de Fogo",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_FIRESTAFF",
+    "name": "Cajado de Fogo T6",
+    "category": "Cajados de Fogo",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_FIRESTAFF",
+    "name": "Cajado de Fogo T7",
+    "category": "Cajados de Fogo",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_FIRESTAFF",
+    "name": "Cajado de Fogo T8",
+    "category": "Cajados de Fogo",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_2H_INFERNOSTAFF",
+    "name": "Cajado Infernal T4",
+    "category": "Cajados de Fogo",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_INFERNOSTAFF",
+    "name": "Cajado Infernal T5",
+    "category": "Cajados de Fogo",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_INFERNOSTAFF",
+    "name": "Cajado Infernal T6",
+    "category": "Cajados de Fogo",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_INFERNOSTAFF",
+    "name": "Cajado Infernal T7",
+    "category": "Cajados de Fogo",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_INFERNOSTAFF",
+    "name": "Cajado Infernal T8",
+    "category": "Cajados de Fogo",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_FROSTSTAFF",
+    "name": "Cajado de Gelo T4",
+    "category": "Cajados de Gelo",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_FROSTSTAFF",
+    "name": "Cajado de Gelo T5",
+    "category": "Cajados de Gelo",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_FROSTSTAFF",
+    "name": "Cajado de Gelo T6",
+    "category": "Cajados de Gelo",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_FROSTSTAFF",
+    "name": "Cajado de Gelo T7",
+    "category": "Cajados de Gelo",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_FROSTSTAFF",
+    "name": "Cajado de Gelo T8",
+    "category": "Cajados de Gelo",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_2H_GLACIALSTAFF",
+    "name": "Cajado Glacial T4",
+    "category": "Cajados de Gelo",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_GLACIALSTAFF",
+    "name": "Cajado Glacial T5",
+    "category": "Cajados de Gelo",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_GLACIALSTAFF",
+    "name": "Cajado Glacial T6",
+    "category": "Cajados de Gelo",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_GLACIALSTAFF",
+    "name": "Cajado Glacial T7",
+    "category": "Cajados de Gelo",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_GLACIALSTAFF",
+    "name": "Cajado Glacial T8",
+    "category": "Cajados de Gelo",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_HOLYSTAFF",
+    "name": "Cajado Sagrado T4",
+    "category": "Cajados Sagrados",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_HOLYSTAFF",
+    "name": "Cajado Sagrado T5",
+    "category": "Cajados Sagrados",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_HOLYSTAFF",
+    "name": "Cajado Sagrado T6",
+    "category": "Cajados Sagrados",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_HOLYSTAFF",
+    "name": "Cajado Sagrado T7",
+    "category": "Cajados Sagrados",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_HOLYSTAFF",
+    "name": "Cajado Sagrado T8",
+    "category": "Cajados Sagrados",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_2H_DIVINESTAFF",
+    "name": "Cajado Divino T4",
+    "category": "Cajados Sagrados",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_DIVINESTAFF",
+    "name": "Cajado Divino T5",
+    "category": "Cajados Sagrados",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_DIVINESTAFF",
+    "name": "Cajado Divino T6",
+    "category": "Cajados Sagrados",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_DIVINESTAFF",
+    "name": "Cajado Divino T7",
+    "category": "Cajados Sagrados",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_DIVINESTAFF",
+    "name": "Cajado Divino T8",
+    "category": "Cajados Sagrados",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_ARCANESTAFF",
+    "name": "Cajado Arcano T4",
+    "category": "Cajados Arcanos",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_ARCANESTAFF",
+    "name": "Cajado Arcano T5",
+    "category": "Cajados Arcanos",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_ARCANESTAFF",
+    "name": "Cajado Arcano T6",
+    "category": "Cajados Arcanos",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_ARCANESTAFF",
+    "name": "Cajado Arcano T7",
+    "category": "Cajados Arcanos",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_ARCANESTAFF",
+    "name": "Cajado Arcano T8",
+    "category": "Cajados Arcanos",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_2H_ARCANESTAFF",
+    "name": "Grande Cajado Arcano T4",
+    "category": "Cajados Arcanos",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_ARCANESTAFF",
+    "name": "Grande Cajado Arcano T5",
+    "category": "Cajados Arcanos",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_ARCANESTAFF",
+    "name": "Grande Cajado Arcano T6",
+    "category": "Cajados Arcanos",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_ARCANESTAFF",
+    "name": "Grande Cajado Arcano T7",
+    "category": "Cajados Arcanos",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_ARCANESTAFF",
+    "name": "Grande Cajado Arcano T8",
+    "category": "Cajados Arcanos",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_CURSESTAFF",
+    "name": "Cajado Maldito T4",
+    "category": "Cajados Malditos",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_CURSESTAFF",
+    "name": "Cajado Maldito T5",
+    "category": "Cajados Malditos",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_CURSESTAFF",
+    "name": "Cajado Maldito T6",
+    "category": "Cajados Malditos",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_CURSESTAFF",
+    "name": "Cajado Maldito T7",
+    "category": "Cajados Malditos",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_CURSESTAFF",
+    "name": "Cajado Maldito T8",
+    "category": "Cajados Malditos",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_2H_SKULLORB",
+    "name": "Orbe de Crânio T4",
+    "category": "Cajados Malditos",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_SKULLORB",
+    "name": "Orbe de Crânio T5",
+    "category": "Cajados Malditos",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_SKULLORB",
+    "name": "Orbe de Crânio T6",
+    "category": "Cajados Malditos",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_SKULLORB",
+    "name": "Orbe de Crânio T7",
+    "category": "Cajados Malditos",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_SKULLORB",
+    "name": "Orbe de Crânio T8",
+    "category": "Cajados Malditos",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_HAMMER",
+    "name": "Martelo T4",
+    "category": "Martelos",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_HAMMER",
+    "name": "Martelo T5",
+    "category": "Martelos",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_HAMMER",
+    "name": "Martelo T6",
+    "category": "Martelos",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_HAMMER",
+    "name": "Martelo T7",
+    "category": "Martelos",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_HAMMER",
+    "name": "Martelo T8",
+    "category": "Martelos",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_2H_POLEHAMMER",
+    "name": "Martelo de Haste T4",
+    "category": "Martelos",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_POLEHAMMER",
+    "name": "Martelo de Haste T5",
+    "category": "Martelos",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_POLEHAMMER",
+    "name": "Martelo de Haste T6",
+    "category": "Martelos",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_POLEHAMMER",
+    "name": "Martelo de Haste T7",
+    "category": "Martelos",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_POLEHAMMER",
+    "name": "Martelo de Haste T8",
+    "category": "Martelos",
+    "tier": "T8"
+  },
+  { "id": "T4_MACE", "name": "Maça T4", "category": "Maças", "tier": "T4" },
+  { "id": "T5_MACE", "name": "Maça T5", "category": "Maças", "tier": "T5" },
+  { "id": "T6_MACE", "name": "Maça T6", "category": "Maças", "tier": "T6" },
+  { "id": "T7_MACE", "name": "Maça T7", "category": "Maças", "tier": "T7" },
+  { "id": "T8_MACE", "name": "Maça T8", "category": "Maças", "tier": "T8" },
+  {
+    "id": "T4_2H_MACE",
+    "name": "Grande Maça T4",
+    "category": "Maças",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_MACE",
+    "name": "Grande Maça T5",
+    "category": "Maças",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_MACE",
+    "name": "Grande Maça T6",
+    "category": "Maças",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_MACE",
+    "name": "Grande Maça T7",
+    "category": "Maças",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_MACE",
+    "name": "Grande Maça T8",
+    "category": "Maças",
+    "tier": "T8"
+  },
+  { "id": "T4_DAGGER", "name": "Adaga T4", "category": "Adagas", "tier": "T4" },
+  { "id": "T5_DAGGER", "name": "Adaga T5", "category": "Adagas", "tier": "T5" },
+  { "id": "T6_DAGGER", "name": "Adaga T6", "category": "Adagas", "tier": "T6" },
+  { "id": "T7_DAGGER", "name": "Adaga T7", "category": "Adagas", "tier": "T7" },
+  { "id": "T8_DAGGER", "name": "Adaga T8", "category": "Adagas", "tier": "T8" },
+  {
+    "id": "T4_2H_DAGGERPAIR",
+    "name": "Par de Adagas T4",
+    "category": "Adagas",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_DAGGERPAIR",
+    "name": "Par de Adagas T5",
+    "category": "Adagas",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_DAGGERPAIR",
+    "name": "Par de Adagas T6",
+    "category": "Adagas",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_DAGGERPAIR",
+    "name": "Par de Adagas T7",
+    "category": "Adagas",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_DAGGERPAIR",
+    "name": "Par de Adagas T8",
+    "category": "Adagas",
+    "tier": "T8"
+  },
+  { "id": "T4_SPEAR", "name": "Lança T4", "category": "Lanças", "tier": "T4" },
+  { "id": "T5_SPEAR", "name": "Lança T5", "category": "Lanças", "tier": "T5" },
+  { "id": "T6_SPEAR", "name": "Lança T6", "category": "Lanças", "tier": "T6" },
+  { "id": "T7_SPEAR", "name": "Lança T7", "category": "Lanças", "tier": "T7" },
+  { "id": "T8_SPEAR", "name": "Lança T8", "category": "Lanças", "tier": "T8" },
+  {
+    "id": "T4_2H_PIKE",
+    "name": "Pique T4",
+    "category": "Lanças",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_PIKE",
+    "name": "Pique T5",
+    "category": "Lanças",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_PIKE",
+    "name": "Pique T6",
+    "category": "Lanças",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_PIKE",
+    "name": "Pique T7",
+    "category": "Lanças",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_PIKE",
+    "name": "Pique T8",
+    "category": "Lanças",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_QUARTERSTAFF",
+    "name": "Bastão T4",
+    "category": "Bastões",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_QUARTERSTAFF",
+    "name": "Bastão T5",
+    "category": "Bastões",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_QUARTERSTAFF",
+    "name": "Bastão T6",
+    "category": "Bastões",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_QUARTERSTAFF",
+    "name": "Bastão T7",
+    "category": "Bastões",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_QUARTERSTAFF",
+    "name": "Bastão T8",
+    "category": "Bastões",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_2H_IRONCLADEDSTAFF",
+    "name": "Bastão Reforçado T4",
+    "category": "Bastões",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_2H_IRONCLADEDSTAFF",
+    "name": "Bastão Reforçado T5",
+    "category": "Bastões",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_2H_IRONCLADEDSTAFF",
+    "name": "Bastão Reforçado T6",
+    "category": "Bastões",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_2H_IRONCLADEDSTAFF",
+    "name": "Bastão Reforçado T7",
+    "category": "Bastões",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_2H_IRONCLADEDSTAFF",
+    "name": "Bastão Reforçado T8",
+    "category": "Bastões",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_ARMOR_PLATE_SET1",
+    "name": "Armadura de Placas T4",
+    "category": "Armadura de Placas",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_ARMOR_PLATE_SET1",
+    "name": "Armadura de Placas T5",
+    "category": "Armadura de Placas",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_ARMOR_PLATE_SET1",
+    "name": "Armadura de Placas T6",
+    "category": "Armadura de Placas",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_ARMOR_PLATE_SET1",
+    "name": "Armadura de Placas T7",
+    "category": "Armadura de Placas",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_ARMOR_PLATE_SET1",
+    "name": "Armadura de Placas T8",
+    "category": "Armadura de Placas",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_HEAD_PLATE_SET1",
+    "name": "Capacete de Placas T4",
+    "category": "Capacetes de Placas",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_HEAD_PLATE_SET1",
+    "name": "Capacete de Placas T5",
+    "category": "Capacetes de Placas",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_HEAD_PLATE_SET1",
+    "name": "Capacete de Placas T6",
+    "category": "Capacetes de Placas",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_HEAD_PLATE_SET1",
+    "name": "Capacete de Placas T7",
+    "category": "Capacetes de Placas",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_HEAD_PLATE_SET1",
+    "name": "Capacete de Placas T8",
+    "category": "Capacetes de Placas",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_SHOES_PLATE_SET1",
+    "name": "Botas de Placas T4",
+    "category": "Botas de Placas",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_SHOES_PLATE_SET1",
+    "name": "Botas de Placas T5",
+    "category": "Botas de Placas",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_SHOES_PLATE_SET1",
+    "name": "Botas de Placas T6",
+    "category": "Botas de Placas",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_SHOES_PLATE_SET1",
+    "name": "Botas de Placas T7",
+    "category": "Botas de Placas",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_SHOES_PLATE_SET1",
+    "name": "Botas de Placas T8",
+    "category": "Botas de Placas",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_ARMOR_LEATHER_SET1",
+    "name": "Armadura de Couro T4",
+    "category": "Armadura de Couro",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_ARMOR_LEATHER_SET1",
+    "name": "Armadura de Couro T5",
+    "category": "Armadura de Couro",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_ARMOR_LEATHER_SET1",
+    "name": "Armadura de Couro T6",
+    "category": "Armadura de Couro",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_ARMOR_LEATHER_SET1",
+    "name": "Armadura de Couro T7",
+    "category": "Armadura de Couro",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_ARMOR_LEATHER_SET1",
+    "name": "Armadura de Couro T8",
+    "category": "Armadura de Couro",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_HEAD_LEATHER_SET1",
+    "name": "Capacete de Couro T4",
+    "category": "Capacetes de Couro",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_HEAD_LEATHER_SET1",
+    "name": "Capacete de Couro T5",
+    "category": "Capacetes de Couro",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_HEAD_LEATHER_SET1",
+    "name": "Capacete de Couro T6",
+    "category": "Capacetes de Couro",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_HEAD_LEATHER_SET1",
+    "name": "Capacete de Couro T7",
+    "category": "Capacetes de Couro",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_HEAD_LEATHER_SET1",
+    "name": "Capacete de Couro T8",
+    "category": "Capacetes de Couro",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_SHOES_LEATHER_SET1",
+    "name": "Botas de Couro T4",
+    "category": "Botas de Couro",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_SHOES_LEATHER_SET1",
+    "name": "Botas de Couro T5",
+    "category": "Botas de Couro",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_SHOES_LEATHER_SET1",
+    "name": "Botas de Couro T6",
+    "category": "Botas de Couro",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_SHOES_LEATHER_SET1",
+    "name": "Botas de Couro T7",
+    "category": "Botas de Couro",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_SHOES_LEATHER_SET1",
+    "name": "Botas de Couro T8",
+    "category": "Botas de Couro",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_ARMOR_CLOTH_SET1",
+    "name": "Robe de Pano T4",
+    "category": "Armadura de Pano",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_ARMOR_CLOTH_SET1",
+    "name": "Robe de Pano T5",
+    "category": "Armadura de Pano",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_ARMOR_CLOTH_SET1",
+    "name": "Robe de Pano T6",
+    "category": "Armadura de Pano",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_ARMOR_CLOTH_SET1",
+    "name": "Robe de Pano T7",
+    "category": "Armadura de Pano",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_ARMOR_CLOTH_SET1",
+    "name": "Robe de Pano T8",
+    "category": "Armadura de Pano",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_HEAD_CLOTH_SET1",
+    "name": "Capuz de Pano T4",
+    "category": "Capuzes de Pano",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_HEAD_CLOTH_SET1",
+    "name": "Capuz de Pano T5",
+    "category": "Capuzes de Pano",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_HEAD_CLOTH_SET1",
+    "name": "Capuz de Pano T6",
+    "category": "Capuzes de Pano",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_HEAD_CLOTH_SET1",
+    "name": "Capuz de Pano T7",
+    "category": "Capuzes de Pano",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_HEAD_CLOTH_SET1",
+    "name": "Capuz de Pano T8",
+    "category": "Capuzes de Pano",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_SHOES_CLOTH_SET1",
+    "name": "Sandálias de Pano T4",
+    "category": "Sandálias de Pano",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_SHOES_CLOTH_SET1",
+    "name": "Sandálias de Pano T5",
+    "category": "Sandálias de Pano",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_SHOES_CLOTH_SET1",
+    "name": "Sandálias de Pano T6",
+    "category": "Sandálias de Pano",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_SHOES_CLOTH_SET1",
+    "name": "Sandálias de Pano T7",
+    "category": "Sandálias de Pano",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_SHOES_CLOTH_SET1",
+    "name": "Sandálias de Pano T8",
+    "category": "Sandálias de Pano",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_ORE",
+    "name": "Minério de Ferro T4",
+    "category": "Recursos - Minério",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_ORE",
+    "name": "Minério de Titânio T5",
+    "category": "Recursos - Minério",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_ORE",
+    "name": "Minério de Rúnico T6",
+    "category": "Recursos - Minério",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_ORE",
+    "name": "Minério de Alma T7",
+    "category": "Recursos - Minério",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_ORE",
+    "name": "Minério de Meteorito T8",
+    "category": "Recursos - Minério",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_METALBAR",
+    "name": "Barra de Ferro T4",
+    "category": "Recursos - Metal",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_METALBAR",
+    "name": "Barra de Titânio T5",
+    "category": "Recursos - Metal",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_METALBAR",
+    "name": "Barra Rúnica T6",
+    "category": "Recursos - Metal",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_METALBAR",
+    "name": "Barra da Alma T7",
+    "category": "Recursos - Metal",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_METALBAR",
+    "name": "Barra de Meteorito T8",
+    "category": "Recursos - Metal",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_WOOD",
+    "name": "Tronco de Carvalho T4",
+    "category": "Recursos - Madeira",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_WOOD",
+    "name": "Tronco de Pinheiro T5",
+    "category": "Recursos - Madeira",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_WOOD",
+    "name": "Tronco de Cedro T6",
+    "category": "Recursos - Madeira",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_WOOD",
+    "name": "Tronco de Bloodoak T7",
+    "category": "Recursos - Madeira",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_WOOD",
+    "name": "Tronco de Ashenbark T8",
+    "category": "Recursos - Madeira",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_PLANKS",
+    "name": "Tábuas de Carvalho T4",
+    "category": "Recursos - Tábuas",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_PLANKS",
+    "name": "Tábuas de Pinheiro T5",
+    "category": "Recursos - Tábuas",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_PLANKS",
+    "name": "Tábuas de Cedro T6",
+    "category": "Recursos - Tábuas",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_PLANKS",
+    "name": "Tábuas de Bloodoak T7",
+    "category": "Recursos - Tábuas",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_PLANKS",
+    "name": "Tábuas de Ashenbark T8",
+    "category": "Recursos - Tábuas",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_HIDE",
+    "name": "Pele de Javali T4",
+    "category": "Recursos - Couro",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_HIDE",
+    "name": "Pele de Lobo T5",
+    "category": "Recursos - Couro",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_HIDE",
+    "name": "Pele de Urso T6",
+    "category": "Recursos - Couro",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_HIDE",
+    "name": "Pele de Dragão T7",
+    "category": "Recursos - Couro",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_HIDE",
+    "name": "Pele de Mamute T8",
+    "category": "Recursos - Couro",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_LEATHER",
+    "name": "Couro de Javali T4",
+    "category": "Recursos - Couro Refinado",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_LEATHER",
+    "name": "Couro de Lobo T5",
+    "category": "Recursos - Couro Refinado",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_LEATHER",
+    "name": "Couro de Urso T6",
+    "category": "Recursos - Couro Refinado",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_LEATHER",
+    "name": "Couro de Dragão T7",
+    "category": "Recursos - Couro Refinado",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_LEATHER",
+    "name": "Couro de Mamute T8",
+    "category": "Recursos - Couro Refinado",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_FIBER",
+    "name": "Algodão T4",
+    "category": "Recursos - Fibra",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_FIBER",
+    "name": "Linho T5",
+    "category": "Recursos - Fibra",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_FIBER",
+    "name": "Seda de Rato T6",
+    "category": "Recursos - Fibra",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_FIBER",
+    "name": "Fibra Demoníaca T7",
+    "category": "Recursos - Fibra",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_FIBER",
+    "name": "Fibra de Silkweed T8",
+    "category": "Recursos - Fibra",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_CLOTH",
+    "name": "Pano de Algodão T4",
+    "category": "Recursos - Pano",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_CLOTH",
+    "name": "Pano de Linho T5",
+    "category": "Recursos - Pano",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_CLOTH",
+    "name": "Pano de Seda T6",
+    "category": "Recursos - Pano",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_CLOTH",
+    "name": "Pano Demoníaco T7",
+    "category": "Recursos - Pano",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_CLOTH",
+    "name": "Pano de Silkweed T8",
+    "category": "Recursos - Pano",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_ROCK",
+    "name": "Calcário T4",
+    "category": "Recursos - Pedra",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_ROCK",
+    "name": "Arenito T5",
+    "category": "Recursos - Pedra",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_ROCK",
+    "name": "Travertino T6",
+    "category": "Recursos - Pedra",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_ROCK",
+    "name": "Granito T7",
+    "category": "Recursos - Pedra",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_ROCK",
+    "name": "Ardósia T8",
+    "category": "Recursos - Pedra",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_STONEBLOCK",
+    "name": "Bloco de Calcário T4",
+    "category": "Recursos - Bloco",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_STONEBLOCK",
+    "name": "Bloco de Arenito T5",
+    "category": "Recursos - Bloco",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_STONEBLOCK",
+    "name": "Bloco de Travertino T6",
+    "category": "Recursos - Bloco",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_STONEBLOCK",
+    "name": "Bloco de Granito T7",
+    "category": "Recursos - Bloco",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_STONEBLOCK",
+    "name": "Bloco de Ardósia T8",
+    "category": "Recursos - Bloco",
+    "tier": "T8"
+  },
+  { "id": "T4_BAG", "name": "Bolsa T4", "category": "Bolsas", "tier": "T4" },
+  { "id": "T5_BAG", "name": "Bolsa T5", "category": "Bolsas", "tier": "T5" },
+  { "id": "T6_BAG", "name": "Bolsa T6", "category": "Bolsas", "tier": "T6" },
+  { "id": "T7_BAG", "name": "Bolsa T7", "category": "Bolsas", "tier": "T7" },
+  { "id": "T8_BAG", "name": "Bolsa T8", "category": "Bolsas", "tier": "T8" },
+  { "id": "T4_CAPE", "name": "Capa T4", "category": "Capas", "tier": "T4" },
+  { "id": "T5_CAPE", "name": "Capa T5", "category": "Capas", "tier": "T5" },
+  { "id": "T6_CAPE", "name": "Capa T6", "category": "Capas", "tier": "T6" },
+  { "id": "T7_CAPE", "name": "Capa T7", "category": "Capas", "tier": "T7" },
+  { "id": "T8_CAPE", "name": "Capa T8", "category": "Capas", "tier": "T8" },
+  {
+    "id": "T4_MOUNT_HORSE",
+    "name": "Cavalo de Montaria T4",
+    "category": "Montarias",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_MOUNT_HORSE",
+    "name": "Cavalo de Montaria T5",
+    "category": "Montarias",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_MOUNT_HORSE",
+    "name": "Cavalo de Montaria T6",
+    "category": "Montarias",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_MOUNT_HORSE",
+    "name": "Cavalo de Montaria T7",
+    "category": "Montarias",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_MOUNT_HORSE",
+    "name": "Cavalo de Montaria T8",
+    "category": "Montarias",
+    "tier": "T8"
+  },
+  {
+    "id": "T5_MOUNT_ARMORED_HORSE",
+    "name": "Cavalo Blindado T5",
+    "category": "Montarias",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_MOUNT_ARMORED_HORSE",
+    "name": "Cavalo Blindado T6",
+    "category": "Montarias",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_MOUNT_ARMORED_HORSE",
+    "name": "Cavalo Blindado T7",
+    "category": "Montarias",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_MOUNT_ARMORED_HORSE",
+    "name": "Cavalo Blindado T8",
+    "category": "Montarias",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_MOUNT_OX",
+    "name": "Boi de Carga T4",
+    "category": "Montarias",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_MOUNT_OX",
+    "name": "Boi de Carga T5",
+    "category": "Montarias",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_MOUNT_OX",
+    "name": "Boi de Carga T6",
+    "category": "Montarias",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_MOUNT_OX",
+    "name": "Boi de Carga T7",
+    "category": "Montarias",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_MOUNT_OX",
+    "name": "Boi de Carga T8",
+    "category": "Montarias",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_POTION_HEAL",
+    "name": "Poção de Cura Menor T4",
+    "category": "Poções",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_POTION_HEAL",
+    "name": "Poção de Cura Média T5",
+    "category": "Poções",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_POTION_HEAL",
+    "name": "Poção de Cura Maior T6",
+    "category": "Poções",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_POTION_HEAL",
+    "name": "Poção de Cura Elevada T7",
+    "category": "Poções",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_POTION_HEAL",
+    "name": "Poção de Cura Suprema T8",
+    "category": "Poções",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_POTION_ENERGY",
+    "name": "Poção de Energia Menor T4",
+    "category": "Poções",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_POTION_ENERGY",
+    "name": "Poção de Energia Média T5",
+    "category": "Poções",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_POTION_ENERGY",
+    "name": "Poção de Energia Maior T6",
+    "category": "Poções",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_POTION_ENERGY",
+    "name": "Poção de Energia Elevada T7",
+    "category": "Poções",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_POTION_ENERGY",
+    "name": "Poção de Energia Suprema T8",
+    "category": "Poções",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_MEAL_OMELETTE",
+    "name": "Omelete T4",
+    "category": "Comida",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_MEAL_OMELETTE",
+    "name": "Omelete T5",
+    "category": "Comida",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_MEAL_OMELETTE",
+    "name": "Omelete T6",
+    "category": "Comida",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_MEAL_OMELETTE",
+    "name": "Omelete T7",
+    "category": "Comida",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_MEAL_OMELETTE",
+    "name": "Omelete T8",
+    "category": "Comida",
+    "tier": "T8"
+  },
+  {
+    "id": "T4_MEAL_STEW",
+    "name": "Ensopado T4",
+    "category": "Comida",
+    "tier": "T4"
+  },
+  {
+    "id": "T5_MEAL_STEW",
+    "name": "Ensopado T5",
+    "category": "Comida",
+    "tier": "T5"
+  },
+  {
+    "id": "T6_MEAL_STEW",
+    "name": "Ensopado T6",
+    "category": "Comida",
+    "tier": "T6"
+  },
+  {
+    "id": "T7_MEAL_STEW",
+    "name": "Ensopado T7",
+    "category": "Comida",
+    "tier": "T7"
+  },
+  {
+    "id": "T8_MEAL_STEW",
+    "name": "Ensopado T8",
+    "category": "Comida",
+    "tier": "T8"
+  }
+]

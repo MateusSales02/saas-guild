@@ -24,7 +24,10 @@ yarn-debug.log*
 pnpm-debug.log*
 *.log
 
+# Ignora data/ exceto os dados estáticos da API
 data/
+!apps/api/src/data/
+!apps/api/src/data/**
 
 # arquivos de build do TypeScript
 *.tsbuildinfo
