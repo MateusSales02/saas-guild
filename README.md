@@ -18,11 +18,13 @@ Oferecer uma solução centralizada que permita a líderes e membros de clãs or
 - 👥 **Gestão de Membros:** Cadastro, edição e controle de cargos (Líder, Oficial, Membro)
 - 📅 **Eventos:** Agendamento e confirmação de presença (RSVP)
 - 💰 **Controle Financeiro:** Registro de entradas/saídas e visualização de saldo
-- 🧠 **Gerenciamento de Builds:** Armazenamento e compartilhamento de builds de personagens
-- 📊 **Dashboard Dinâmico:** Visão geral com KPIs e gráficos
-- 📤 **Exportação de Dados:** Histórico financeiro, membros e eventos em CSV
+- 🧠 **Gerenciamento de Builds:** Armazenamento e compartilhamento de builds de personagens com 309+ itens do Albion Online
+- 📊 **Dashboard Dinâmico:** Visão geral com KPIs e gráficos em tempo real
+- 📤 **Exportação de Dados:** Histórico financeiro, membros e eventos em CSV e PDF
 - 🔐 **Autenticação Segura:** Sistema próprio com JWT
 - 📋 **Logs de Auditoria:** Rastreamento de ações críticas no sistema
+- 💹 **Integração com Market API:** Preços e valores em tempo real dos itens do Albion Online
+- 🎮 **Catálogo Completo de Itens:** Base de dados com todos os equipamentos, armas e recursos do jogo
 
 ---
 
@@ -179,21 +181,19 @@ saas-guild/
 - Compatível apenas com **Albion Online**
 - Sem app mobile nativo (interface web responsiva)
 - Permissões baseadas em 3 níveis hierárquicos (Líder, Oficial, Membro)
-- Exportação apenas em CSV (PDF em desenvolvimento)
-- Integrações externas em fase inicial
+- Integrações externas em fase inicial de expansão
 
 ---
 
 ## 📈 Próximos Passos
 
 ### Funcionalidades Planejadas
-- 📤 Exportação em PDF
 - 💬 Sistema de comunicação interna (chat/mensagens)
 - 🎁 Distribuição de recompensas
 - 🔄 Eventos recorrentes (diário, semanal, mensal)
 - 📊 Dashboard de auditoria com interface visual
 - 🌍 Internacionalização (i18n)
-- 🔗 Integração completa com APIs do Albion Online
+- 🔗 Expansão das integrações com APIs do Albion Online
 - 🔔 Notificações via Discord webhook
 
 ### Melhorias Técnicas
@@ -214,7 +214,14 @@ saas-guild/
 
 ## 🌐 Aplicação em Produção
 
-**URL:** http://54.161.67.120
+**URL:** http://guildmesh.duckdns.org
+
+### 🔑 Credenciais de Teste
+
+Para testar a aplicação, utilize as seguintes credenciais:
+
+- **Email:** teste@gmail.com
+- **Senha:** 123456
 
 > **Nota:** Servidor de demonstração para avaliação do TCC. Pode estar offline fora do período de apresentação.
 
