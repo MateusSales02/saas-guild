@@ -293,6 +293,19 @@ export class BuildsService {
     }
   }
 
+  async clearAllItems() {
+    console.log('🗑️ Clearing all items from database...');
+    const count = await this.itemRepo.count();
+    await this.itemRepo.clear();
+    console.log(`✅ Cleared ${count} items from database`);
+
+    return {
+      success: true,
+      message: `Cleared ${count} items from database. Restart server to auto-seed 309+ items.`,
+      itemsCleared: count,
+    };
+  }
+
   debugFileCheck() {
     const fs = require('node:fs');
     const path = require('node:path');

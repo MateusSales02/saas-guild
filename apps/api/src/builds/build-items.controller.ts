@@ -78,4 +78,10 @@ export class BuildItemsController {
     console.log('🐛 [BuildItemsController] GET /build-items/debug/file-check called');
     return this.buildsService.debugFileCheck();
   }
+
+  @Post('clear-all')
+  async clearAll() {
+    console.log('🗑️ [BuildItemsController] POST /build-items/clear-all called');
+    return this.buildsService.clearAllItems();
+  }
 }
