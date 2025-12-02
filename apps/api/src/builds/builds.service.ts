@@ -278,6 +278,34 @@ export class BuildsService {
     };
   }
 
+  debugFileCheck() {
+    const fs = require('node:fs');
+    const path = require('node:path');
+
+    const possiblePaths = [
+      path.join(__dirname, '../data/albion-items.json'),
+      path.join(__dirname, '../../data/albion-items.json'),
+      path.join(__dirname, 'data/albion-items.json'),
+      path.join(process.cwd(), 'dist/data/albion-items.json'),
+      path.join(process.cwd(), 'src/data/albion-items.json'),
+    ];
+
+    const results = possiblePaths.map((filePath) => ({
+      path: filePath,
+      exists: fs.existsSync(filePath),
+      size: fs.existsSync(filePath)
+        ? fs.statSync(filePath).size + ' bytes'
+        : 'N/A',
+    }));
+
+    return {
+      __dirname,
+      'process.cwd()': process.cwd(),
+      paths: results,
+      foundPath: results.find((r) => r.exists)?.path || 'NOT FOUND',
+    };
+  }
+
   async seedDefaults() {
     // Check and seed items from Albion separately
     const hasItems = await this.itemRepo.count();

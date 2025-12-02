@@ -72,4 +72,10 @@ export class BuildItemsController {
     console.log('🔄 [BuildItemsController] POST /build-items/reseed called');
     return this.buildsService.reseedItems();
   }
+
+  @Get('debug/file-check')
+  async debugFileCheck() {
+    console.log('🐛 [BuildItemsController] GET /build-items/debug/file-check called');
+    return this.buildsService.debugFileCheck();
+  }
 }
