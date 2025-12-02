@@ -345,11 +345,34 @@ export class BuildsService {
         : 'N/A',
     }));
 
+    // Tentar ler o arquivo e parse JSON
+    const foundPath = results.find((r) => r.exists)?.path;
+    let parseResult = { success: false, itemCount: 0, error: null };
+
+    if (foundPath) {
+      try {
+        const fileContent = fs.readFileSync(foundPath, 'utf8');
+        const items = JSON.parse(fileContent);
+        parseResult = {
+          success: true,
+          itemCount: items.length,
+          error: null,
+        };
+      } catch (error) {
+        parseResult = {
+          success: false,
+          itemCount: 0,
+          error: error.message,
+        };
+      }
+    }
+
     return {
       __dirname,
       'process.cwd()': process.cwd(),
       paths: results,
-      foundPath: results.find((r) => r.exists)?.path || 'NOT FOUND',
+      foundPath: foundPath || 'NOT FOUND',
+      parseTest: parseResult,
     };
   }
 
