@@ -322,40 +322,58 @@ export class BuildsService {
   }
 
   async seedDefaults() {
-    // Check and seed items from Albion separately
-    const itemCount = await this.itemRepo.count();
-    console.log(`📊 Current item count in database: ${itemCount}`);
+    try {
+      // Check and seed items from Albion separately
+      const itemCount = await this.itemRepo.count();
+      console.log(`📊 Current item count in database: ${itemCount}`);
 
-    // If we have fewer than 100 items, reseed with all Albion items
-    if (itemCount < 100) {
-      console.log('📦 Few items found in database (< 100), reseeding Albion items...');
+      // If we have fewer than 100 items, reseed with all Albion items
+      if (itemCount < 100) {
+        console.log(
+          '📦 Few items found in database (< 100), reseeding Albion items...',
+        );
 
-      // Clear existing items first
-      if (itemCount > 0) {
-        console.log(`🗑️ Clearing ${itemCount} existing items...`);
-        await this.itemRepo.clear();
+        // Clear existing items first
+        if (itemCount > 0) {
+          console.log(`🗑️ Clearing ${itemCount} existing items...`);
+          await this.itemRepo.clear();
+        }
+
+        const albionItems = loadAlbionItems();
+
+        if (!albionItems || albionItems.length === 0) {
+          console.error(
+            '⚠️ Failed to load Albion items, skipping seed. Server will continue starting.',
+          );
+        } else {
+          const itemsToCreate = albionItems.map((item: AlbionItem) =>
+            this.itemRepo.create({
+              name: item.name,
+              slot: item.category,
+              albion_id: item.id,
+              item_id: item.id,
+            }),
+          );
+
+          console.log(
+            `📦 Seeding ${itemsToCreate.length} items from albion-items.json...`,
+          );
+          await this.itemRepo.save(itemsToCreate);
+          console.log(
+            `✅ Successfully seeded ${itemsToCreate.length} items from albion-items.json`,
+          );
+        }
+      } else {
+        console.log(`✅ Items already in database: ${itemCount} items`);
       }
-
-      const albionItems = loadAlbionItems();
-
-      const itemsToCreate = albionItems.map((item: AlbionItem) =>
-        this.itemRepo.create({
-          name: item.name,
-          slot: item.category,
-          albion_id: item.id,
-          item_id: item.id,
-        }),
+    } catch (error) {
+      console.error(
+        '❌ Error in seedDefaults (Albion items):',
+        error,
       );
-
-      console.log(
-        `📦 Seeding ${itemsToCreate.length} items from albion-items.json...`,
+      console.error(
+        '⚠️ Server will continue starting despite seed error.',
       );
-      await this.itemRepo.save(itemsToCreate);
-      console.log(
-        `✅ Successfully seeded ${itemsToCreate.length} items from albion-items.json`,
-      );
-    } else {
-      console.log(`✅ Items already in database: ${itemCount} items`);
     }
 
     // Check and seed classes/specs/builds
