@@ -29,9 +29,9 @@ RUN npm ci --omit=dev
 # Copia código compilado do stage anterior
 COPY --from=builder /app/dist ./dist
 
-# Cria diretório de dados e copia o arquivo JSON
+# Cria diretório de dados e copia o arquivo JSON diretamente do source
 RUN mkdir -p ./dist/data
-COPY --from=builder /app/src/data/albion-items.json ./dist/data/
+COPY src/data/albion-items.json ./dist/data/
 
 # Copia package.json para produção (não precisa copiar .env pois usamos variáveis de ambiente)
 
