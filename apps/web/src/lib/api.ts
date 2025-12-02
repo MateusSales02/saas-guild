@@ -163,6 +163,7 @@ export const BuildItemsApi = {
   async list() {
     // Try direct axios call bypassing the global api instance to avoid any caching
     const timestamp = Date.now()
+    console.log('🚀 [BuildItemsApi] NEW IMPLEMENTATION - Using direct axios with unique URL')
     console.log('🌐 [BuildItemsApi] Fetching /build-items with timestamp:', timestamp)
 
     const response = await axios.get(`${API_BASE_URL}/build-items?_nocache=${timestamp}`, {
