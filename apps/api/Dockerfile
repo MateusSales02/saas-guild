@@ -29,6 +29,9 @@ RUN npm ci --omit=dev
 # Copia código compilado do stage anterior
 COPY --from=builder /app/dist ./dist
 
+# Copia diretório de dados (albion-items.json)
+COPY --from=builder /app/src/data ./dist/data
+
 # Copia arquivo de configuração (se existir)
 COPY --from=builder /app/.env* ./
 
