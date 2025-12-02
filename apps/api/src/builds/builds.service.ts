@@ -17,12 +17,43 @@ import { CreateBuildSpecDto } from './dto/create-build-spec.dto';
 import { UpdateBuildSpecDto } from './dto/update-build-spec.dto';
 import { CreateBuildItemDto } from './dto/create-build-item.dto';
 import { UpdateBuildItemDto } from './dto/update-build-item.dto';
-import * as albionItemsJson from '../data/albion-items.json';
+import * as fs from 'fs';
+import * as path from 'path';
 
 interface AlbionItem {
   id: string;
   name: string;
   category: string;
+}
+
+// Função helper para carregar albion-items.json
+function loadAlbionItems(): AlbionItem[] {
+  try {
+    // Em produção, o arquivo está em dist/data/albion-items.json
+    // Em desenvolvimento, está em src/data/albion-items.json
+    const possiblePaths = [
+      path.join(__dirname, '../data/albion-items.json'), // Produção (dist/)
+      path.join(process.cwd(), 'dist/data/albion-items.json'), // Produção alternativa
+      path.join(process.cwd(), 'src/data/albion-items.json'), // Desenvolvimento
+    ];
+
+    for (const filePath of possiblePaths) {
+      if (fs.existsSync(filePath)) {
+        console.log(`✅ Found albion-items.json at: ${filePath}`);
+        const fileContent = fs.readFileSync(filePath, 'utf8');
+        return JSON.parse(fileContent) as AlbionItem[];
+      }
+    }
+
+    console.error(
+      '❌ albion-items.json not found in any of the expected paths:',
+    );
+    possiblePaths.forEach((p) => console.error(`   - ${p}`));
+    return [];
+  } catch (error) {
+    console.error('❌ Error loading albion-items.json:', error);
+    return [];
+  }
 }
 
 @Injectable()
@@ -114,7 +145,7 @@ export class BuildsService {
     if (dto.description !== undefined) build.description = dto.description;
     if (dto.role !== undefined) build.role = dto.role;
     if (dto.is_public !== undefined) build.is_public = dto.is_public;
-    if (dto.price !== undefined) build.price = dto.price as number;
+    if (dto.price !== undefined) build.price = dto.price;
 
     await this.applyRelations(build, dto);
     return this.buildRepo.save(build);
@@ -211,12 +242,7 @@ export class BuildsService {
     await this.itemRepo.clear();
 
     console.log('📦 Loading Albion items from JSON...');
-    const loadedData = albionItemsJson as
-      | { default?: AlbionItem[] }
-      | AlbionItem[];
-    const albionItems: AlbionItem[] = Array.isArray(loadedData)
-      ? loadedData
-      : loadedData.default || [];
+    const albionItems = loadAlbionItems();
 
     const itemsToCreate = albionItems.map((item: AlbionItem) =>
       this.itemRepo.create({
@@ -245,12 +271,7 @@ export class BuildsService {
     const hasItems = await this.itemRepo.count();
     if (hasItems === 0) {
       console.log('📦 No items found in database, seeding Albion items...');
-      const loadedData = albionItemsJson as
-        | { default?: AlbionItem[] }
-        | AlbionItem[];
-      const albionItems: AlbionItem[] = Array.isArray(loadedData)
-        ? loadedData
-        : loadedData.default || [];
+      const albionItems = loadAlbionItems();
 
       const itemsToCreate = albionItems.map((item: AlbionItem) =>
         this.itemRepo.create({
