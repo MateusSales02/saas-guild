@@ -10,12 +10,14 @@ import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { User } from '../users/user.entity';
 import { GuildsService } from '../guilds/guilds.service';
+import { PasswordResetToken } from './entities/password-reset-token.entity';
 
 jest.mock('bcrypt');
 
 describe('AuthService', () => {
   let service: AuthService;
   let mockUsersRepo: any;
+  let mockResetTokenRepo: any;
   let mockJwtService: any;
   let mockGuildsService: any;
 
@@ -41,6 +43,14 @@ describe('AuthService', () => {
       findOne: jest.fn(),
       create: jest.fn(),
       save: jest.fn(),
+      update: jest.fn(),
+    };
+
+    mockResetTokenRepo = {
+      findOne: jest.fn(),
+      save: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
     };
 
     mockJwtService = {
@@ -58,6 +68,10 @@ describe('AuthService', () => {
         {
           provide: getRepositoryToken(User),
           useValue: mockUsersRepo,
+        },
+        {
+          provide: getRepositoryToken(PasswordResetToken),
+          useValue: mockResetTokenRepo,
         },
         {
           provide: JwtService,
