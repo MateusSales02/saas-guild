@@ -8,10 +8,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { FinanceService } from './finance.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { AuthGuard } from '@nestjs/passport';
 
+@ApiTags('finance')
 @UseGuards(AuthGuard('jwt'))
 @Controller('finance-transactions')
 export class FinanceController {

@@ -9,6 +9,7 @@ import {
   UseGuards,
   ParseIntPipe,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
 import { GuildsService } from './guilds.service';
@@ -20,6 +21,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import type { JwtPayload } from '../auth/jwt.strategy';
 
+@ApiTags('guilds')
 @Controller('guilds')
 @UseGuards(AuthGuard('jwt'))
 export class GuildsController {

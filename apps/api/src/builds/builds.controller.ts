@@ -9,11 +9,13 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { BuildsService } from './builds.service';
 import { CreateBuildDto } from './dto/create-build.dto';
 import { UpdateBuildDto } from './dto/update-build.dto';
 import { FilterBuildsDto } from './dto/filter-builds.dto';
 
+@ApiTags('builds')
 @Controller('builds')
 export class BuildsController {
   constructor(private readonly buildsService: BuildsService) {}

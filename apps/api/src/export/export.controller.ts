@@ -6,12 +6,14 @@ import {
   UseGuards,
   ParseIntPipe,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import type { Response } from 'express';
 import { ExportService } from './export.service';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 
+@ApiTags('export')
 @Controller('export')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Roles('leader', 'officer')

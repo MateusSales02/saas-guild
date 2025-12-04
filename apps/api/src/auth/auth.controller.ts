@@ -1,6 +1,12 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Throttle } from '@nestjs/throttler';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -12,17 +18,24 @@ import { Roles } from './decorators/roles.decorator';
 import { RolesGuard } from './guards/roles.guard';
 import type { JwtPayload } from './jwt.strategy';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
-  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 tentativas por minuto
+  @ApiOperation({ summary: 'Registrar novo usuário' })
+  @ApiResponse({ status: 201, description: 'Usuário registrado com sucesso' })
+  @ApiResponse({ status: 400, description: 'Dados inválidos' })
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('register')
   register(@Body() dto: RegisterDto) {
     return this.auth.register(dto);
   }
 
-  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 tentativas por minuto
+  @ApiOperation({ summary: 'Fazer login' })
+  @ApiResponse({ status: 200, description: 'Login realizado com sucesso' })
+  @ApiResponse({ status: 401, description: 'Credenciais inválidas' })
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('login')
   login(@Body() dto: LoginDto) {
     return this.auth.login(dto);
@@ -50,30 +63,32 @@ export class AuthController {
     return this.auth.createPlayerSimple(dto.nickname);
   }
 
-  /**
-   * Retorna os dados do usuário autenticado.
-   * Usado para verificar se o token é válido.
-   */
+  @ApiOperation({ summary: 'Obter dados do usuário autenticado' })
+  @ApiBearerAuth('JWT-auth')
+  @ApiResponse({ status: 200, description: 'Dados do usuário' })
+  @ApiResponse({ status: 401, description: 'Não autorizado' })
   @UseGuards(AuthGuard('jwt'))
   @Get('me')
   me(@CurrentUser() user: JwtPayload) {
     return this.auth.findById(user.sub);
   }
 
-  /**
-   * Solicita recuperação de senha.
-   * Gera um token e retorna (em produção, enviaria por email).
-   */
-  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 tentativas por minuto
+  @ApiOperation({ summary: 'Solicitar recuperação de senha' })
+  @ApiResponse({
+    status: 200,
+    description: 'Token de recuperação gerado (enviado por email)',
+  })
+  @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post('forgot-password')
   forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.auth.forgotPassword(dto.email);
   }
 
-  /**
-   * Reseta a senha usando o token recebido por email.
-   */
-  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 tentativas por minuto
+  @ApiOperation({ summary: 'Resetar senha com token' })
+  @ApiResponse({ status: 200, description: 'Senha resetada com sucesso' })
+  @ApiResponse({ status: 400, description: 'Token inválido ou expirado' })
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('reset-password')
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.auth.resetPassword(dto.token, dto.newPassword);
