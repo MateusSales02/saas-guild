@@ -45,6 +45,14 @@ services:
       PORT: 3000
       NODE_ENV: production
       JWT_SECRET: ${JWT_SECRET:-sua-chave-secreta-mude-em-producao}
+      # Email Configuration
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_SECURE: false
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: "Guild Mesh <noreply@guildmesh.com>"
+      FRONTEND_URL: http://guildmesh.duckdns.org
     depends_on:
       - db
       - redis
