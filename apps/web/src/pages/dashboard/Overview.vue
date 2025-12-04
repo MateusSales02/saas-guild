@@ -173,36 +173,57 @@
           </select>
         </div>
 
-        <svg viewBox="0 0 400 160" class="w-full h-40">
-          <line
-            v-for="i in 5"
-            :key="i"
-            x1="0"
-            :y1="i * 40"
-            x2="400"
-            :y2="i * 40"
-            stroke="#1e293b"
-            stroke-width="1"
-            stroke-dasharray="4 4"
-          />
-          <path :d="eventAreaPath" fill="url(#eventGradient)" opacity="0.3" />
-          <path :d="eventLinePath" fill="none" stroke="#10b981" stroke-width="3" />
-          <circle
-            v-for="(p, i) in eventPoints"
-            :key="i"
-            :cx="p.x"
-            :cy="p.y"
-            r="5"
-            fill="#10b981"
-            class="cursor-pointer hover:r-7 transition-all"
-          />
-          <defs>
-            <linearGradient id="eventGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#10b981" stop-opacity="0.6" />
-              <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
-            </linearGradient>
-          </defs>
-        </svg>
+        <div class="relative">
+          <svg viewBox="0 0 400 160" class="w-full h-40">
+            <line
+              v-for="i in 5"
+              :key="i"
+              x1="0"
+              :y1="i * 40"
+              x2="400"
+              :y2="i * 40"
+              stroke="#1e293b"
+              stroke-width="1"
+              stroke-dasharray="4 4"
+            />
+            <path :d="eventAreaPath" fill="url(#eventGradient)" opacity="0.3" />
+            <path :d="eventLinePath" fill="none" stroke="#10b981" stroke-width="3" />
+            <g v-for="(p, i) in eventPoints" :key="i">
+              <circle
+                :cx="p.x"
+                :cy="p.y"
+                r="12"
+                fill="transparent"
+                class="cursor-pointer"
+                @mouseenter="showEventTooltip(p, i)"
+                @mouseleave="hideEventTooltip"
+              />
+              <circle
+                :cx="p.x"
+                :cy="p.y"
+                r="6"
+                :fill="eventTooltip && eventTooltip.x === p.x ? '#34d399' : '#10b981'"
+                class="pointer-events-none transition-all"
+              />
+            </g>
+            <defs>
+              <linearGradient id="eventGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#10b981" stop-opacity="0.6" />
+                <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+          </svg>
+
+          <!-- Tooltip -->
+          <div
+            v-if="eventTooltip"
+            class="absolute z-10 px-3 py-2 bg-slate-800 border border-emerald-500/50 rounded-lg shadow-xl pointer-events-none"
+            :style="{ left: eventTooltip.x + 'px', top: eventTooltip.y + 'px', transform: 'translate(-50%, -100%) translateY(-10px)' }"
+          >
+            <p class="text-xs text-slate-400 mb-1">{{ eventTooltip.date }}</p>
+            <p class="text-sm font-bold text-emerald-400">{{ eventTooltip.value }}</p>
+          </div>
+        </div>
       </div>
 
       <!-- Gráfico de Tesouraria -->
@@ -492,6 +513,8 @@ const recentBuilds = ref<any[]>([])
 const showCustomizeModal = ref(false)
 const treasuryTooltip = ref<{ date: string; value: string; x: number; y: number } | null>(null)
 const treasuryHistoryData = ref<Array<{ date: string; balance: number }>>([])
+const eventTooltip = ref<{ date: string; value: string; x: number; y: number } | null>(null)
+const eventHistoryData = ref<Array<{ date: string; count: number }>>([])
 
 const widgets = ref({
   members: true,
@@ -722,6 +745,31 @@ function hideTreasuryTooltip() {
   treasuryTooltip.value = null
 }
 
+function showEventTooltip(point: { x: number; y: number }, index: number) {
+  if (index < 0 || index >= eventHistoryData.value.length) return
+
+  const data = eventHistoryData.value[index]
+  const date = new Date(data.date)
+  const dateStr = date.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
+
+  const eventText = data.count === 1 ? 'evento' : 'eventos'
+
+  eventTooltip.value = {
+    date: dateStr,
+    value: `${data.count} ${eventText}`,
+    x: point.x,
+    y: point.y
+  }
+}
+
+function hideEventTooltip() {
+  eventTooltip.value = null
+}
+
 function buildDailySeries(list: EventItem[], days: number) {
   const now = new Date()
   const start = new Date(now)
@@ -743,6 +791,12 @@ function buildDailySeries(list: EventItem[], days: number) {
     if (key in buckets) buckets[key]++
   }
 
-  return Object.values(buckets)
+  const result: Array<{ date: string; count: number }> = []
+  for (const [date, count] of Object.entries(buckets)) {
+    result.push({ date, count })
+  }
+
+  eventHistoryData.value = result
+  return result.map(d => d.count)
 }
 </script>
