@@ -91,6 +91,11 @@ const router = createRouter({
           name: 'items-test',
           component: () => import('@/pages/dashboard/Items-test.vue'),
         },
+        {
+          path: 'audit-logs',
+          name: 'audit-logs',
+          component: () => import('@/pages/dashboard/AuditLogs.vue'),
+        },
       ],
     },
 
