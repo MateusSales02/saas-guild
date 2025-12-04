@@ -10,11 +10,12 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuditService, AuditLogFilter } from './audit.service';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { AuditAccessGuard } from './guards/audit-access.guard';
 import type { AuditAction } from './audit-log.entity';
 
 @ApiTags('audit')
 @Controller('audit')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt'), AuditAccessGuard)
 export class AuditController {
   constructor(private readonly auditService: AuditService) {}
 
