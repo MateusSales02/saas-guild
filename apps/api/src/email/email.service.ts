@@ -12,6 +12,17 @@ export class EmailService {
   constructor(private readonly configService: ConfigService) {
     const smtpHost = this.configService.get<string>('SMTP_HOST');
     const smtpUser = this.configService.get<string>('SMTP_USER');
+    const smtpPassword = this.configService.get<string>('SMTP_PASSWORD');
+    const smtpPort = this.configService.get<number>('SMTP_PORT', 587);
+
+    // Log de configuração (sem expor senha completa)
+    this.logger.log('=== Email Service Configuration ===');
+    this.logger.log(`SMTP_HOST: ${smtpHost || 'NOT SET'}`);
+    this.logger.log(`SMTP_USER: ${smtpUser || 'NOT SET'}`);
+    this.logger.log(
+      `SMTP_PASSWORD: ${smtpPassword ? '***' + smtpPassword.slice(-4) : 'NOT SET'}`,
+    );
+    this.logger.log(`SMTP_PORT: ${smtpPort}`);
 
     // Se SMTP não estiver configurado, desabilita envio
     this.enabled = !!(smtpHost && smtpUser);
@@ -19,18 +30,20 @@ export class EmailService {
     if (this.enabled) {
       this.transporter = nodemailer.createTransport({
         host: smtpHost,
-        port: this.configService.get<number>('SMTP_PORT', 587),
+        port: smtpPort,
         secure: this.configService.get<boolean>('SMTP_SECURE', false),
         auth: {
           user: smtpUser,
-          pass: this.configService.get<string>('SMTP_PASSWORD'),
+          pass: smtpPassword,
         },
       });
 
-      this.logger.log(`Email service enabled with SMTP: ${smtpHost}`);
+      this.logger.log(
+        `✅ Email service enabled with SMTP: ${smtpHost}:${smtpPort}`,
+      );
     } else {
       this.logger.warn(
-        'Email service disabled - SMTP credentials not configured',
+        '⚠️ Email service disabled - SMTP credentials not configured',
       );
     }
   }
@@ -67,8 +80,20 @@ export class EmailService {
       this.logger.log(`Password reset email sent to ${to}`);
       return { sent: true };
     } catch (error) {
-      this.logger.error(`Failed to send email to ${to}:`, error);
-      this.logger.error('Error details:', error.message || error);
+      // Log detalhado para diagnosticar problemas de SMTP
+      this.logger.error(`Failed to send email to ${to}`);
+      this.logger.error('Error name:', error.name);
+      this.logger.error('Error message:', error.message);
+      this.logger.error('Error code:', error.code);
+      this.logger.error('Error command:', error.command);
+
+      if (error.response) {
+        this.logger.error('SMTP Response:', error.response);
+      }
+
+      if (error.responseCode) {
+        this.logger.error('SMTP Response Code:', error.responseCode);
+      }
 
       // Em caso de falha no envio, retorna token (fallback para modo dev)
       this.logger.warn(
