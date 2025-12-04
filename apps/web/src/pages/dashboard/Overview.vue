@@ -94,11 +94,11 @@
       >
         <div class="absolute -inset-0.5 bg-gradient-to-r from-[#C6A95D]/20 to-amber-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
         <div class="relative flex items-center justify-between">
-          <div>
+          <div class="flex-1 pr-2">
             <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Tesouraria
             </p>
-            <p class="mt-2 text-3xl font-black text-[#C6A95D]">{{ toGold(kpis.treasury) }}</p>
+            <p class="mt-2 text-2xl font-black text-[#C6A95D] break-words">{{ toGold(kpis.treasury) }}</p>
           </div>
           <div
             class="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#C6A95D] to-amber-500 shadow-lg shadow-[#C6A95D]/30"

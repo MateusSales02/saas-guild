@@ -15,7 +15,6 @@ export class EmailService {
     const smtpPassword = this.configService.get<string>('SMTP_PASSWORD');
     const smtpPort = this.configService.get<number>('SMTP_PORT', 587);
 
-    // Log de configuração (sem expor senha completa)
     this.logger.log('=== Email Service Configuration ===');
     this.logger.log(`SMTP_HOST: ${smtpHost || 'NOT SET'}`);
     this.logger.log(`SMTP_USER: ${smtpUser || 'NOT SET'}`);
@@ -24,7 +23,6 @@ export class EmailService {
     );
     this.logger.log(`SMTP_PORT: ${smtpPort}`);
 
-    // Se SMTP não estiver configurado, desabilita envio
     this.enabled = !!(smtpHost && smtpUser);
 
     if (this.enabled) {
@@ -80,7 +78,6 @@ export class EmailService {
       this.logger.log(`Password reset email sent to ${to}`);
       return { sent: true };
     } catch (error) {
-      // Log detalhado para diagnosticar problemas de SMTP
       this.logger.error(`Failed to send email to ${to}`);
       this.logger.error('Error name:', error.name);
       this.logger.error('Error message:', error.message);
@@ -95,7 +92,6 @@ export class EmailService {
         this.logger.error('SMTP Response Code:', error.responseCode);
       }
 
-      // Em caso de falha no envio, retorna token (fallback para modo dev)
       this.logger.warn(
         `[FALLBACK] Returning token due to email send failure. Token: ${token.substring(0, 20)}...`,
       );

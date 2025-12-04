@@ -4,7 +4,6 @@ import { createRouter, createMemoryHistory } from 'vue-router'
 import RecoverPassword from './RecoverPassword.vue'
 import * as apiLib from '@/lib/api'
 
-// Mock the API
 vi.mock('@/lib/api', () => ({
   api: {
     post: vi.fn(),
@@ -137,7 +136,6 @@ describe('RecoverPassword.vue', () => {
     expect(submitButton.text()).toContain('Enviando')
     expect(submitButton.attributes('disabled')).toBeDefined()
 
-    // Resolve the promise to clean up
     resolveRecover({})
     await wrapper.vm.$nextTick()
   })

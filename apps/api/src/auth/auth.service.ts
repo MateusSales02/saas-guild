@@ -30,10 +30,6 @@ export class AuthService {
     private readonly emailService: EmailService,
   ) {}
 
-  /**
-   * Registro público (tela "Criar conta").
-   * Sempre cria um LÍDER da guilda.
-   */
   async register(dto: RegisterDto) {
     const exists = await this.usersRepo.findOne({
       where: { email: dto.email },
@@ -54,7 +50,6 @@ export class AuthService {
 
     const saved = await this.usersRepo.save(user);
 
-    // Cria automaticamente uma guilda com o nome informado pelo usuário e associa como líder
     const guild = await this.guildsService.createGuildWithLeader(
       saved.id,
       dto.nickname,
@@ -72,9 +67,6 @@ export class AuthService {
     };
   }
 
-  /**
-   * Login normal.
-   */
   async login(dto: LoginDto) {
     const user = await this.usersRepo.findOne({
       where: { email: dto.email },
@@ -88,7 +80,6 @@ export class AuthService {
       throw new UnauthorizedException('Credenciais inválidas');
     }
 
-    // Busca a guilda do usuário
     const guilds = await this.guildsService.findByMember(user.id);
     const guild = guilds.length > 0 ? guilds[0] : null;
 
@@ -105,10 +96,6 @@ export class AuthService {
     };
   }
 
-  /**
-   * Cria um usuário "player" para ser vinculado como membro de guilda.
-   * NÃO faz login e NÃO retorna token.
-   */
   async createPlayer(email: string, password: string, nickname: string) {
     const exists = await this.usersRepo.findOne({ where: { email } });
     if (exists) {
@@ -129,19 +116,12 @@ export class AuthService {
     return this.publicUser(saved);
   }
 
-  /**
-   * Cria um usuário "player" de forma simplificada.
-   * Gera email e senha automaticamente baseado no nickname.
-   * NÃO faz login e NÃO retorna token.
-   */
   async createPlayerSimple(nickname: string) {
-    // Gera email único baseado no nickname
     const baseEmail =
       nickname.toLowerCase().replaceAll(/\s+/g, '') + '@guild.local';
     let email = baseEmail;
     let counter = 1;
 
-    // Verifica se email já existe e incrementa contador se necessário
     while (await this.usersRepo.findOne({ where: { email } })) {
       email =
         nickname.toLowerCase().replaceAll(/\s+/g, '') +
@@ -150,7 +130,6 @@ export class AuthService {
       counter++;
     }
 
-    // Gera senha aleatória de 10 caracteres
     const password =
       Math.random().toString(36).slice(-10) +
       Math.random().toString(36).slice(-10);
@@ -158,9 +137,6 @@ export class AuthService {
     return this.createPlayer(email, password, nickname);
   }
 
-  /**
-   * Busca usuário por ID (para o endpoint /auth/me)
-   */
   async findById(id: number) {
     const user = await this.usersRepo.findOne({ where: { id } });
     if (!user) {
@@ -169,17 +145,12 @@ export class AuthService {
     return this.publicUser(user);
   }
 
-  /**
-   * Solicita recuperação de senha.
-   * Gera um token único e retorna para ser enviado por email.
-   */
   async forgotPassword(email: string): Promise<{
     message: string;
     token?: string;
   }> {
     const user = await this.usersRepo.findOne({ where: { email } });
 
-    // Por segurança, sempre retorna sucesso mesmo se email não existir
     if (!user) {
       console.log(`[ForgotPassword] Email não encontrado: ${email}`);
       return {
@@ -188,20 +159,16 @@ export class AuthService {
       };
     }
 
-    // Invalida tokens antigos do usuário
     await this.resetTokenRepo.update(
       { user: { id: user.id }, used: false },
       { used: true },
     );
 
-    // Gera token seguro
     const token = crypto.randomBytes(32).toString('hex');
 
-    // Calcula data de expiração (1 hora)
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + TOKEN_EXPIRATION_HOURS);
 
-    // Salva token no banco
     await this.resetTokenRepo.save({
       token,
       user,
@@ -211,7 +178,6 @@ export class AuthService {
 
     console.log(`[ForgotPassword] Token gerado para ${email}: ${token}`);
 
-    // Envia email ou retorna token (dependendo da configuração SMTP)
     const result = await this.emailService.sendPasswordResetEmail(
       user.email,
       token,
@@ -220,17 +186,13 @@ export class AuthService {
     return {
       message:
         'Se o email existir, você receberá um link de recuperação de senha.',
-      token: result.sent ? undefined : result.token, // Retorna token apenas em modo dev
+      token: result.sent ? undefined : result.token,
     };
   }
 
-  /**
-   * Reseta a senha usando o token recebido.
-   */
   async resetPassword(token: string, newPassword: string): Promise<{
     message: string;
   }> {
-    // Busca token válido
     const resetToken = await this.resetTokenRepo.findOne({
       where: { token, used: false },
       relations: ['user'],
@@ -240,16 +202,13 @@ export class AuthService {
       throw new BadRequestException('Token inválido ou já utilizado');
     }
 
-    // Verifica se token expirou
     if (new Date() > resetToken.expiresAt) {
       throw new BadRequestException('Token expirado');
     }
 
-    // Atualiza senha do usuário
     const password_hash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
     await this.usersRepo.update(resetToken.user.id, { password_hash });
 
-    // Marca token como usado
     await this.resetTokenRepo.update(resetToken.id, { used: true });
 
     console.log(
@@ -261,9 +220,6 @@ export class AuthService {
     };
   }
 
-  /**
-   * Remove tokens expirados (pode ser chamado periodicamente via cron)
-   */
   async cleanupExpiredTokens(): Promise<number> {
     const result = await this.resetTokenRepo.delete({
       expiresAt: LessThan(new Date()),
@@ -280,7 +236,6 @@ export class AuthService {
   }
 
   private publicUser(u: User) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password_hash, ...rest } = u;
     return rest;
   }
