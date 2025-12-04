@@ -18,12 +18,14 @@ import { IntegrationsModule } from './integrations/integrations.module';
 import { ReportsModule } from './reports/reports.module';
 import { ExportModule } from './export/export.module';
 import { AuditModule } from './audit/audit.module';
+import { CacheModule } from './cache/cache.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    CacheModule,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     PrometheusModule.register({
       defaultMetrics: {

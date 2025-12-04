@@ -1,6 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { Build } from './build.entity';
 import { CreateBuildDto } from './dto/create-build.dto';
 import { UpdateBuildDto } from './dto/update-build.dto';
@@ -89,6 +91,8 @@ export class BuildsService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(GuildMember)
     private readonly memberRepo: Repository<GuildMember>,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
   ) {}
 
   async findAll(filters: FilterBuildsDto) {
@@ -174,24 +178,46 @@ export class BuildsService {
   }
 
   // --- Classes ---
-  listClasses() {
-    return this.classRepo.find({ order: { name: 'ASC' } });
+  async listClasses() {
+    const cacheKey = 'build-classes:all';
+    const cached = await this.cacheManager.get(cacheKey);
+
+    if (cached) {
+      return cached;
+    }
+
+    const classes = await this.classRepo.find({ order: { name: 'ASC' } });
+    await this.cacheManager.set(cacheKey, classes, 600000); // 10 minutos
+    return classes;
   }
 
   async createClass(dto: CreateBuildClassDto) {
     const created = this.classRepo.create(dto);
-    return this.classRepo.save(created);
+    const saved = await this.classRepo.save(created);
+
+    // Invalida o cache
+    await this.cacheManager.del('build-classes:all');
+
+    return saved;
   }
 
   async updateClass(id: number, dto: UpdateBuildClassDto) {
     await this.classRepo.update(id, dto);
     const updated = await this.classRepo.findOne({ where: { id } });
     if (!updated) throw new NotFoundException('Classe não encontrada');
+
+    // Invalida o cache
+    await this.cacheManager.del('build-classes:all');
+
     return updated;
   }
 
   async removeClass(id: number) {
     await this.classRepo.delete(id);
+
+    // Invalida o cache
+    await this.cacheManager.del('build-classes:all');
+
     return { deleted: true };
   }
 
@@ -232,24 +258,46 @@ export class BuildsService {
   }
 
   // --- Items ---
-  listItems() {
-    return this.itemRepo.find({ order: { name: 'ASC' } });
+  async listItems() {
+    const cacheKey = 'build-items:all';
+    const cached = await this.cacheManager.get(cacheKey);
+
+    if (cached) {
+      return cached;
+    }
+
+    const items = await this.itemRepo.find({ order: { name: 'ASC' } });
+    await this.cacheManager.set(cacheKey, items, 600000); // 10 minutos
+    return items;
   }
 
   async createItem(dto: CreateBuildItemDto) {
     const created = this.itemRepo.create(dto);
-    return this.itemRepo.save(created);
+    const saved = await this.itemRepo.save(created);
+
+    // Invalida o cache
+    await this.cacheManager.del('build-items:all');
+
+    return saved;
   }
 
   async updateItem(id: number, dto: UpdateBuildItemDto) {
     await this.itemRepo.update(id, dto);
     const updated = await this.itemRepo.findOne({ where: { id } });
     if (!updated) throw new NotFoundException('Item não encontrado');
+
+    // Invalida o cache
+    await this.cacheManager.del('build-items:all');
+
     return updated;
   }
 
   async removeItem(id: number) {
     await this.itemRepo.delete(id);
+
+    // Invalida o cache
+    await this.cacheManager.del('build-items:all');
+
     return { deleted: true };
   }
 
@@ -302,6 +350,9 @@ export class BuildsService {
 
       console.log(`✅ Successfully seeded ${itemsToCreate.length} items!`);
 
+      // Invalida o cache
+      await this.cacheManager.del('build-items:all');
+
       return {
         success: true,
         message: `Successfully reseeded ${itemsToCreate.length} items from Albion database`,
@@ -319,6 +370,9 @@ export class BuildsService {
     // Usar delete({}) em vez de clear() para respeitar foreign keys
     await this.itemRepo.delete({});
     console.log(`✅ Cleared ${count} items from database`);
+
+    // Invalida o cache
+    await this.cacheManager.del('build-items:all');
 
     return {
       success: true,
