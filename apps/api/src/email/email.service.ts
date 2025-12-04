@@ -68,7 +68,13 @@ export class EmailService {
       return { sent: true };
     } catch (error) {
       this.logger.error(`Failed to send email to ${to}:`, error);
-      throw error;
+      this.logger.error('Error details:', error.message || error);
+
+      // Em caso de falha no envio, retorna token (fallback para modo dev)
+      this.logger.warn(
+        `[FALLBACK] Returning token due to email send failure. Token: ${token.substring(0, 20)}...`,
+      );
+      return { sent: false, token };
     }
   }
 
