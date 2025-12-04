@@ -241,17 +241,24 @@
             />
             <path :d="treasuryAreaPath" fill="url(#treasuryGradient)" opacity="0.3" />
             <path :d="treasuryLinePath" fill="none" stroke="#C6A95D" stroke-width="3" />
-            <circle
-              v-for="(p, i) in treasuryPoints"
-              :key="i"
-              :cx="p.x"
-              :cy="p.y"
-              r="5"
-              fill="#C6A95D"
-              class="cursor-pointer transition-all"
-              @mouseenter="showTreasuryTooltip(p, i)"
-              @mouseleave="hideTreasuryTooltip"
-            />
+            <g v-for="(p, i) in treasuryPoints" :key="i">
+              <circle
+                :cx="p.x"
+                :cy="p.y"
+                r="12"
+                fill="transparent"
+                class="cursor-pointer"
+                @mouseenter="showTreasuryTooltip(p, i)"
+                @mouseleave="hideTreasuryTooltip"
+              />
+              <circle
+                :cx="p.x"
+                :cy="p.y"
+                r="6"
+                :fill="treasuryTooltip && treasuryTooltip.x === p.x ? '#FFA500' : '#C6A95D'"
+                class="pointer-events-none transition-all"
+              />
+            </g>
             <defs>
               <linearGradient id="treasuryGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stop-color="#C6A95D" stop-opacity="0.6" />
