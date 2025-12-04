@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -15,11 +16,13 @@ import type { JwtPayload } from './jwt.strategy';
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 tentativas por minuto
   @Post('register')
   register(@Body() dto: RegisterDto) {
     return this.auth.register(dto);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 tentativas por minuto
   @Post('login')
   login(@Body() dto: LoginDto) {
     return this.auth.login(dto);
@@ -61,6 +64,7 @@ export class AuthController {
    * Solicita recuperação de senha.
    * Gera um token e retorna (em produção, enviaria por email).
    */
+  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 tentativas por minuto
   @Post('forgot-password')
   forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.auth.forgotPassword(dto.email);
@@ -69,6 +73,7 @@ export class AuthController {
   /**
    * Reseta a senha usando o token recebido por email.
    */
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 tentativas por minuto
   @Post('reset-password')
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.auth.resetPassword(dto.token, dto.newPassword);
