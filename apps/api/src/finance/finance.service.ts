@@ -77,9 +77,13 @@ export class FinanceService {
       d.setDate(start.getDate() + i);
       const dateKey = d.toISOString().slice(0, 10);
 
-      const dayTransactions = transactions.filter(
-        (t) => t.date.slice(0, 10) === dateKey,
-      );
+      const dayTransactions = transactions.filter((t) => {
+        const tDateStr =
+          typeof t.date === 'string'
+            ? t.date
+            : (t.date as Date).toISOString();
+        return tDateStr.slice(0, 10) === dateKey;
+      });
       const dayIn = Number(
         dayTransactions.find((t) => t.type === 'in')?.amount ?? 0,
       );
