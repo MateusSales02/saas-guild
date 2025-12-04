@@ -47,8 +47,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:-sua-chave-secreta-mude-em-producao}
       # Email Configuration
       SMTP_HOST: smtp.gmail.com
-      SMTP_PORT: 587
-      SMTP_SECURE: false
+      SMTP_PORT: 465
+      SMTP_SECURE: true
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       SMTP_FROM: "Guild Mesh <noreply@guildmesh.com>"
