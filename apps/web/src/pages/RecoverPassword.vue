@@ -17,7 +17,7 @@ async function recoverPassword() {
   error.value = ''
   loading.value = true
   try {
-    await api.post('/auth/recover-password', { email: email.value })
+    await api.post('/auth/forgot-password', { email: email.value })
     success.value = true
   } catch (e: any) {
     error.value = e.response?.data?.message || 'Erro ao solicitar recuperação de senha'
