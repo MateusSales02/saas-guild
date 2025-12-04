@@ -29,6 +29,12 @@ const router = createRouter({
       component: () => import('@/pages/RecoverPassword.vue'),
       meta: { hideHeader: true },
     },
+    {
+      path: '/reset-password',
+      name: 'reset-password',
+      component: () => import('@/pages/ResetPassword.vue'),
+      meta: { hideHeader: true },
+    },
 
     {
       path: '/logout',
