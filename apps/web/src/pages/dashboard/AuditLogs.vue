@@ -226,7 +226,7 @@ const loadLogs = async () => {
     if (filters.value.endDate) params.endDate = filters.value.endDate
 
     const response = await axios.get('/audit', { params })
-    logs.value = response.data
+    logs.value = response.data.logs || []
   } catch (err: any) {
     error.value = err.response?.data?.message || 'Erro ao carregar logs de auditoria'
   } finally {
