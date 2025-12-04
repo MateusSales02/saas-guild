@@ -212,9 +212,13 @@ describe('ResetPassword.vue', () => {
     const passwordInput = wrapper.find('#password')
     expect(passwordInput.attributes('type')).toBe('password')
 
-    const toggleButtons = wrapper.findAll('button[type="button"]')
-    const passwordToggle = toggleButtons[0]
-    await passwordToggle.trigger('click')
+    // Find the toggle button that is a sibling of the password input
+    const passwordContainer = passwordInput.element.parentElement
+    const passwordToggle = wrapper.findAll('button[type="button"]').find(btn =>
+      passwordContainer?.contains(btn.element)
+    )
+
+    await passwordToggle?.trigger('click')
 
     await wrapper.vm.$nextTick()
     expect(passwordInput.attributes('type')).toBe('text')
