@@ -119,7 +119,8 @@
             class="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#C6A95D] to-amber-500 shadow-lg shadow-[#C6A95D]/30"
           >
             <svg class="w-8 h-8 text-slate-900" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/>
+              <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
             </svg>
           </div>
         </div>
@@ -225,36 +226,50 @@
           </select>
         </div>
 
-        <svg viewBox="0 0 400 160" class="w-full h-40">
-          <line
-            v-for="i in 5"
-            :key="i"
-            x1="0"
-            :y1="i * 40"
-            x2="400"
-            :y2="i * 40"
-            stroke="#1e293b"
-            stroke-width="1"
-            stroke-dasharray="4 4"
-          />
-          <path :d="treasuryAreaPath" fill="url(#treasuryGradient)" opacity="0.3" />
-          <path :d="treasuryLinePath" fill="none" stroke="#C6A95D" stroke-width="3" />
-          <circle
-            v-for="(p, i) in treasuryPoints"
-            :key="i"
-            :cx="p.x"
-            :cy="p.y"
-            r="5"
-            fill="#C6A95D"
-            class="cursor-pointer hover:r-7 transition-all"
-          />
-          <defs>
-            <linearGradient id="treasuryGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#C6A95D" stop-opacity="0.6" />
-              <stop offset="100%" stop-color="#C6A95D" stop-opacity="0" />
-            </linearGradient>
-          </defs>
-        </svg>
+        <div class="relative">
+          <svg viewBox="0 0 400 160" class="w-full h-40">
+            <line
+              v-for="i in 5"
+              :key="i"
+              x1="0"
+              :y1="i * 40"
+              x2="400"
+              :y2="i * 40"
+              stroke="#1e293b"
+              stroke-width="1"
+              stroke-dasharray="4 4"
+            />
+            <path :d="treasuryAreaPath" fill="url(#treasuryGradient)" opacity="0.3" />
+            <path :d="treasuryLinePath" fill="none" stroke="#C6A95D" stroke-width="3" />
+            <circle
+              v-for="(p, i) in treasuryPoints"
+              :key="i"
+              :cx="p.x"
+              :cy="p.y"
+              r="5"
+              fill="#C6A95D"
+              class="cursor-pointer transition-all"
+              @mouseenter="showTreasuryTooltip(p, i)"
+              @mouseleave="hideTreasuryTooltip"
+            />
+            <defs>
+              <linearGradient id="treasuryGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#C6A95D" stop-opacity="0.6" />
+                <stop offset="100%" stop-color="#C6A95D" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+          </svg>
+
+          <!-- Tooltip -->
+          <div
+            v-if="treasuryTooltip"
+            class="absolute z-10 px-3 py-2 bg-slate-800 border border-[#C6A95D]/50 rounded-lg shadow-xl pointer-events-none"
+            :style="{ left: treasuryTooltip.x + 'px', top: treasuryTooltip.y + 'px', transform: 'translate(-50%, -100%) translateY(-10px)' }"
+          >
+            <p class="text-xs text-slate-400 mb-1">{{ treasuryTooltip.date }}</p>
+            <p class="text-sm font-bold text-[#C6A95D]">{{ treasuryTooltip.value }}</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -438,7 +453,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import { auth } from '@/stores/auth'
 
 import {
@@ -468,6 +483,8 @@ const loading = ref(true)
 const err = ref('')
 const recentBuilds = ref<any[]>([])
 const showCustomizeModal = ref(false)
+const treasuryTooltip = ref<{ date: string; value: string; x: number; y: number } | null>(null)
+const treasuryHistoryData = ref<Array<{ date: string; balance: number }>>([])
 
 const widgets = ref({
   members: true,
@@ -484,6 +501,12 @@ const widgets = ref({
 onMounted(() => {
   loadWidgetPreferences()
   load()
+})
+
+watch(treasuryRange, async () => {
+  if (!guild.value) return
+  const days = treasuryRange.value === '7d' ? 7 : 30
+  treasuryHistoryData.value = await FinanceApi.dailyHistory(guild.value.id, days)
 })
 
 function loadWidgetPreferences() {
@@ -560,16 +583,19 @@ async function load() {
       return
     }
 
-    const [memb, evs, fin, buildsRes] = await Promise.all([
+    const days = treasuryRange.value === '7d' ? 7 : 30
+    const [memb, evs, fin, buildsRes, treasuryHistory] = await Promise.all([
       MembersApi.listByGuild(guild.value.id),
       EventsApi.listByGuild(guild.value.id),
       FinanceApi.summary(guild.value.id),
       BuildsApi.list({ guildId: guild.value.id }),
+      FinanceApi.dailyHistory(guild.value.id, days),
     ])
 
     members.value = memb
     events.value = evs
     recentBuilds.value = (buildsRes as any[])?.slice(0, 6) ?? []
+    treasuryHistoryData.value = treasuryHistory
 
     kpis.value.members = memb.length
     kpis.value.online = 0
@@ -641,11 +667,11 @@ const eventAreaPath = computed(() => {
 })
 
 const treasuryPoints = computed(() => {
-  const days = treasuryRange.value === '7d' ? 7 : 30
-  const series = Array.from({ length: days }, (_, i) => {
-    const variation = Math.sin(i * 0.5) * 2000 + Math.random() * 1000
-    return Math.max(0, kpis.value.treasury + variation - (days - i) * 500)
-  })
+  if (treasuryHistoryData.value.length === 0) {
+    return []
+  }
+
+  const series = treasuryHistoryData.value.map(d => d.balance)
   const maxY = Math.max(1, ...series) * 1.2
   const stepX = 400 / (series.length - 1 || 1)
   return series.map((v, i) => ({
@@ -665,6 +691,29 @@ const treasuryAreaPath = computed(() => {
   const end = 'L 400 160 Z'
   return `${start} ${line} ${end}`
 })
+
+function showTreasuryTooltip(point: { x: number; y: number }, index: number) {
+  if (index < 0 || index >= treasuryHistoryData.value.length) return
+
+  const data = treasuryHistoryData.value[index]
+  const date = new Date(data.date)
+  const dateStr = date.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
+
+  treasuryTooltip.value = {
+    date: dateStr,
+    value: toGold(data.balance),
+    x: point.x,
+    y: point.y
+  }
+}
+
+function hideTreasuryTooltip() {
+  treasuryTooltip.value = null
+}
 
 function buildDailySeries(list: EventItem[], days: number) {
   const now = new Date()
