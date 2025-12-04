@@ -11,6 +11,7 @@ import { AuthService } from './auth.service';
 import { User } from '../users/user.entity';
 import { GuildsService } from '../guilds/guilds.service';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
+import { EmailService } from '../email/email.service';
 
 jest.mock('bcrypt');
 
@@ -20,6 +21,7 @@ describe('AuthService', () => {
   let mockResetTokenRepo: any;
   let mockJwtService: any;
   let mockGuildsService: any;
+  let mockEmailService: any;
 
   const mockUser: User = {
     id: 1,
@@ -62,6 +64,12 @@ describe('AuthService', () => {
       findByMember: jest.fn().mockResolvedValue([mockGuild]),
     };
 
+    mockEmailService = {
+      sendPasswordResetEmail: jest
+        .fn()
+        .mockResolvedValue({ sent: false, token: 'mock_reset_token' }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -80,6 +88,10 @@ describe('AuthService', () => {
         {
           provide: GuildsService,
           useValue: mockGuildsService,
+        },
+        {
+          provide: EmailService,
+          useValue: mockEmailService,
         },
       ],
     }).compile();

@@ -56,7 +56,15 @@
       "Bash(where:*)",
       "Bash(if exist dist rmdir /s /q dist)",
       "Bash(del temp_items.json)",
-      "Bash(npm run format:*)"
+      "Bash(npm run format:*)",
+      "Bash(timeout 600 bash -c 'while true; do echo \"\"=== Testing at $(date +%H:%M:%S) ===\"\"; response=$(curl -s http://54.161.67.120:3000/build-items/reseed -X POST 2>&1); echo \"\"$response\"\"; if echo \"\"$response\"\" | grep -q \"\"Successfully reseeded\"\"; then echo \"\"✅ SUCCESS! Items loaded!\"\"; break; elif echo \"\"$response\"\" | grep -q \"\"500\"\"; then echo \"\"⏳ Still old image, waiting 45s...\"\"; sleep 45; else echo \"\"⚠️ Unexpected response: $response\"\"; sleep 30; fi; done')",
+      "Bash(for i in {1..5})",
+      "Bash(do echo \"=== Tentativa $i ===\")",
+      "Bash(done)",
+      "Bash(python -m json.tool:*)",
+      "Bash(timeout 600 bash -c 'while true; do echo \"\"=== Testing at $(date +%H:%M:%S) ===\"\"; response=$(curl -s http://54.161.67.120:3000/build-items/clear-all -X POST 2>&1); echo \"\"$response\"\"; if echo \"\"$response\"\" | grep -q \"\"Cleared\"\"; then echo \"\"✅ SUCCESS! Items cleared!\"\"; break; elif echo \"\"$response\"\" | grep -q \"\"500\"\"; then echo \"\"⏳ Endpoint not deployed yet, waiting 30s...\"\"; sleep 30; else echo \"\"⚠️ Response: $response\"\"; sleep 30; fi; done')",
+      "Bash(timeout 600 bash -c 'echo \"\"Aguardando deploy...\"\"; sleep 120; echo \"\"=== Testando Password Recovery ===\"\"; echo \"\"1. Forgot Password:\"\"; response=$(curl -s -X POST http://54.161.67.120:3000/auth/forgot-password -H \"\"Content-Type: application/json\"\" -d \"\"{\\\"\"email\\\"\":\\\"\"teste@gmail.com\\\"\"}\"\" 2>&1); echo \"\"$response\"\"; if echo \"\"$response\"\" | grep -q \"\"token\"\"; then token=$(echo \"\"$response\"\" | grep -o \"\"\\\"\"token\\\"\":\\\"\"[^\\\"\"]*\\\"\"\"\" | cut -d\"\"\\\"\"\"\" -f4); echo \"\"Token obtido: $token\"\"; echo \"\"\"\"; echo \"\"2. Reset Password com token:\"\"; curl -s -X POST http://54.161.67.120:3000/auth/reset-password -H \"\"Content-Type: application/json\"\" -d \"\"{\\\"\"token\\\"\":\\\"\"$token\\\"\",\\\"\"newPassword\\\"\":\\\"\"123456\\\"\"}\"\"; echo \"\"\"\"; echo \"\"✅ Password Recovery testado!\"\"; else echo \"\"❌ Erro no forgot-password\"\"; fi')",
+      "Bash(npx vite build:*)"
     ],
     "deny": [],
     "ask": []

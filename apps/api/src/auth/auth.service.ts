@@ -14,6 +14,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { GuildsService } from '../guilds/guilds.service';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
+import { EmailService } from '../email/email.service';
 
 const BCRYPT_ROUNDS = 12;
 const TOKEN_EXPIRATION_HOURS = 1;
@@ -26,6 +27,7 @@ export class AuthService {
     private readonly resetTokenRepo: Repository<PasswordResetToken>,
     private readonly jwt: JwtService,
     private readonly guildsService: GuildsService,
+    private readonly emailService: EmailService,
   ) {}
 
   /**
@@ -209,12 +211,16 @@ export class AuthService {
 
     console.log(`[ForgotPassword] Token gerado para ${email}: ${token}`);
 
-    // Em produção, aqui você enviaria o email com o link
-    // Para desenvolvimento, retornamos o token diretamente
+    // Envia email ou retorna token (dependendo da configuração SMTP)
+    const result = await this.emailService.sendPasswordResetEmail(
+      user.email,
+      token,
+    );
+
     return {
       message:
         'Se o email existir, você receberá um link de recuperação de senha.',
-      token, // REMOVER EM PRODUÇÃO - apenas para desenvolvimento
+      token: result.sent ? undefined : result.token, // Retorna token apenas em modo dev
     };
   }
 

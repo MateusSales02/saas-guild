@@ -10,12 +10,14 @@ import { JwtStrategy } from './jwt.strategy';
 import { User } from '../users/user.entity';
 import { GuildsModule } from '../guilds/guilds.module';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
     ConfigModule,
     TypeOrmModule.forFeature([User, PasswordResetToken]),
     GuildsModule,
+    EmailModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
