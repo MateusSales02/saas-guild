@@ -72,7 +72,7 @@ describe('RecoverPassword.vue', () => {
     await wrapper.vm.$nextTick()
     await new Promise((resolve) => setTimeout(resolve, 100))
 
-    expect(apiLib.api.post).toHaveBeenCalledWith('/auth/recover-password', {
+    expect(apiLib.api.post).toHaveBeenCalledWith('/auth/forgot-password', {
       email: 'test@example.com',
     })
     expect(wrapper.text()).toContain('Email Enviado!')
