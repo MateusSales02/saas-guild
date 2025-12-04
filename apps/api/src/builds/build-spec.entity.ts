@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  UpdateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -25,4 +26,7 @@ export class BuildSpec {
 
   @CreateDateColumn()
   created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

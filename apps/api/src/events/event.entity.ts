@@ -5,6 +5,7 @@ import {
   ManyToOne,
   OneToMany,
   CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Guild } from '../guilds/guild.entity';
 import { EventParticipant } from './event-participant.entity';
@@ -34,6 +35,9 @@ export class Event {
 
   @CreateDateColumn()
   created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 
   @OneToMany(
     () => EventParticipant,

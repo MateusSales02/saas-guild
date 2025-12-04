@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  UpdateDateColumn,
   Entity,
   JoinColumn,
   JoinTable,
@@ -77,4 +78,7 @@ export class Build {
 
   @CreateDateColumn()
   created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

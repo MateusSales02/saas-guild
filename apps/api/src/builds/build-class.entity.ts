@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  UpdateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -18,4 +19,7 @@ export class BuildClass {
 
   @CreateDateColumn()
   created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

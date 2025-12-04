@@ -4,6 +4,8 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Event } from './event.entity';
 import { User } from '../users/user.entity';
@@ -25,4 +27,10 @@ export class EventParticipant {
 
   @Column({ default: 'pending' })
   status: string; // confirmed | declined | pending
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

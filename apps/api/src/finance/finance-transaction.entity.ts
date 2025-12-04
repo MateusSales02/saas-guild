@@ -4,6 +4,7 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
+  UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
 import { Guild } from '../guilds/guild.entity';
@@ -32,4 +33,10 @@ export class FinanceTransaction {
     default: () => 'now()',
   })
   created_at: Date;
+
+  @UpdateDateColumn({
+    name: 'updated_at',
+    type: 'timestamp',
+  })
+  updated_at: Date;
 }
