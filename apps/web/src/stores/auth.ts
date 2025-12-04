@@ -85,3 +85,13 @@ export function clearSession(): void {
   localStorage.removeItem('user')
   localStorage.removeItem('guild')
 }
+
+/**
+ * Verifica se o usuário tem acesso aos logs de auditoria
+ * Apenas emails autorizados podem acessar
+ */
+export function hasAuditAccess(): boolean {
+  const allowedEmails = ['teste@gmail.com', 'salesmateus463@gmail.com']
+
+  return auth.user ? allowedEmails.includes(auth.user.email) : false
+}

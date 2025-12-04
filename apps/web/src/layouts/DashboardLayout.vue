@@ -24,6 +24,7 @@
           <SidebarLink icon="treasure" label="Tesouraria" :to="{ name: 'treasury' }" />
           <SidebarLink icon="hammer" label="Builds" :to="{ name: 'builds' }" />
           <SidebarLink icon="market" label="Mercado" :to="{ name: 'market' }" />
+          <SidebarLink v-if="canAccessAudit" icon="list" label="Audit Logs" :to="{ name: 'audit-logs' }" />
         </nav>
 
         <!-- Logout Button -->
@@ -46,13 +47,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter, RouterView } from 'vue-router'
 import SidebarLink from '@/components/SidebarLink.vue'
-import { clearSession } from '@/stores/auth'
+import { clearSession, hasAuditAccess } from '@/stores/auth'
 
 const sidebarOpen = ref(false)
 const router = useRouter()
+
+const canAccessAudit = computed(() => hasAuditAccess())
 
 function logout() {
   clearSession()
