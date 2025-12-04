@@ -173,7 +173,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { api } from '@/lib/api'
 
 interface AuditLog {
   id: number
@@ -225,7 +225,7 @@ const loadLogs = async () => {
     if (filters.value.startDate) params.startDate = filters.value.startDate
     if (filters.value.endDate) params.endDate = filters.value.endDate
 
-    const response = await axios.get('/audit', { params })
+    const response = await api.get('/audit', { params })
     logs.value = response.data.logs || []
   } catch (err: any) {
     error.value = err.response?.data?.message || 'Erro ao carregar logs de auditoria'
