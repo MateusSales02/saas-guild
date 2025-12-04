@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { BuildsService } from './builds.service';
 import { Build } from './build.entity';
 import { BuildClass } from './build-class.entity';
@@ -19,6 +20,7 @@ describe('BuildsService', () => {
   let mockGuildRepo: any;
   let mockUserRepo: any;
   let mockMemberRepo: any;
+  let mockCacheManager: any;
 
   const mockClass: BuildClass = {
     id: 1,
@@ -110,6 +112,12 @@ describe('BuildsService', () => {
       findOne: jest.fn(),
     };
 
+    mockCacheManager = {
+      get: jest.fn(),
+      set: jest.fn(),
+      del: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         BuildsService,
@@ -120,6 +128,7 @@ describe('BuildsService', () => {
         { provide: getRepositoryToken(Guild), useValue: mockGuildRepo },
         { provide: getRepositoryToken(User), useValue: mockUserRepo },
         { provide: getRepositoryToken(GuildMember), useValue: mockMemberRepo },
+        { provide: CACHE_MANAGER, useValue: mockCacheManager },
       ],
     }).compile();
 
@@ -264,6 +273,7 @@ describe('BuildsService', () => {
   describe('Classes', () => {
     describe('listClasses', () => {
       it('should return all classes', async () => {
+        mockCacheManager.get.mockResolvedValue(null); // No cache hit
         mockClassRepo.find.mockResolvedValue([mockClass]);
 
         const result = await service.listClasses();
@@ -271,6 +281,16 @@ describe('BuildsService', () => {
         expect(mockClassRepo.find).toHaveBeenCalledWith({
           order: { name: 'ASC' },
         });
+        expect(mockCacheManager.set).toHaveBeenCalled();
+        expect(result).toHaveLength(1);
+      });
+
+      it('should return cached classes if available', async () => {
+        mockCacheManager.get.mockResolvedValue([mockClass]);
+
+        const result = await service.listClasses();
+
+        expect(mockClassRepo.find).not.toHaveBeenCalled();
         expect(result).toHaveLength(1);
       });
     });
@@ -286,6 +306,7 @@ describe('BuildsService', () => {
         });
 
         expect(mockClassRepo.create).toHaveBeenCalled();
+        expect(mockCacheManager.del).toHaveBeenCalledWith('build-classes:all');
         expect(result).toEqual(mockClass);
       });
     });
@@ -300,6 +321,7 @@ describe('BuildsService', () => {
 
         const result = await service.updateClass(1, { name: 'Updated' });
 
+        expect(mockCacheManager.del).toHaveBeenCalledWith('build-classes:all');
         expect(result.name).toBe('Updated');
       });
 
@@ -319,6 +341,7 @@ describe('BuildsService', () => {
 
         const result = await service.removeClass(1);
 
+        expect(mockCacheManager.del).toHaveBeenCalledWith('build-classes:all');
         expect(result).toEqual({ deleted: true });
       });
     });
@@ -387,6 +410,7 @@ describe('BuildsService', () => {
   describe('Items', () => {
     describe('listItems', () => {
       it('should return all items', async () => {
+        mockCacheManager.get.mockResolvedValue(null); // No cache hit
         mockItemRepo.find.mockResolvedValue([mockItem]);
 
         const result = await service.listItems();
@@ -394,6 +418,16 @@ describe('BuildsService', () => {
         expect(mockItemRepo.find).toHaveBeenCalledWith({
           order: { name: 'ASC' },
         });
+        expect(mockCacheManager.set).toHaveBeenCalled();
+        expect(result).toHaveLength(1);
+      });
+
+      it('should return cached items if available', async () => {
+        mockCacheManager.get.mockResolvedValue([mockItem]);
+
+        const result = await service.listItems();
+
+        expect(mockItemRepo.find).not.toHaveBeenCalled();
         expect(result).toHaveLength(1);
       });
     });
@@ -408,6 +442,7 @@ describe('BuildsService', () => {
           slot: 'Arma',
         });
 
+        expect(mockCacheManager.del).toHaveBeenCalledWith('build-items:all');
         expect(result).toEqual(mockItem);
       });
     });
@@ -418,6 +453,7 @@ describe('BuildsService', () => {
 
         const result = await service.removeItem(1);
 
+        expect(mockCacheManager.del).toHaveBeenCalledWith('build-items:all');
         expect(result).toEqual({ deleted: true });
       });
     });
