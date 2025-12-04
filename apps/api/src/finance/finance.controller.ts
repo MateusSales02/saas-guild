@@ -32,6 +32,14 @@ export class FinanceController {
     return this.service.summary(Number(guildId));
   }
 
+  @Get('daily-history')
+  dailyHistory(
+    @Query('guildId') guildId: string,
+    @Query('days') days: string,
+  ) {
+    return this.service.dailyHistory(Number(guildId), Number(days) || 7);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.service.remove(Number(id));

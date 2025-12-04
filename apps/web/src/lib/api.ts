@@ -137,6 +137,14 @@ export const FinanceApi = {
     return api.get('/finance-transactions', { params: { guildId } }).then((r) => r.data)
   },
 
+  dailyHistory(guildId: number, days: number) {
+    return api
+      .get<Array<{ date: string; balance: number }>>('/finance-transactions/daily-history', {
+        params: { guildId, days },
+      })
+      .then((r) => r.data)
+  },
+
   create(payload: FinanceTxPayload) {
     return api.post('/finance-transactions', payload).then((r) => r.data)
   },

@@ -51,4 +51,46 @@ export class FinanceService {
     await this.repo.delete(id);
     return { ok: true };
   }
+
+  async dailyHistory(guildId: number, days: number) {
+    const now = new Date();
+    const start = new Date(now);
+    start.setDate(now.getDate() - (days - 1));
+    start.setHours(0, 0, 0, 0);
+
+    const transactions = await this.repo
+      .createQueryBuilder('t')
+      .select('DATE(t.created_at)', 'date')
+      .addSelect('t.type', 'type')
+      .addSelect('COALESCE(SUM(t.amount),0)', 'amount')
+      .where('t.guild_id = :guildId', { guildId })
+      .andWhere('t.created_at >= :start', { start })
+      .groupBy('DATE(t.created_at), t.type')
+      .orderBy('DATE(t.created_at)', 'ASC')
+      .getRawMany<{ date: string; type: 'in' | 'out'; amount: string }>();
+
+    const dailyBalances: Array<{ date: string; balance: number }> = [];
+    let currentBalance = 0;
+
+    for (let i = 0; i < days; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      const dateKey = d.toISOString().slice(0, 10);
+
+      const dayTransactions = transactions.filter(
+        (t) => t.date.slice(0, 10) === dateKey,
+      );
+      const dayIn = Number(
+        dayTransactions.find((t) => t.type === 'in')?.amount ?? 0,
+      );
+      const dayOut = Number(
+        dayTransactions.find((t) => t.type === 'out')?.amount ?? 0,
+      );
+
+      currentBalance += dayIn - dayOut;
+      dailyBalances.push({ date: dateKey, balance: currentBalance });
+    }
+
+    return dailyBalances;
+  }
 }
