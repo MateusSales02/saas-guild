@@ -3,17 +3,20 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Instala pnpm
+RUN npm install -g pnpm
+
 # Copia arquivos de dependências
-COPY package.json package-lock.json ./
+COPY package.json pnpm-lock.yaml ./
 
 # Instala TODAS as dependências (incluindo devDependencies para build)
-RUN npm ci
+RUN pnpm install --frozen-lockfile
 
 # Copia código fonte
 COPY . .
 
 # Compila TypeScript
-RUN npm run build
+RUN pnpm run build
 
 # Copia arquivo JSON para o diretório dist após build
 RUN mkdir -p dist/data && cp src/data/albion-items.json dist/data/
@@ -23,11 +26,14 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
+# Instala pnpm
+RUN npm install -g pnpm
+
 # Copia arquivos de dependências
-COPY package.json package-lock.json ./
+COPY package.json pnpm-lock.yaml ./
 
 # Instala apenas dependências de produção
-RUN npm ci --omit=dev
+RUN pnpm install --frozen-lockfile --prod
 
 # Copia código compilado do stage anterior (incluindo dist/data/)
 COPY --from=builder /app/dist ./dist
