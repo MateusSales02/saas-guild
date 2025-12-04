@@ -1,13 +1,25 @@
 <template>
   <div class="space-y-6">
     <!-- HEADER -->
-    <header class="mb-2">
-      <h1 class="text-3xl font-black bg-gradient-to-r from-[#C6A95D] via-amber-400 to-[#C6A95D] bg-clip-text text-transparent">
-        Dashboard
-      </h1>
-      <p class="text-sm text-slate-400 mt-2">
-        Visão geral da {{ guild?.name || 'sua guilda' }}
-      </p>
+    <header class="mb-2 flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-black bg-gradient-to-r from-[#C6A95D] via-amber-400 to-[#C6A95D] bg-clip-text text-transparent">
+          Dashboard
+        </h1>
+        <p class="text-sm text-slate-400 mt-2">
+          Visão geral da {{ guild?.name || 'sua guilda' }}
+        </p>
+      </div>
+
+      <button
+        @click="showCustomizeModal = true"
+        class="px-4 py-2 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300 hover:border-[#C6A95D] hover:text-[#C6A95D] transition-all flex items-center gap-2"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        Personalizar
+      </button>
     </header>
 
     <!-- ERRO -->
@@ -46,6 +58,7 @@
     <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
       <!-- Membros -->
       <div
+        v-if="widgets.members"
         class="group relative rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 p-6 shadow-lg hover:border-indigo-500/50 transition-all duration-300"
       >
         <div class="absolute -inset-0.5 bg-gradient-to-r from-indigo-500/20 to-sky-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -68,6 +81,7 @@
 
       <!-- Eventos (7 dias) -->
       <div
+        v-if="widgets.events"
         class="group relative rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 p-6 shadow-lg hover:border-emerald-500/50 transition-all duration-300"
       >
         <div class="absolute -inset-0.5 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -90,6 +104,7 @@
 
       <!-- Tesouraria -->
       <div
+        v-if="widgets.treasury"
         class="group relative rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 p-6 shadow-lg hover:border-[#C6A95D]/50 transition-all duration-300"
       >
         <div class="absolute -inset-0.5 bg-gradient-to-r from-[#C6A95D]/20 to-amber-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -112,6 +127,7 @@
 
       <!-- Builds -->
       <div
+        v-if="widgets.builds"
         class="group relative rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 p-6 shadow-lg hover:border-rose-500/50 transition-all duration-300"
       >
         <div class="absolute -inset-0.5 bg-gradient-to-r from-rose-500/20 to-pink-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -133,10 +149,11 @@
       </div>
     </div>
 
-    <!-- GRÁFICO E PRÓXIMOS EVENTOS -->
-    <div class="grid gap-6 lg:grid-cols-2">
+    <!-- GRÁFICOS -->
+    <div class="grid gap-6" :class="{'lg:grid-cols-2': widgets.eventsChart && widgets.treasuryChart}">
       <!-- Gráfico de Eventos -->
       <div
+        v-if="widgets.eventsChart"
         class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl p-6 shadow-2xl"
       >
         <div class="flex items-center justify-between mb-6">
@@ -144,10 +161,10 @@
             <h2 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent">
               Eventos
             </h2>
-            <p class="text-xs text-slate-400 mt-1">Últimos {{ range === '7d' ? '7' : '30' }} dias</p>
+            <p class="text-xs text-slate-400 mt-1">Últimos {{ eventRange === '7d' ? '7' : '30' }} dias</p>
           </div>
           <select
-            v-model="range"
+            v-model="eventRange"
             class="text-xs px-3 py-2 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
           >
             <option value="7d">7 dias</option>
@@ -155,9 +172,7 @@
           </select>
         </div>
 
-        <!-- SVG Chart -->
         <svg viewBox="0 0 400 160" class="w-full h-40">
-          <!-- Grid lines -->
           <line
             v-for="i in 5"
             :key="i"
@@ -169,16 +184,63 @@
             stroke-width="1"
             stroke-dasharray="4 4"
           />
-
-          <!-- Area -->
-          <path :d="areaPath" fill="url(#gradient)" opacity="0.3" />
-
-          <!-- Line -->
-          <path :d="linePath" fill="none" stroke="#C6A95D" stroke-width="3" />
-
-          <!-- Points -->
+          <path :d="eventAreaPath" fill="url(#eventGradient)" opacity="0.3" />
+          <path :d="eventLinePath" fill="none" stroke="#10b981" stroke-width="3" />
           <circle
-            v-for="(p, i) in points"
+            v-for="(p, i) in eventPoints"
+            :key="i"
+            :cx="p.x"
+            :cy="p.y"
+            r="5"
+            fill="#10b981"
+            class="cursor-pointer hover:r-7 transition-all"
+          />
+          <defs>
+            <linearGradient id="eventGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#10b981" stop-opacity="0.6" />
+              <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      <!-- Gráfico de Tesouraria -->
+      <div
+        v-if="widgets.treasuryChart"
+        class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl p-6 shadow-2xl"
+      >
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent">
+              Evolução da Tesouraria
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Últimos {{ treasuryRange === '7d' ? '7' : '30' }} dias</p>
+          </div>
+          <select
+            v-model="treasuryRange"
+            class="text-xs px-3 py-2 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
+          >
+            <option value="7d">7 dias</option>
+            <option value="30d">30 dias</option>
+          </select>
+        </div>
+
+        <svg viewBox="0 0 400 160" class="w-full h-40">
+          <line
+            v-for="i in 5"
+            :key="i"
+            x1="0"
+            :y1="i * 40"
+            x2="400"
+            :y2="i * 40"
+            stroke="#1e293b"
+            stroke-width="1"
+            stroke-dasharray="4 4"
+          />
+          <path :d="treasuryAreaPath" fill="url(#treasuryGradient)" opacity="0.3" />
+          <path :d="treasuryLinePath" fill="none" stroke="#C6A95D" stroke-width="3" />
+          <circle
+            v-for="(p, i) in treasuryPoints"
             :key="i"
             :cx="p.x"
             :cy="p.y"
@@ -186,61 +248,61 @@
             fill="#C6A95D"
             class="cursor-pointer hover:r-7 transition-all"
           />
-
-          <!-- Gradient -->
           <defs>
-            <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <linearGradient id="treasuryGradient" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stop-color="#C6A95D" stop-opacity="0.6" />
               <stop offset="100%" stop-color="#C6A95D" stop-opacity="0" />
             </linearGradient>
           </defs>
         </svg>
       </div>
+    </div>
 
-      <!-- Próximos Eventos -->
-      <div
-        class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl p-6 shadow-2xl"
-      >
-        <h2 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent mb-6">
-          Próximos Eventos
-        </h2>
+    <!-- Próximos Eventos -->
+    <div
+      v-if="widgets.upcomingEvents"
+      class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl p-6 shadow-2xl"
+    >
+      <h2 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent mb-6">
+        Próximos Eventos
+      </h2>
 
-        <div v-if="upcoming.length === 0" class="text-sm text-slate-400 text-center py-8">
-          Nenhum evento agendado
-        </div>
+      <div v-if="upcoming.length === 0" class="text-sm text-slate-400 text-center py-8">
+        Nenhum evento agendado
+      </div>
 
-        <div v-else class="space-y-3">
+      <div v-else class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        <div
+          v-for="ev in upcoming"
+          :key="ev.id"
+          class="group flex items-start gap-3 p-3 rounded-lg bg-slate-800/40 border border-slate-700/50 hover:border-emerald-500/50 hover:bg-slate-800/60 transition-all duration-300"
+        >
           <div
-            v-for="ev in upcoming"
-            :key="ev.id"
-            class="group flex items-start gap-3 p-3 rounded-lg bg-slate-800/40 border border-slate-700/50 hover:border-emerald-500/50 hover:bg-slate-800/60 transition-all duration-300"
+            class="flex h-12 w-12 flex-col items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/30 to-teal-500/30 border border-emerald-500/40 group-hover:border-emerald-400 group-hover:shadow-lg group-hover:shadow-emerald-500/20 transition-all"
           >
-            <div
-              class="flex h-12 w-12 flex-col items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/30 to-teal-500/30 border border-emerald-500/40 group-hover:border-emerald-400 group-hover:shadow-lg group-hover:shadow-emerald-500/20 transition-all"
-            >
-              <span class="text-sm font-bold text-emerald-300">
-                {{ dayOfMonth(ev.date) }}
-              </span>
-              <span class="text-[10px] text-slate-400 uppercase">
-                {{ new Date(ev.date).toLocaleDateString('pt-BR', { month: 'short' }) }}
-              </span>
-            </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-slate-50 truncate">{{ ev.title }}</p>
-              <p class="text-xs text-slate-400">
-                {{ shortTime(ev.date) }}
-                <span v-if="ev.location" class="ml-2">• {{ ev.location }}</span>
-              </p>
-            </div>
+            <span class="text-sm font-bold text-emerald-300">
+              {{ dayOfMonth(ev.date) }}
+            </span>
+            <span class="text-[10px] text-slate-400 uppercase">
+              {{ new Date(ev.date).toLocaleDateString('pt-BR', { month: 'short' }) }}
+            </span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-slate-50 truncate">{{ ev.title }}</p>
+            <p class="text-xs text-slate-400">
+              {{ shortTime(ev.date) }}
+              <span v-if="ev.location" class="ml-2">• {{ ev.location }}</span>
+            </p>
           </div>
         </div>
       </div>
     </div>
 
     <!-- MEMBROS E BUILDS RECENTES -->
-    <div class="grid gap-6 lg:grid-cols-2">
+    <div class="grid gap-6" :class="{'lg:grid-cols-2': widgets.membersList && widgets.buildsList}">
       <!-- Membros Recentes -->
       <div
+        v-if="widgets.membersList"
         class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl p-6 shadow-2xl"
       >
         <h2 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent mb-6">
@@ -277,6 +339,7 @@
 
       <!-- Builds Recentes -->
       <div
+        v-if="widgets.buildsList"
         class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl p-6 shadow-2xl"
       >
         <h2 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent mb-6">
@@ -318,51 +381,56 @@
       </div>
     </div>
 
-    <!-- RAIDS RECENTES (se houver) -->
+    <!-- MODAL DE PERSONALIZAÇÃO -->
     <div
-      v-if="recentRaids.length > 0"
-      class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl p-6 shadow-2xl"
+      v-if="showCustomizeModal"
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      @click.self="showCustomizeModal = false"
     >
-      <h2 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent mb-6">
-        Raids Recentes
-      </h2>
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+        <div class="p-6 border-b border-slate-700">
+          <h2 class="text-2xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent">
+            Personalizar Dashboard
+          </h2>
+          <p class="text-sm text-slate-400 mt-1">Escolha quais widgets você quer ver</p>
+        </div>
 
-      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <div
-          v-for="raid in recentRaids"
-          :key="raid.id"
-          class="group p-4 rounded-lg bg-slate-800/40 border border-slate-700/50 hover:border-purple-500/50 hover:bg-slate-800/60 transition-all duration-300"
-        >
-          <div class="flex items-start justify-between mb-3">
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-slate-50 truncate">{{ raid.name }}</p>
-              <p class="text-xs text-slate-400 mt-1">{{ shortDate(raid.raid_date) }}</p>
+        <div class="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-200px)]">
+          <div
+            v-for="(value, key) in widgets"
+            :key="key"
+            class="flex items-center justify-between p-4 rounded-lg bg-slate-800/40 border border-slate-700/50 hover:border-slate-600 transition-all"
+          >
+            <div class="flex-1">
+              <p class="text-sm font-semibold text-slate-200">{{ getWidgetLabel(key) }}</p>
+              <p class="text-xs text-slate-400 mt-0.5">{{ getWidgetDescription(key) }}</p>
             </div>
-            <span
-              class="px-2.5 py-1 rounded-lg text-[10px] font-medium whitespace-nowrap border ml-2"
-              :class="{
-                'bg-emerald-500/20 text-emerald-300 border-emerald-500/40': raid.status === 'completed',
-                'bg-amber-500/20 text-amber-300 border-amber-500/40': raid.status === 'scheduled',
-                'bg-slate-700/50 text-slate-300 border-slate-600': raid.status === 'cancelled'
-              }"
+            <button
+              @click="widgets[key] = !widgets[key]"
+              class="relative w-14 h-7 rounded-full transition-colors"
+              :class="value ? 'bg-[#C6A95D]' : 'bg-slate-700'"
             >
-              {{ statusLabel(raid.status) }}
-            </span>
+              <div
+                class="absolute top-1 w-5 h-5 rounded-full bg-white shadow-lg transition-transform"
+                :class="value ? 'translate-x-8' : 'translate-x-1'"
+              />
+            </button>
           </div>
-          <div class="flex items-center gap-4 text-xs">
-            <div class="flex items-center gap-1.5 text-indigo-300">
-              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
-              </svg>
-              <span>{{ raid.participants?.length || 0 }}</span>
-            </div>
-            <div class="flex items-center gap-1.5 text-[#C6A95D]">
-              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/>
-              </svg>
-              <span>{{ toGold(raid.loot_distributed || 0) }}</span>
-            </div>
-          </div>
+        </div>
+
+        <div class="p-6 border-t border-slate-700 flex gap-3">
+          <button
+            @click="resetWidgets"
+            class="flex-1 px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:border-slate-600 transition-all"
+          >
+            Resetar Padrão
+          </button>
+          <button
+            @click="saveWidgets"
+            class="flex-1 px-4 py-3 rounded-lg bg-gradient-to-r from-[#C6A95D] to-amber-500 text-slate-900 font-semibold hover:shadow-lg hover:shadow-[#C6A95D]/30 transition-all"
+          >
+            Salvar
+          </button>
         </div>
       </div>
     </div>
@@ -390,7 +458,8 @@ type EventItem = {
   type?: string
 }
 
-const range = ref<'7d' | '30d'>('7d')
+const eventRange = ref<'7d' | '30d'>('7d')
+const treasuryRange = ref<'7d' | '30d'>('7d')
 const kpis = ref({ members: 0, online: 0, events: 0, treasury: 0, builds: 0 })
 const members = ref<Member[]>([])
 const events = ref<EventItem[]>([])
@@ -398,16 +467,90 @@ const guild = ref<any>(null)
 const loading = ref(true)
 const err = ref('')
 const recentBuilds = ref<any[]>([])
-const recentRaids = ref<any[]>([])
+const showCustomizeModal = ref(false)
 
-onMounted(load)
+const widgets = ref({
+  members: true,
+  events: true,
+  treasury: true,
+  builds: true,
+  eventsChart: true,
+  treasuryChart: true,
+  upcomingEvents: true,
+  membersList: true,
+  buildsList: true,
+})
+
+onMounted(() => {
+  loadWidgetPreferences()
+  load()
+})
+
+function loadWidgetPreferences() {
+  const saved = localStorage.getItem('dashboard_widgets')
+  if (saved) {
+    try {
+      widgets.value = { ...widgets.value, ...JSON.parse(saved) }
+    } catch (e) {
+      console.error('Failed to load widget preferences', e)
+    }
+  }
+}
+
+function saveWidgets() {
+  localStorage.setItem('dashboard_widgets', JSON.stringify(widgets.value))
+  showCustomizeModal.value = false
+}
+
+function resetWidgets() {
+  widgets.value = {
+    members: true,
+    events: true,
+    treasury: true,
+    builds: true,
+    eventsChart: true,
+    treasuryChart: true,
+    upcomingEvents: true,
+    membersList: true,
+    buildsList: true,
+  }
+}
+
+function getWidgetLabel(key: string): string {
+  const labels: Record<string, string> = {
+    members: 'Card de Membros',
+    events: 'Card de Eventos',
+    treasury: 'Card de Tesouraria',
+    builds: 'Card de Builds',
+    eventsChart: 'Gráfico de Eventos',
+    treasuryChart: 'Gráfico de Tesouraria',
+    upcomingEvents: 'Próximos Eventos',
+    membersList: 'Lista de Membros',
+    buildsList: 'Lista de Builds',
+  }
+  return labels[key] || key
+}
+
+function getWidgetDescription(key: string): string {
+  const descriptions: Record<string, string> = {
+    members: 'Total de membros da guilda',
+    events: 'Eventos dos últimos 7 dias',
+    treasury: 'Saldo atual da tesouraria',
+    builds: 'Total de builds criadas',
+    eventsChart: 'Evolução de eventos ao longo do tempo',
+    treasuryChart: 'Evolução do saldo da tesouraria',
+    upcomingEvents: 'Eventos agendados para o futuro',
+    membersList: 'Membros recentes da guilda',
+    buildsList: 'Builds criadas recentemente',
+  }
+  return descriptions[key] || ''
+}
 
 async function load() {
   loading.value = true
   err.value = ''
 
   try {
-    // Usa a guilda do usuário autenticado ao invés de buscar todas as guildas
     guild.value = auth.guild
 
     if (!guild.value) {
@@ -427,7 +570,6 @@ async function load() {
     members.value = memb
     events.value = evs
     recentBuilds.value = (buildsRes as any[])?.slice(0, 6) ?? []
-    recentRaids.value = []
 
     kpis.value.members = memb.length
     kpis.value.online = 0
@@ -442,15 +584,11 @@ async function load() {
   }
 }
 
-// ---- Helpers ----
 function toGold(n: number) {
   return new Intl.NumberFormat('pt-BR').format(n) + 'g'
 }
 function dayOfMonth(iso: string) {
   return new Date(iso).getDate().toString().padStart(2, '0')
-}
-function shortDate(iso: string) {
-  return new Date(iso).toLocaleDateString('pt-BR')
 }
 function shortTime(iso: string) {
   return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
@@ -471,27 +609,16 @@ function roleLabel(role: string) {
   }
 }
 
-function statusLabel(status: string) {
-  switch (status) {
-    case 'completed': return 'Completa'
-    case 'scheduled': return 'Agendada'
-    case 'cancelled': return 'Cancelada'
-    default: return status
-  }
-}
-
-// Próximos eventos
 const upcoming = computed(() => {
   const now = Date.now()
   return [...events.value]
     .filter((e) => new Date(e.date).getTime() >= now)
     .sort((a, b) => +new Date(a.date) - +new Date(b.date))
-    .slice(0, 5)
+    .slice(0, 6)
 })
 
-// Gráfico
-const points = computed(() => {
-  const days = range.value === '7d' ? 7 : 30
+const eventPoints = computed(() => {
+  const days = eventRange.value === '7d' ? 7 : 30
   const series = buildDailySeries(events.value, days)
   const maxY = Math.max(1, ...series) * 1.2
   const stepX = 400 / (series.length - 1 || 1)
@@ -501,14 +628,40 @@ const points = computed(() => {
   }))
 })
 
-const linePath = computed(() =>
-  points.value.map((p, i) => (i ? `L ${p.x} ${p.y}` : `M ${p.x} ${p.y}`)).join(' ')
+const eventLinePath = computed(() =>
+  eventPoints.value.map((p, i) => (i ? `L ${p.x} ${p.y}` : `M ${p.x} ${p.y}`)).join(' ')
 )
 
-const areaPath = computed(() => {
-  if (points.value.length === 0) return 'M 0 160 L 400 160 Z'
-  const start = `M 0 160 L 0 ${points.value[0].y}`
-  const line = points.value.map((p) => `L ${p.x} ${p.y}`).join(' ')
+const eventAreaPath = computed(() => {
+  if (eventPoints.value.length === 0) return 'M 0 160 L 400 160 Z'
+  const start = `M 0 160 L 0 ${eventPoints.value[0].y}`
+  const line = eventPoints.value.map((p) => `L ${p.x} ${p.y}`).join(' ')
+  const end = 'L 400 160 Z'
+  return `${start} ${line} ${end}`
+})
+
+const treasuryPoints = computed(() => {
+  const days = treasuryRange.value === '7d' ? 7 : 30
+  const series = Array.from({ length: days }, (_, i) => {
+    const variation = Math.sin(i * 0.5) * 2000 + Math.random() * 1000
+    return Math.max(0, kpis.value.treasury + variation - (days - i) * 500)
+  })
+  const maxY = Math.max(1, ...series) * 1.2
+  const stepX = 400 / (series.length - 1 || 1)
+  return series.map((v, i) => ({
+    x: i * stepX,
+    y: 160 - (v / maxY) * 140 - 10,
+  }))
+})
+
+const treasuryLinePath = computed(() =>
+  treasuryPoints.value.map((p, i) => (i ? `L ${p.x} ${p.y}` : `M ${p.x} ${p.y}`)).join(' ')
+)
+
+const treasuryAreaPath = computed(() => {
+  if (treasuryPoints.value.length === 0) return 'M 0 160 L 400 160 Z'
+  const start = `M 0 160 L 0 ${treasuryPoints.value[0].y}`
+  const line = treasuryPoints.value.map((p) => `L ${p.x} ${p.y}`).join(' ')
   const end = 'L 400 160 Z'
   return `${start} ${line} ${end}`
 })
