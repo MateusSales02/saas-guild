@@ -9,11 +9,12 @@ import { JwtStrategy } from './jwt.strategy';
 
 import { User } from '../users/user.entity';
 import { GuildsModule } from '../guilds/guilds.module';
+import { PasswordResetToken } from './entities/password-reset-token.entity';
 
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, PasswordResetToken]),
     GuildsModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

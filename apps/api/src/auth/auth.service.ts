@@ -5,20 +5,25 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, LessThan } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { GuildsService } from '../guilds/guilds.service';
+import { PasswordResetToken } from './entities/password-reset-token.entity';
 
 const BCRYPT_ROUNDS = 12;
+const TOKEN_EXPIRATION_HOURS = 1;
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private readonly usersRepo: Repository<User>,
+    @InjectRepository(PasswordResetToken)
+    private readonly resetTokenRepo: Repository<PasswordResetToken>,
     private readonly jwt: JwtService,
     private readonly guildsService: GuildsService,
   ) {}
@@ -160,6 +165,104 @@ export class AuthService {
       throw new NotFoundException('Usuário não encontrado');
     }
     return this.publicUser(user);
+  }
+
+  /**
+   * Solicita recuperação de senha.
+   * Gera um token único e retorna para ser enviado por email.
+   */
+  async forgotPassword(email: string): Promise<{
+    message: string;
+    token?: string;
+  }> {
+    const user = await this.usersRepo.findOne({ where: { email } });
+
+    // Por segurança, sempre retorna sucesso mesmo se email não existir
+    if (!user) {
+      console.log(`[ForgotPassword] Email não encontrado: ${email}`);
+      return {
+        message:
+          'Se o email existir, você receberá um link de recuperação de senha.',
+      };
+    }
+
+    // Invalida tokens antigos do usuário
+    await this.resetTokenRepo.update(
+      { user: { id: user.id }, used: false },
+      { used: true },
+    );
+
+    // Gera token seguro
+    const token = crypto.randomBytes(32).toString('hex');
+
+    // Calcula data de expiração (1 hora)
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + TOKEN_EXPIRATION_HOURS);
+
+    // Salva token no banco
+    await this.resetTokenRepo.save({
+      token,
+      user,
+      expiresAt,
+      used: false,
+    });
+
+    console.log(`[ForgotPassword] Token gerado para ${email}: ${token}`);
+
+    // Em produção, aqui você enviaria o email com o link
+    // Para desenvolvimento, retornamos o token diretamente
+    return {
+      message:
+        'Se o email existir, você receberá um link de recuperação de senha.',
+      token, // REMOVER EM PRODUÇÃO - apenas para desenvolvimento
+    };
+  }
+
+  /**
+   * Reseta a senha usando o token recebido.
+   */
+  async resetPassword(token: string, newPassword: string): Promise<{
+    message: string;
+  }> {
+    // Busca token válido
+    const resetToken = await this.resetTokenRepo.findOne({
+      where: { token, used: false },
+      relations: ['user'],
+    });
+
+    if (!resetToken) {
+      throw new BadRequestException('Token inválido ou já utilizado');
+    }
+
+    // Verifica se token expirou
+    if (new Date() > resetToken.expiresAt) {
+      throw new BadRequestException('Token expirado');
+    }
+
+    // Atualiza senha do usuário
+    const password_hash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+    await this.usersRepo.update(resetToken.user.id, { password_hash });
+
+    // Marca token como usado
+    await this.resetTokenRepo.update(resetToken.id, { used: true });
+
+    console.log(
+      `[ResetPassword] Senha alterada para usuário ID: ${resetToken.user.id}`,
+    );
+
+    return {
+      message: 'Senha alterada com sucesso! Você já pode fazer login.',
+    };
+  }
+
+  /**
+   * Remove tokens expirados (pode ser chamado periodicamente via cron)
+   */
+  async cleanupExpiredTokens(): Promise<number> {
+    const result = await this.resetTokenRepo.delete({
+      expiresAt: LessThan(new Date()),
+    });
+    return result.affected || 0;
   }
 
   private async signToken(user: User) {
