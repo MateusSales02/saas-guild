@@ -38,6 +38,8 @@ export class AuditService {
    * Registra uma ação no log de auditoria
    */
   async log(dto: CreateAuditLogDto): Promise<AuditLog> {
+    console.log(`[AuditService] Creating log: ${dto.action} on ${dto.entityType} by ${dto.userEmail ?? 'anonymous'}`);
+
     const log = this.auditRepo.create({
       user_id: dto.userId ?? null,
       user_email: dto.userEmail ?? null,
@@ -51,7 +53,9 @@ export class AuditService {
       user_agent: dto.userAgent ?? null,
     });
 
-    return this.auditRepo.save(log);
+    const saved = await this.auditRepo.save(log);
+    console.log(`[AuditService] Log saved with ID: ${saved.id}`);
+    return saved;
   }
 
   /**

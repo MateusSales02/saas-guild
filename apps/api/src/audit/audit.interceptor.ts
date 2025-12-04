@@ -38,10 +38,13 @@ export class AuditInterceptor implements NestInterceptor {
     const entityType = this.extractEntityType(url);
     const entityId = this.extractEntityId(url);
 
+    console.log(`[AuditInterceptor] ${method} ${url} - User: ${user?.email ?? 'anonymous'} - Entity: ${entityType}`);
+
     return next.handle().pipe(
       tap({
         next: (response) => {
           // Log após sucesso
+          console.log(`[AuditInterceptor] Logging action: ${action} on ${entityType}`);
           void this.auditService.log({
             userId: user?.sub,
             userEmail: user?.email,
@@ -57,8 +60,8 @@ export class AuditInterceptor implements NestInterceptor {
             userAgent: request.headers['user-agent'],
           });
         },
-        error: () => {
-          // Não loga erros para não poluir o audit log
+        error: (error) => {
+          console.error(`[AuditInterceptor] Error during request: ${error}`);
         },
       }),
     );
