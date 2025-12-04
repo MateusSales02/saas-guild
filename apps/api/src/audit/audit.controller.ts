@@ -14,8 +14,7 @@ import type { AuditAction } from './audit-log.entity';
 
 @ApiTags('audit')
 @Controller('audit')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
-@Roles('leader')
+@UseGuards(AuthGuard('jwt'))
 export class AuditController {
   constructor(private readonly auditService: AuditService) {}
 
