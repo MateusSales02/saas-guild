@@ -103,12 +103,36 @@
         class="group p-5 rounded-xl border border-slate-700/50 bg-slate-800/30 hover:bg-slate-800/50 hover:border-emerald-500/50 transition-all duration-300"
       >
         <div class="flex items-start justify-between mb-3">
-          <span
-            class="px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border"
-            :class="getTypeStyle(ev.type)"
-          >
-            {{ getTypeLabel(ev.type) }}
-          </span>
+          <div class="flex flex-col gap-2">
+            <span
+              class="px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border"
+              :class="getTypeStyle(ev.type)"
+            >
+              {{ getTypeLabel(ev.type) }}
+            </span>
+            <!-- Badge de Recorrência -->
+            <span
+              v-if="ev.is_recurring && !ev.parent_event_id"
+              class="px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 bg-purple-500/20 border border-purple-500/40 text-purple-300"
+              :title="`Repete ${getRecurrenceLabel(ev.recurrence_pattern, ev.recurrence_interval)}`"
+            >
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+              </svg>
+              {{ getRecurrenceLabel(ev.recurrence_pattern, ev.recurrence_interval) }}
+            </span>
+            <!-- Badge para Ocorrências Geradas -->
+            <span
+              v-if="ev.parent_event_id"
+              class="px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-blue-500/20 border border-blue-500/40 text-blue-300"
+              title="Ocorrência gerada automaticamente"
+            >
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+              </svg>
+              Auto-gerado
+            </span>
+          </div>
           <div
             class="flex h-10 w-10 flex-col items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/30 to-teal-500/30 border border-emerald-500/40"
           >
@@ -200,6 +224,10 @@ type EventItem = {
   type: string
   location?: string
   participants?: Participant[]
+  is_recurring?: boolean
+  recurrence_pattern?: 'daily' | 'weekly' | 'monthly'
+  recurrence_interval?: number
+  parent_event_id?: number | null
 }
 
 const guild = ref<any>(null)
@@ -357,5 +385,19 @@ function getTypeStyle(type: string) {
     PVP: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
   }
   return styles[type] || 'bg-slate-700/50 text-slate-300 border-slate-600'
+}
+
+function getRecurrenceLabel(pattern?: string, interval?: number) {
+  if (!pattern) return 'Recorrente'
+
+  const num = interval || 1
+
+  const labels: Record<string, string> = {
+    daily: num === 1 ? 'Diário' : `A cada ${num} dias`,
+    weekly: num === 1 ? 'Semanal' : `A cada ${num} semanas`,
+    monthly: num === 1 ? 'Mensal' : `A cada ${num} meses`,
+  }
+
+  return labels[pattern] || 'Recorrente'
 }
 </script>
