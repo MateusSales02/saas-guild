@@ -16,15 +16,17 @@ Oferecer uma solução centralizada que permita a líderes e membros de clãs or
 ## ✨ Funcionalidades Implementadas
 
 - 👥 **Gestão de Membros:** Cadastro, edição e controle de cargos (Líder, Oficial, Membro)
-- 📅 **Eventos:** Agendamento e confirmação de presença (RSVP)
-- 💰 **Controle Financeiro:** Registro de entradas/saídas e visualização de saldo
+- 📅 **Eventos Recorrentes:** Agendamento, confirmação de presença (RSVP) e eventos que se repetem automaticamente (diário, semanal, mensal)
+- 💰 **Controle Financeiro:** Registro de entradas/saídas, visualização de saldo, histórico diário e soft delete
 - 🧠 **Gerenciamento de Builds:** Armazenamento e compartilhamento de builds de personagens com 309+ itens do Albion Online
 - 📊 **Dashboard Dinâmico:** Visão geral com KPIs e gráficos em tempo real
 - 📤 **Exportação de Dados:** Histórico financeiro, membros e eventos em CSV e PDF
-- 🔐 **Autenticação Segura:** Sistema próprio com JWT
+- 🔐 **Autenticação Segura:** Sistema próprio com JWT e recuperação de senha por email
 - 📋 **Logs de Auditoria:** Rastreamento de ações críticas no sistema
 - 💹 **Integração com Market API:** Preços e valores em tempo real dos itens do Albion Online
 - 🎮 **Catálogo Completo de Itens:** Base de dados com todos os equipamentos, armas e recursos do jogo
+- ⚡ **Cache Redis:** Sistema de cache para melhor performance
+- 🛡️ **Rate Limiting:** Proteção contra abuso de APIs com throttling
 
 ---
 
@@ -34,17 +36,22 @@ Oferecer uma solução centralizada que permita a líderes e membros de clãs or
 
 - [NestJS](https://nestjs.com/) (TypeScript)
 - PostgreSQL (banco relacional com TypeORM)
-- Redis (preparado para cache)
-- Jest (testes unitários - 84% de cobertura)
+- Redis (cache com @keyv/redis)
+- Jest (testes unitários - **76% de cobertura**, 158 testes)
 - JWT (autenticação)
-- Axios (HTTP client)
+- Nodemailer (envio de emails)
+- Class-validator (validação de DTOs)
+- @nestjs/schedule (tarefas agendadas - cron jobs)
+- @nestjs/throttler (rate limiting)
+- Prometheus (métricas e monitoramento)
 
 ### 🖥️ Frontend
 
 - [Vue.js 3](https://vuejs.org/) (Composition API)
 - [Tailwind CSS](https://tailwindcss.com/)
 - Vue Router
-- Vitest (testes unitários)
+- Pinia (gerenciamento de estado)
+- Vitest (testes unitários - **52% de cobertura**)
 
 ### 🧱 DevOps e Infra
 
