@@ -6,13 +6,14 @@ import { EventsService } from './events.service';
 import { EventsController } from './events.controller';
 import { ParticipantsService } from './participants.service';
 import { ParticipantsController } from './participants.controller';
+import { RecurrenceService } from './recurrence.service';
 import { User } from '../users/user.entity';
 import { Guild } from '../guilds/guild.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Event, EventParticipant, User, Guild])],
-  providers: [EventsService, ParticipantsService],
+  providers: [EventsService, ParticipantsService, RecurrenceService],
   controllers: [EventsController, ParticipantsController],
-  exports: [EventsService],
+  exports: [EventsService, RecurrenceService],
 })
 export class EventsModule {}

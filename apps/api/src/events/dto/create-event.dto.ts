@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsEnum,
   IsInt,
+  IsBoolean,
 } from 'class-validator';
 
 export enum EventType {
@@ -11,6 +12,12 @@ export enum EventType {
   GATHERING = 'GATHERING',
   DUNGEON = 'DUNGEON',
   PVP = 'PVP',
+}
+
+export enum RecurrencePattern {
+  DAILY = 'daily',
+  WEEKLY = 'weekly',
+  MONTHLY = 'monthly',
 }
 
 export class CreateEventDto {
@@ -32,4 +39,21 @@ export class CreateEventDto {
 
   @IsInt()
   guildId: number;
+
+  // Campos de recorrência
+  @IsOptional()
+  @IsBoolean()
+  is_recurring?: boolean;
+
+  @IsOptional()
+  @IsEnum(RecurrencePattern)
+  recurrence_pattern?: RecurrencePattern;
+
+  @IsOptional()
+  @IsInt()
+  recurrence_interval?: number;
+
+  @IsOptional()
+  @IsDateString()
+  recurrence_end_date?: string;
 }
