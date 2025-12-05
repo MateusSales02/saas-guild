@@ -236,4 +236,116 @@ describe('FinanceService', () => {
       expect(result).toEqual({ ok: true });
     });
   });
+
+  describe('findDeleted', () => {
+    it('should return only deleted transactions', async () => {
+      const deletedTransaction = {
+        ...mockTransaction,
+        deleted_at: new Date(),
+      };
+      mockRepo.find.mockResolvedValue([deletedTransaction]);
+
+      const result = await service.findDeleted();
+
+      expect(mockRepo.find).toHaveBeenCalledWith({
+        where: {},
+        withDeleted: true,
+      });
+      expect(result).toHaveLength(1);
+      expect(result[0].deleted_at).toBeDefined();
+    });
+
+    it('should filter out non-deleted transactions', async () => {
+      mockRepo.find.mockResolvedValue([
+        { ...mockTransaction, deleted_at: new Date() },
+        { ...mockTransaction, id: 2, deleted_at: null },
+      ]);
+
+      const result = await service.findDeleted();
+
+      expect(result).toHaveLength(1);
+    });
+  });
+
+  describe('restore', () => {
+    it('should restore a deleted transaction', async () => {
+      mockRepo.restore.mockResolvedValue({ affected: 1 });
+
+      const result = await service.restore(1);
+
+      expect(mockRepo.restore).toHaveBeenCalledWith(1);
+      expect(result).toEqual({ restored: true });
+    });
+  });
+
+  describe('hardRemove', () => {
+    it('should permanently delete a transaction', async () => {
+      mockRepo.findOne.mockResolvedValue(mockTransaction);
+      mockRepo.remove.mockResolvedValue(mockTransaction);
+
+      const result = await service.hardRemove(1);
+
+      expect(mockRepo.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        withDeleted: true,
+      });
+      expect(mockRepo.remove).toHaveBeenCalledWith(mockTransaction);
+      expect(result).toEqual({ deleted: true });
+    });
+
+    it('should throw NotFoundException if transaction not found', async () => {
+      mockRepo.findOne.mockResolvedValue(null);
+
+      await expect(service.hardRemove(999)).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.hardRemove(999)).rejects.toThrow(
+        'Transação não encontrada',
+      );
+    });
+  });
+
+  describe('dailyHistory', () => {
+    it('should return daily balance history', async () => {
+      const mockQueryBuilder = {
+        select: jest.fn().mockReturnThis(),
+        addSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getRawMany: jest.fn().mockResolvedValue([
+          { date: '2025-01-01', type: 'in', amount: '1000' },
+          { date: '2025-01-01', type: 'out', amount: '200' },
+          { date: '2025-01-02', type: 'in', amount: '500' },
+        ]),
+      };
+      mockRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+
+      const result = await service.dailyHistory(1, 3);
+
+      expect(mockRepo.createQueryBuilder).toHaveBeenCalledWith('t');
+      expect(result).toHaveLength(3);
+      expect(result[0]).toHaveProperty('date');
+      expect(result[0]).toHaveProperty('balance');
+    });
+
+    it('should handle days with no transactions', async () => {
+      const mockQueryBuilder = {
+        select: jest.fn().mockReturnThis(),
+        addSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getRawMany: jest.fn().mockResolvedValue([]),
+      };
+      mockRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+
+      const result = await service.dailyHistory(1, 7);
+
+      expect(result).toHaveLength(7);
+      expect(result[0].balance).toBe(0);
+    });
+  });
 });
