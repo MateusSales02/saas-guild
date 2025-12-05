@@ -76,14 +76,14 @@
       </div>
 
       <!-- Checkbox de Recorrência -->
-      <div class="mt-4 flex items-center gap-3 p-4 rounded-xl bg-purple-500/10 border border-purple-500/30">
+      <div class="mt-4 flex items-center gap-3 p-4 rounded-xl bg-[#C6A95D]/10 border border-[#C6A95D]/30">
         <input
           v-model="form.is_recurring"
           type="checkbox"
           id="recurring-checkbox"
-          class="w-5 h-5 rounded border-purple-500/50 bg-slate-800 text-purple-500 focus:ring-2 focus:ring-purple-500/50 cursor-pointer"
+          class="w-5 h-5 rounded border-[#C6A95D]/50 bg-slate-800 text-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/50 cursor-pointer"
         />
-        <label for="recurring-checkbox" class="flex items-center gap-2 text-sm font-semibold text-purple-300 cursor-pointer">
+        <label for="recurring-checkbox" class="flex items-center gap-2 text-sm font-semibold text-[#C6A95D] cursor-pointer">
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
           </svg>
@@ -92,12 +92,12 @@
       </div>
 
       <!-- Campos de Recorrência (aparecem quando checkbox está marcado) -->
-      <div v-if="form.is_recurring" class="mt-4 grid gap-4 md:grid-cols-3 p-4 rounded-xl bg-purple-500/5 border border-purple-500/20">
+      <div v-if="form.is_recurring" class="mt-4 grid gap-4 md:grid-cols-3 p-4 rounded-xl bg-[#C6A95D]/5 border border-[#C6A95D]/20">
         <div>
-          <label class="block text-xs font-semibold text-purple-300 mb-2">Repetir</label>
+          <label class="block text-xs font-semibold text-amber-400 mb-2">Repetir</label>
           <select
             v-model="form.recurrence_pattern"
-            class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-purple-500/40 text-slate-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all"
+            class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-[#C6A95D]/40 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
           >
             <option value="daily">Diariamente</option>
             <option value="weekly">Semanalmente</option>
@@ -106,14 +106,14 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-purple-300 mb-2">A cada</label>
+          <label class="block text-xs font-semibold text-amber-400 mb-2">A cada</label>
           <input
             v-model.number="form.recurrence_interval"
             type="number"
             min="1"
             max="30"
             placeholder="1"
-            class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-purple-500/40 text-slate-100 placeholder-slate-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all"
+            class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-[#C6A95D]/40 text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
           />
           <p class="mt-1 text-xs text-slate-400">
             {{ form.recurrence_pattern === 'daily' ? 'dia(s)' : form.recurrence_pattern === 'weekly' ? 'semana(s)' : 'mês(es)' }}
@@ -121,12 +121,12 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-purple-300 mb-2">Termina em (opcional)</label>
+          <label class="block text-xs font-semibold text-amber-400 mb-2">Termina em (opcional)</label>
           <input
             v-model="form.recurrence_end_date"
             type="date"
             :min="minDate"
-            class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-purple-500/40 text-slate-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all"
+            class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-[#C6A95D]/40 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
           />
         </div>
       </div>
@@ -172,7 +172,7 @@
             <!-- Badge de Recorrência -->
             <span
               v-if="ev.is_recurring && !ev.parent_event_id"
-              class="px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 bg-purple-500/20 border border-purple-500/40 text-purple-300"
+              class="px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 bg-[#C6A95D]/20 border border-[#C6A95D]/40 text-[#C6A95D]"
               :title="`Repete ${getRecurrenceLabel(ev.recurrence_pattern, ev.recurrence_interval)}`"
             >
               <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
@@ -183,7 +183,7 @@
             <!-- Badge para Ocorrências Geradas -->
             <span
               v-if="ev.parent_event_id"
-              class="px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-blue-500/20 border border-blue-500/40 text-blue-300"
+              class="px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-slate-700/50 border border-slate-600 text-slate-300"
               title="Ocorrência gerada automaticamente"
             >
               <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
