@@ -5,12 +5,14 @@ import { EventsService } from './events.service';
 import { Event } from './event.entity';
 import { Guild } from '../guilds/guild.entity';
 import { ParticipantsService } from './participants.service';
+import { RecurrenceService } from './recurrence.service';
 
 describe('EventsService', () => {
   let service: EventsService;
   let mockEventRepo: any;
   let mockGuildRepo: any;
   let mockParticipantsService: any;
+  let mockRecurrenceService: any;
 
   const mockGuild: Guild = {
     id: 1,
@@ -55,6 +57,13 @@ describe('EventsService', () => {
       update: jest.fn(),
     };
 
+    mockRecurrenceService = {
+      createNextOccurrences: jest.fn().mockResolvedValue(0),
+      deleteFutureOccurrences: jest.fn().mockResolvedValue(0),
+      updateFutureOccurrences: jest.fn().mockResolvedValue(0),
+      generateRecurringEvents: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EventsService,
@@ -69,6 +78,10 @@ describe('EventsService', () => {
         {
           provide: ParticipantsService,
           useValue: mockParticipantsService,
+        },
+        {
+          provide: RecurrenceService,
+          useValue: mockRecurrenceService,
         },
       ],
     }).compile();
