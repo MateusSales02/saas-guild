@@ -34,8 +34,19 @@ import { CacheModule } from './cache/cache.module';
     }),
     ThrottlerModule.forRoot([
       {
+        name: 'short',
+        ttl: 1000, // 1 second
+        limit: 10, // 10 requests per second
+      },
+      {
+        name: 'medium',
         ttl: 60000, // 60 seconds
-        limit: 100, // 100 requests per minute (global default)
+        limit: 100, // 100 requests per minute
+      },
+      {
+        name: 'long',
+        ttl: 3600000, // 1 hour
+        limit: 1000, // 1000 requests per hour
       },
     ]),
     TypeOrmModule.forRootAsync({
