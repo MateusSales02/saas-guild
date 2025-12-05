@@ -41,9 +41,7 @@ COPY apps/api/package.json ./apps/api/
 RUN pnpm install --frozen-lockfile --filter api --prod
 
 # Copia código compilado do stage anterior (incluindo dist/data/)
-COPY --from=builder /app/apps/api/dist ./dist
-
-# Copia package.json para produção (não precisa copiar .env pois usamos variáveis de ambiente)
+COPY --from=builder /app/apps/api/dist ./apps/api/dist
 
 # Usuário não-root para segurança
 RUN addgroup -g 1001 -S nodejs && \
@@ -54,4 +52,4 @@ USER nestjs
 
 EXPOSE 3000
 
-CMD ["node", "dist/main.js"]
+CMD ["node", "/app/apps/api/dist/main.js"]
