@@ -73,10 +73,69 @@
           placeholder="Local (opcional)"
           class="px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
         />
+      </div>
+
+      <!-- Checkbox de Recorrência -->
+      <div class="mt-4 flex items-center gap-3 p-4 rounded-xl bg-purple-500/10 border border-purple-500/30">
+        <input
+          v-model="form.is_recurring"
+          type="checkbox"
+          id="recurring-checkbox"
+          class="w-5 h-5 rounded border-purple-500/50 bg-slate-800 text-purple-500 focus:ring-2 focus:ring-purple-500/50 cursor-pointer"
+        />
+        <label for="recurring-checkbox" class="flex items-center gap-2 text-sm font-semibold text-purple-300 cursor-pointer">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+          </svg>
+          Evento Recorrente
+        </label>
+      </div>
+
+      <!-- Campos de Recorrência (aparecem quando checkbox está marcado) -->
+      <div v-if="form.is_recurring" class="mt-4 grid gap-4 md:grid-cols-3 p-4 rounded-xl bg-purple-500/5 border border-purple-500/20">
+        <div>
+          <label class="block text-xs font-semibold text-purple-300 mb-2">Repetir</label>
+          <select
+            v-model="form.recurrence_pattern"
+            class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-purple-500/40 text-slate-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all"
+          >
+            <option value="daily">Diariamente</option>
+            <option value="weekly">Semanalmente</option>
+            <option value="monthly">Mensalmente</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-purple-300 mb-2">A cada</label>
+          <input
+            v-model.number="form.recurrence_interval"
+            type="number"
+            min="1"
+            max="30"
+            placeholder="1"
+            class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-purple-500/40 text-slate-100 placeholder-slate-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all"
+          />
+          <p class="mt-1 text-xs text-slate-400">
+            {{ form.recurrence_pattern === 'daily' ? 'dia(s)' : form.recurrence_pattern === 'weekly' ? 'semana(s)' : 'mês(es)' }}
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-purple-300 mb-2">Termina em (opcional)</label>
+          <input
+            v-model="form.recurrence_end_date"
+            type="date"
+            :min="minDate"
+            class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-purple-500/40 text-slate-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all"
+          />
+        </div>
+      </div>
+
+      <div class="mt-4">
         <button
           @click="createEvent"
           :disabled="creating || !form.title || !form.date || !form.time || !guild"
-          class="px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300"
+          class="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300"
         >
           {{ creating ? 'Criando...' : 'Criar Evento' }}
         </button>
@@ -246,6 +305,10 @@ const form = ref({
   time: '',
   type: 'GATHERING' as 'RAID' | 'GATHERING' | 'DUNGEON' | 'PVP',
   location: '',
+  is_recurring: false,
+  recurrence_pattern: 'weekly' as 'daily' | 'weekly' | 'monthly',
+  recurrence_interval: 1,
+  recurrence_end_date: '',
 })
 
 onMounted(load)
@@ -289,7 +352,7 @@ async function createEvent() {
   creating.value = true
   error.value = ''
   try {
-    const payload = {
+    const payload: any = {
       title: form.value.title.trim(),
       description: form.value.description?.trim() || 'Evento da guilda',
       date: toISO(form.value.date, form.value.time),
@@ -297,9 +360,31 @@ async function createEvent() {
       location: form.value.location?.trim() || undefined,
       guildId: guild.value.id,
     }
+
+    // Adiciona campos de recorrência se o evento for recorrente
+    if (form.value.is_recurring) {
+      payload.is_recurring = true
+      payload.recurrence_pattern = form.value.recurrence_pattern
+      payload.recurrence_interval = form.value.recurrence_interval || 1
+      if (form.value.recurrence_end_date) {
+        payload.recurrence_end_date = form.value.recurrence_end_date
+      }
+    }
+
     await EventsApi.create(payload)
     showForm.value = false
-    form.value = { title: '', description: '', date: '', time: '', type: 'GATHERING', location: '' }
+    form.value = {
+      title: '',
+      description: '',
+      date: '',
+      time: '',
+      type: 'GATHERING',
+      location: '',
+      is_recurring: false,
+      recurrence_pattern: 'weekly',
+      recurrence_interval: 1,
+      recurrence_end_date: '',
+    }
     await load()
   } catch (e: any) {
     error.value = e?.response?.data?.message ?? e?.message ?? 'Falha ao criar evento'
