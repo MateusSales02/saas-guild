@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import type { Cache } from 'cache-manager';
 import { Build } from './build.entity';
 import { CreateBuildDto } from './dto/create-build.dto';
 import { UpdateBuildDto } from './dto/update-build.dto';
@@ -178,9 +178,9 @@ export class BuildsService {
   }
 
   // --- Classes ---
-  async listClasses() {
+  async listClasses(): Promise<BuildClass[]> {
     const cacheKey = 'build-classes:all';
-    const cached = await this.cacheManager.get(cacheKey);
+    const cached = await this.cacheManager.get<BuildClass[]>(cacheKey);
 
     if (cached) {
       return cached;
@@ -258,9 +258,9 @@ export class BuildsService {
   }
 
   // --- Items ---
-  async listItems() {
+  async listItems(): Promise<BuildItem[]> {
     const cacheKey = 'build-items:all';
-    const cached = await this.cacheManager.get(cacheKey);
+    const cached = await this.cacheManager.get<BuildItem[]>(cacheKey);
 
     if (cached) {
       return cached;
