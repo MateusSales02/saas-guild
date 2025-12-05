@@ -39,7 +39,8 @@ jobs:
     - name: Build e Push - API
       uses: docker/build-push-action@v5
       with:
-        context: ./apps/api
+        context: .
+        file: ./apps/api/Dockerfile
         push: true
         tags: ${{ steps.vars.outputs.api_image }}:latest,${{ steps.vars.outputs.api_image }}:${{ github.sha }}
 

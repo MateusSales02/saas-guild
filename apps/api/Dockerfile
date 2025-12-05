@@ -6,16 +6,20 @@ WORKDIR /app
 # Instala pnpm
 RUN npm install -g pnpm
 
-# Copia arquivos de dependências
-COPY package.json pnpm-lock.yaml ./
+# Copia arquivos de configuração do workspace da raiz
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+
+# Copia package.json da API
+COPY apps/api/package.json ./apps/api/
 
 # Instala TODAS as dependências (incluindo devDependencies para build)
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --filter api
 
-# Copia código fonte
-COPY . .
+# Copia código fonte da API
+COPY apps/api ./apps/api
 
-# Compila TypeScript
+# Compila TypeScript da API
+WORKDIR /app/apps/api
 RUN pnpm run build
 
 # Copia arquivo JSON para o diretório dist após build
@@ -29,14 +33,15 @@ WORKDIR /app
 # Instala pnpm
 RUN npm install -g pnpm
 
-# Copia arquivos de dependências
-COPY package.json pnpm-lock.yaml ./
+# Copia arquivos de configuração do workspace
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY apps/api/package.json ./apps/api/
 
-# Instala apenas dependências de produção
-RUN pnpm install --frozen-lockfile --prod
+# Instala apenas dependências de produção da API
+RUN pnpm install --frozen-lockfile --filter api --prod
 
 # Copia código compilado do stage anterior (incluindo dist/data/)
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/apps/api/dist ./dist
 
 # Copia package.json para produção (não precisa copiar .env pois usamos variáveis de ambiente)
 
