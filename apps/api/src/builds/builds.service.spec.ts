@@ -67,6 +67,8 @@ describe('BuildsService', () => {
       create: jest.fn(),
       save: jest.fn(),
       remove: jest.fn(),
+      softRemove: jest.fn(),
+      restore: jest.fn(),
       createQueryBuilder: jest.fn(),
     };
 
@@ -259,13 +261,13 @@ describe('BuildsService', () => {
   });
 
   describe('remove', () => {
-    it('should remove a build', async () => {
+    it('should soft remove a build', async () => {
       mockBuildRepo.findOne.mockResolvedValue(mockBuild);
-      mockBuildRepo.remove.mockResolvedValue(mockBuild);
+      mockBuildRepo.softRemove.mockResolvedValue(mockBuild);
 
       const result = await service.remove(1);
 
-      expect(mockBuildRepo.remove).toHaveBeenCalledWith(mockBuild);
+      expect(mockBuildRepo.softRemove).toHaveBeenCalledWith(mockBuild);
       expect(result).toEqual({ deleted: true });
     });
   });

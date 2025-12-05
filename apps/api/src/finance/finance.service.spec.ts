@@ -43,9 +43,13 @@ describe('FinanceService', () => {
   beforeEach(async () => {
     mockRepo = {
       find: jest.fn(),
+      findOne: jest.fn(),
       create: jest.fn(),
       save: jest.fn(),
       delete: jest.fn(),
+      softDelete: jest.fn(),
+      restore: jest.fn(),
+      remove: jest.fn(),
       createQueryBuilder: jest.fn(),
     };
 
@@ -223,12 +227,12 @@ describe('FinanceService', () => {
   });
 
   describe('remove', () => {
-    it('should delete a transaction', async () => {
-      mockRepo.delete.mockResolvedValue({ affected: 1 });
+    it('should soft delete a transaction', async () => {
+      mockRepo.softDelete.mockResolvedValue({ affected: 1 });
 
       const result = await service.remove(1);
 
-      expect(mockRepo.delete).toHaveBeenCalledWith(1);
+      expect(mockRepo.softDelete).toHaveBeenCalledWith(1);
       expect(result).toEqual({ ok: true });
     });
   });

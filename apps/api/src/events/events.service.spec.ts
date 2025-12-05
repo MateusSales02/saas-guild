@@ -43,6 +43,8 @@ describe('EventsService', () => {
       save: jest.fn(),
       update: jest.fn(),
       remove: jest.fn(),
+      softRemove: jest.fn(),
+      restore: jest.fn(),
     };
 
     mockGuildRepo = {
@@ -201,13 +203,13 @@ describe('EventsService', () => {
   });
 
   describe('remove', () => {
-    it('should remove an event', async () => {
+    it('should soft remove an event', async () => {
       mockEventRepo.findOne.mockResolvedValue(mockEvent);
-      mockEventRepo.remove.mockResolvedValue(mockEvent);
+      mockEventRepo.softRemove.mockResolvedValue(mockEvent);
 
       const result = await service.remove(1);
 
-      expect(mockEventRepo.remove).toHaveBeenCalledWith(mockEvent);
+      expect(mockEventRepo.softRemove).toHaveBeenCalledWith(mockEvent);
       expect(result).toEqual(mockEvent);
     });
 
