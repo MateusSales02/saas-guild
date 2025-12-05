@@ -6,6 +6,7 @@ import {
   OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { Guild } from '../guilds/guild.entity';
 import { EventParticipant } from './event-participant.entity';
@@ -38,6 +39,9 @@ export class Event {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @DeleteDateColumn()
+  deleted_at?: Date;
 
   @OneToMany(
     () => EventParticipant,

@@ -61,7 +61,7 @@ export class EventsService {
 
   async remove(id: number) {
     const exists = await this.findOne(id);
-    return this.eventRepo.remove(exists);
+    return this.eventRepo.softRemove(exists);
   }
 
   async updateParticipantStatus(

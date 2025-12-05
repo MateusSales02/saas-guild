@@ -5,6 +5,7 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
   JoinColumn,
 } from 'typeorm';
 import { Guild } from '../guilds/guild.entity';
@@ -39,4 +40,10 @@ export class FinanceTransaction {
     type: 'timestamp',
   })
   updated_at: Date;
+
+  @DeleteDateColumn({
+    name: 'deleted_at',
+    type: 'timestamp',
+  })
+  deleted_at?: Date;
 }

@@ -173,7 +173,7 @@ export class BuildsService {
 
   async remove(id: number) {
     const build = await this.findOne(id);
-    await this.buildRepo.remove(build);
+    await this.buildRepo.softRemove(build);
     return { deleted: true };
   }
 
