@@ -12,6 +12,22 @@ jobs:
   sonarcloud:
     name: SonarCloud
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: saas_guild_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,6 +57,11 @@ jobs:
 
       - name: Run API E2E tests with coverage
         working-directory: ./apps/api
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/saas_guild_test
+          JWT_SECRET: test-secret-key-for-ci-cd-testing-only
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
         run: pnpm test:e2e:cov
 
       - name: Run Web tests with coverage
