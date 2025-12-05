@@ -35,9 +35,13 @@ jobs:
         working-directory: ./apps/web
         run: pnpm install
 
-      - name: Run API tests with coverage
+      - name: Run API unit tests with coverage
         working-directory: ./apps/api
         run: pnpm test:cov
+
+      - name: Run API E2E tests with coverage
+        working-directory: ./apps/api
+        run: pnpm test:e2e:cov
 
       - name: Run Web tests with coverage
         working-directory: ./apps/web

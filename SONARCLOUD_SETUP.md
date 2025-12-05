@@ -101,6 +101,92 @@ Se o erro persistir, verifique:
 Arquivos já configurados no projeto:
 - ✅ `sonar-project.properties` - Configuração do SonarCloud
 - ✅ `.github/workflows/sonarcloud.yml` - Workflow do GitHub Actions
-- ✅ Testes implementados (Backend: 84%, Frontend: 25%)
+- ✅ Testes unitários implementados (Backend)
+- ✅ Testes E2E implementados (Backend: auth, builds, finance, reports, events, guilds)
+- ✅ Cobertura de código configurada (unit + E2E)
+
+## 🎯 Quality Gates - Meta de Cobertura
+
+O projeto tem as seguintes metas de cobertura definidas:
+- **Backend (apps/api)**: Mínimo de **75% de cobertura**
+- **Frontend (apps/web)**: Mínimo de **25% de cobertura**
+
+### Como Configurar Quality Gates no SonarCloud
+
+Após criar o projeto (Passos 1-6 acima), configure os quality gates:
+
+1. Acesse o projeto no SonarCloud:
+   ```
+   https://sonarcloud.io/project/overview?id=MateusSales02_saas-guild
+   ```
+
+2. Vá para **"Project Settings"** → **"Quality Gate"**
+
+3. Você pode:
+   - **Opção A**: Usar o Quality Gate padrão "Sonar way" (recomendado inicialmente)
+   - **Opção B**: Criar um Quality Gate customizado
+
+4. Para configurar thresholds personalizados:
+   - Clique em **"Create"** para criar um novo Quality Gate
+   - Nome sugerido: "SaaS Guild Standards"
+   - Adicione condições:
+     - **Coverage**: Overall Code ≥ 75% (para backend)
+     - **Coverage on New Code**: ≥ 75%
+     - **Duplicated Lines**: ≤ 3%
+     - **Maintainability Rating**: A
+     - **Reliability Rating**: A
+     - **Security Rating**: A
+
+5. Associe o Quality Gate ao projeto:
+   - Em "Project Settings" → "Quality Gate"
+   - Selecione o Quality Gate criado
+
+### Testes E2E Incluídos
+
+O workflow agora executa tanto testes unitários quanto E2E:
+
+**Backend (apps/api)**:
+- `pnpm test:cov` → Testes unitários (coverage/lcov.info)
+- `pnpm test:e2e:cov` → Testes E2E (coverage-e2e/lcov.info)
+
+Módulos com testes E2E completos:
+- ✅ Auth (register, login, profile)
+- ✅ Builds (classes, items, CRUD)
+- ✅ Finance (transactions, summary, soft/hard delete)
+- ✅ Reports (overview, trends, stats, export PDF/CSV)
+- ✅ Events (CRUD, participants, recurrence)
+- ✅ Guilds (management, members)
+
+**Frontend (apps/web)**:
+- `pnpm test:coverage` → Testes (coverage/lcov.info)
+
+### Executar Testes Localmente
+
+```bash
+# Backend - Testes Unitários
+cd apps/api
+pnpm test:cov
+
+# Backend - Testes E2E
+cd apps/api
+pnpm test:e2e:cov
+
+# Frontend
+cd apps/web
+pnpm test:coverage
+```
+
+### Visualizar Relatórios de Cobertura
+
+```bash
+# Backend (Unit Tests)
+start apps/api/coverage/index.html
+
+# Backend (E2E Tests)
+start apps/api/coverage-e2e/index.html
+
+# Frontend
+start apps/web/coverage/index.html
+```
 
 Só falta criar o projeto no SonarCloud e configurar o token! 🚀
