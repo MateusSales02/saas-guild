@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Put,
   Query,
@@ -25,6 +26,11 @@ export class BuildsController {
     return this.buildsService.findAll(filters);
   }
 
+  @Get('deleted/list')
+  findDeleted() {
+    return this.buildsService.findDeleted();
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.buildsService.findOne(id);
@@ -40,8 +46,18 @@ export class BuildsController {
     return this.buildsService.update(id, dto);
   }
 
+  @Patch(':id/restore')
+  restore(@Param('id', ParseIntPipe) id: number) {
+    return this.buildsService.restore(id);
+  }
+
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.buildsService.remove(id);
+  }
+
+  @Delete(':id/hard')
+  hardRemove(@Param('id', ParseIntPipe) id: number) {
+    return this.buildsService.hardRemove(id);
   }
 }

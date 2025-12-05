@@ -64,6 +64,31 @@ export class EventsService {
     return this.eventRepo.softRemove(exists);
   }
 
+  async findDeleted() {
+    return this.eventRepo
+      .find({
+        where: {},
+        withDeleted: true,
+        relations: ['participants', 'participants.user', 'guild'],
+      })
+      .then((events) => events.filter((e) => e.deleted_at !== null));
+  }
+
+  async restore(id: number) {
+    await this.eventRepo.restore(id);
+    return { restored: true };
+  }
+
+  async hardRemove(id: number) {
+    const event = await this.eventRepo.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+    if (!event) throw new NotFoundException('Evento não encontrado');
+    await this.eventRepo.remove(event);
+    return { deleted: true };
+  }
+
   async updateParticipantStatus(
     eventId: number,
     memberId: number,

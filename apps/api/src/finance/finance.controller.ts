@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -29,6 +30,11 @@ export class FinanceController {
     return this.service.listByGuild(Number(guildId));
   }
 
+  @Get('deleted/list')
+  findDeleted() {
+    return this.service.findDeleted();
+  }
+
   @Get('summary')
   summary(@Query('guildId') guildId: string) {
     return this.service.summary(Number(guildId));
@@ -42,8 +48,18 @@ export class FinanceController {
     return this.service.dailyHistory(Number(guildId), Number(days) || 7);
   }
 
+  @Patch(':id/restore')
+  restore(@Param('id') id: string) {
+    return this.service.restore(Number(id));
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.service.remove(Number(id));
+  }
+
+  @Delete(':id/hard')
+  hardRemove(@Param('id') id: string) {
+    return this.service.hardRemove(Number(id));
   }
 }

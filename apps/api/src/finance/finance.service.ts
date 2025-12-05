@@ -52,6 +52,32 @@ export class FinanceService {
     return { ok: true };
   }
 
+  async findDeleted() {
+    return this.repo
+      .find({
+        where: {},
+        withDeleted: true,
+      })
+      .then((transactions) =>
+        transactions.filter((t) => t.deleted_at !== null),
+      );
+  }
+
+  async restore(id: number) {
+    await this.repo.restore(id);
+    return { restored: true };
+  }
+
+  async hardRemove(id: number) {
+    const transaction = await this.repo.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+    if (!transaction) throw new NotFoundException('Transação não encontrada');
+    await this.repo.remove(transaction);
+    return { deleted: true };
+  }
+
   async dailyHistory(guildId: number, days: number) {
     const now = new Date();
     const start = new Date(now);

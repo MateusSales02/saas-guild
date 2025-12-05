@@ -177,6 +177,39 @@ export class BuildsService {
     return { deleted: true };
   }
 
+  async findDeleted() {
+    return this.buildRepo
+      .find({
+        where: {},
+        withDeleted: true,
+        relations: [
+          'class',
+          'spec',
+          'items',
+          'guild',
+          'author',
+          'member',
+          'member.user',
+        ],
+      })
+      .then((builds) => builds.filter((b) => b.deleted_at !== null));
+  }
+
+  async restore(id: number) {
+    await this.buildRepo.restore(id);
+    return { restored: true };
+  }
+
+  async hardRemove(id: number) {
+    const build = await this.buildRepo.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+    if (!build) throw new NotFoundException('Build não encontrada');
+    await this.buildRepo.remove(build);
+    return { deleted: true };
+  }
+
   // --- Classes ---
   async listClasses(): Promise<BuildClass[]> {
     const cacheKey = 'build-classes:all';

@@ -28,6 +28,12 @@ export class EventsController {
     return this.eventsService.findAll(guildId);
   }
 
+  // GET /events/deleted/list
+  @Get('deleted/list')
+  findDeleted() {
+    return this.eventsService.findDeleted();
+  }
+
   // GET /events/:id
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
@@ -46,10 +52,22 @@ export class EventsController {
     return this.eventsService.update(id, dto);
   }
 
+  // PATCH /events/:id/restore
+  @Patch(':id/restore')
+  restore(@Param('id', ParseIntPipe) id: number) {
+    return this.eventsService.restore(id);
+  }
+
   // DELETE /events/:id
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.eventsService.remove(id);
+  }
+
+  // DELETE /events/:id/hard
+  @Delete(':id/hard')
+  hardRemove(@Param('id', ParseIntPipe) id: number) {
+    return this.eventsService.hardRemove(id);
   }
 
   // PATCH /events/:eventId/participants/:memberId/status
