@@ -490,4 +490,143 @@ describe('BuildsService', () => {
       expect(mockClassRepo.save).not.toHaveBeenCalled();
     });
   });
+
+  describe('findAll with filters', () => {
+    beforeEach(() => {
+      const mockQb = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([mockBuild]),
+      };
+      mockBuildRepo.createQueryBuilder.mockReturnValue(mockQb);
+    });
+
+    it('should filter by search query', async () => {
+      await service.findAll({ search: 'tank' });
+
+      const qb = mockBuildRepo.createQueryBuilder();
+      expect(qb.andWhere).toHaveBeenCalledWith(
+        expect.stringContaining('ILIKE'),
+        expect.objectContaining({ q: '%tank%' }),
+      );
+    });
+
+    it('should filter by classId', async () => {
+      await service.findAll({ classId: 1 });
+
+      const qb = mockBuildRepo.createQueryBuilder();
+      expect(qb.andWhere).toHaveBeenCalledWith(
+        'class.id = :classId',
+        { classId: 1 },
+      );
+    });
+
+    it('should filter by specId', async () => {
+      await service.findAll({ specId: 2 });
+
+      const qb = mockBuildRepo.createQueryBuilder();
+      expect(qb.andWhere).toHaveBeenCalledWith(
+        'spec.id = :specId',
+        { specId: 2 },
+      );
+    });
+
+    it('should filter by guildId', async () => {
+      await service.findAll({ guildId: 3 });
+
+      const qb = mockBuildRepo.createQueryBuilder();
+      expect(qb.andWhere).toHaveBeenCalledWith(
+        '(guild.id = :guildId OR build.is_public = true)',
+        { guildId: 3 },
+      );
+    });
+
+    it('should filter by authorId', async () => {
+      await service.findAll({ authorId: 4 });
+
+      const qb = mockBuildRepo.createQueryBuilder();
+      expect(qb.andWhere).toHaveBeenCalledWith(
+        'author.id = :authorId',
+        { authorId: 4 },
+      );
+    });
+
+    it('should filter only public builds', async () => {
+      await service.findAll({ onlyPublic: true });
+
+      const qb = mockBuildRepo.createQueryBuilder();
+      expect(qb.andWhere).toHaveBeenCalledWith('build.is_public = true');
+    });
+
+    it('should apply multiple filters', async () => {
+      await service.findAll({
+        search: 'healer',
+        classId: 1,
+        onlyPublic: true,
+      });
+
+      const qb = mockBuildRepo.createQueryBuilder();
+      expect(qb.andWhere).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('findDeleted', () => {
+    it('should return only deleted builds', async () => {
+      const deletedBuild = { ...mockBuild, deleted_at: new Date() };
+      mockBuildRepo.find.mockResolvedValue([deletedBuild]);
+
+      const result = await service.findDeleted();
+
+      expect(mockBuildRepo.find).toHaveBeenCalledWith({
+        where: {},
+        withDeleted: true,
+        relations: [
+          'class',
+          'spec',
+          'items',
+          'guild',
+          'author',
+          'member',
+          'member.user',
+        ],
+      });
+      expect(result).toHaveLength(1);
+    });
+  });
+
+  describe('restore', () => {
+    it('should restore a deleted build', async () => {
+      mockBuildRepo.restore.mockResolvedValue({ affected: 1 });
+
+      const result = await service.restore(1);
+
+      expect(mockBuildRepo.restore).toHaveBeenCalledWith(1);
+      expect(result).toEqual({ restored: true });
+    });
+  });
+
+  describe('hardRemove', () => {
+    it('should permanently delete a build', async () => {
+      mockBuildRepo.findOne.mockResolvedValue(mockBuild);
+      mockBuildRepo.remove.mockResolvedValue(mockBuild);
+
+      const result = await service.hardRemove(1);
+
+      expect(mockBuildRepo.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        withDeleted: true,
+      });
+      expect(mockBuildRepo.remove).toHaveBeenCalledWith(mockBuild);
+      expect(result).toEqual({ deleted: true });
+    });
+
+    it('should throw NotFoundException if build not found', async () => {
+      mockBuildRepo.findOne.mockResolvedValue(null);
+
+      await expect(service.hardRemove(999)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
 });
