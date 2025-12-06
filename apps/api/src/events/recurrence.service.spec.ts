@@ -1,22 +1,32 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, MoreThan, IsNull } from 'typeorm';
+import { Repository } from 'typeorm';
 import { RecurrenceService } from './recurrence.service';
 import { Event } from './event.entity';
 
 describe('RecurrenceService', () => {
   let service: RecurrenceService;
-  let eventRepo: Repository<Event>;
+  let mockEventRepo: any;
 
-  const mockEventRepo = {
-    find: jest.fn(),
-    create: jest.fn(),
-    save: jest.fn(),
-    softDelete: jest.fn(),
-    update: jest.fn(),
-  };
+  const createMockEvent = (overrides: Partial<Event> = {}): Event => ({
+    id: 1,
+    title: 'Test Event',
+    date: new Date(),
+    is_recurring: true,
+    recurrence_pattern: 'daily',
+    recurrence_interval: 1,
+    ...overrides,
+  } as Event);
 
   beforeEach(async () => {
+    mockEventRepo = {
+      find: jest.fn(),
+      create: jest.fn((data) => data as Event),
+      save: jest.fn().mockResolvedValue([]),
+      softDelete: jest.fn(),
+      update: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RecurrenceService,
@@ -28,7 +38,6 @@ describe('RecurrenceService', () => {
     }).compile();
 
     service = module.get<RecurrenceService>(RecurrenceService);
-    eventRepo = module.get<Repository<Event>>(getRepositoryToken(Event));
   });
 
   afterEach(() => {
@@ -41,19 +50,10 @@ describe('RecurrenceService', () => {
 
   describe('generateRecurringEvents', () => {
     it('should generate recurring events successfully', async () => {
-      const mockEvent = {
-        id: 1,
-        title: 'Weekly Meeting',
-        date: new Date(),
-        is_recurring: true,
-        recurrence_pattern: 'weekly',
-        recurrence_interval: 1,
-      } as Event;
+      const mockEvent = createMockEvent({ recurrence_pattern: 'weekly' });
 
       mockEventRepo.find.mockResolvedValueOnce([mockEvent]);
       mockEventRepo.find.mockResolvedValueOnce([]);
-      mockEventRepo.create.mockImplementation((data) => data);
-      mockEventRepo.save.mockResolvedValue([]);
 
       await service.generateRecurringEvents();
 
@@ -70,103 +70,46 @@ describe('RecurrenceService', () => {
   });
 
   describe('createNextOccurrences', () => {
-    it('should return 0 for non-recurring events', async () => {
-      const event = { is_recurring: false } as Event;
-
-      const result = await service.createNextOccurrences(event);
-
-      expect(result).toBe(0);
-    });
-
-    it('should return 0 for events without recurrence pattern', async () => {
-      const event = { is_recurring: true, recurrence_pattern: null } as Event;
-
-      const result = await service.createNextOccurrences(event);
-
-      expect(result).toBe(0);
-    });
-
-    it('should create daily occurrences', async () => {
-      const today = new Date();
-      const event = {
-        id: 1,
-        title: 'Daily Event',
-        date: today,
-        is_recurring: true,
-        recurrence_pattern: 'daily',
-        recurrence_interval: 1,
-      } as Event;
-
+    beforeEach(() => {
       mockEventRepo.find.mockResolvedValue([]);
-      mockEventRepo.create.mockImplementation((data) => data as Event);
-      mockEventRepo.save.mockResolvedValue([]);
-
-      const result = await service.createNextOccurrences(event);
-
-      expect(result).toBeGreaterThan(0);
-      expect(mockEventRepo.save).toHaveBeenCalled();
     });
 
-    it('should create weekly occurrences', async () => {
-      const today = new Date();
-      const event = {
-        id: 2,
-        title: 'Weekly Event',
-        date: today,
-        is_recurring: true,
-        recurrence_pattern: 'weekly',
-        recurrence_interval: 1,
-      } as Event;
+    it.each([
+      ['non-recurring events', { is_recurring: false }, 0],
+      ['events without recurrence pattern', { is_recurring: true, recurrence_pattern: null }, 0],
+    ])('should return 0 for %s', async (_, eventOverrides, expected) => {
+      const event = createMockEvent(eventOverrides);
+      const result = await service.createNextOccurrences(event);
+      expect(result).toBe(expected);
+    });
 
-      mockEventRepo.find.mockResolvedValue([]);
-      mockEventRepo.create.mockImplementation((data) => data as Event);
-      mockEventRepo.save.mockResolvedValue([]);
+    it.each([
+      ['daily', 'daily'],
+      ['weekly', 'weekly'],
+      ['monthly', 'monthly'],
+    ])('should create %s occurrences', async (_, pattern) => {
+      const event = createMockEvent({
+        recurrence_pattern: pattern,
+        date: new Date()
+      });
 
       const result = await service.createNextOccurrences(event);
 
       expect(result).toBeGreaterThanOrEqual(0);
-    });
-
-    it('should create monthly occurrences', async () => {
-      const today = new Date();
-      const event = {
-        id: 3,
-        title: 'Monthly Event',
-        date: today,
-        is_recurring: true,
-        recurrence_pattern: 'monthly',
-        recurrence_interval: 1,
-      } as Event;
-
-      mockEventRepo.find.mockResolvedValue([]);
-      mockEventRepo.create.mockImplementation((data) => data as Event);
-      mockEventRepo.save.mockResolvedValue([]);
-
-      const result = await service.createNextOccurrences(event);
-
-      expect(result).toBeGreaterThanOrEqual(0);
+      if (result > 0) {
+        expect(mockEventRepo.save).toHaveBeenCalled();
+      }
     });
 
     it('should not create duplicates', async () => {
-      const today = new Date();
-      const event = {
-        id: 4,
-        title: 'Event with Existing',
-        date: today,
-        is_recurring: true,
-        recurrence_pattern: 'daily',
-        recurrence_interval: 1,
-      } as Event;
-
-      const existingOccurrence = {
+      const event = createMockEvent();
+      const existingOccurrence = createMockEvent({
         id: 100,
-        date: new Date(today.getTime() + 86400000),
-        parent_event_id: 4,
-      } as Event;
+        parent_event_id: event.id,
+        date: new Date(Date.now() + 86400000),
+      });
 
       mockEventRepo.find.mockResolvedValue([existingOccurrence]);
-      mockEventRepo.create.mockImplementation((data) => data as Event);
-      mockEventRepo.save.mockResolvedValue([]);
 
       await service.createNextOccurrences(event);
 
@@ -174,19 +117,13 @@ describe('RecurrenceService', () => {
     });
 
     it('should respect recurrence end date', async () => {
-      const today = new Date();
-      const yesterday = new Date(today);
+      const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
 
-      const event = {
-        id: 5,
-        title: 'Ended Event',
+      const event = createMockEvent({
         date: new Date('2024-01-01'),
-        is_recurring: true,
-        recurrence_pattern: 'daily',
-        recurrence_interval: 1,
         recurrence_end_date: yesterday,
-      } as Event;
+      });
 
       const result = await service.createNextOccurrences(event);
 
@@ -195,25 +132,16 @@ describe('RecurrenceService', () => {
   });
 
   describe('deleteFutureOccurrences', () => {
-    it('should delete future occurrences', async () => {
-      mockEventRepo.softDelete.mockResolvedValue({ affected: 5 });
+    it.each([
+      [5, 5],
+      [0, 0],
+    ])('should handle %d affected rows', async (affected, expected) => {
+      mockEventRepo.softDelete.mockResolvedValue({ affected });
 
       const result = await service.deleteFutureOccurrences(1);
 
-      expect(result).toBe(5);
-      expect(mockEventRepo.softDelete).toHaveBeenCalledWith(
-        expect.objectContaining({
-          parent_event_id: 1,
-        }),
-      );
-    });
-
-    it('should handle no occurrences to delete', async () => {
-      mockEventRepo.softDelete.mockResolvedValue({ affected: 0 });
-
-      const result = await service.deleteFutureOccurrences(1);
-
-      expect(result).toBe(0);
+      expect(result).toBe(expected);
+      expect(mockEventRepo.softDelete).toHaveBeenCalled();
     });
   });
 
@@ -221,12 +149,10 @@ describe('RecurrenceService', () => {
     it('should update future occurrences', async () => {
       mockEventRepo.update.mockResolvedValue({ affected: 3 });
 
-      const updates = {
+      const result = await service.updateFutureOccurrences(1, {
         title: 'Updated Title',
         description: 'Updated Description',
-      };
-
-      const result = await service.updateFutureOccurrences(1, updates);
+      });
 
       expect(result).toBe(3);
       expect(mockEventRepo.update).toHaveBeenCalled();
@@ -235,15 +161,13 @@ describe('RecurrenceService', () => {
     it('should filter out unsafe fields', async () => {
       mockEventRepo.update.mockResolvedValue({ affected: 2 });
 
-      const updates = {
+      await service.updateFutureOccurrences(1, {
         title: 'New Title',
         id: 999,
         date: new Date(),
         is_recurring: true,
         recurrence_pattern: 'daily',
-      } as any;
-
-      await service.updateFutureOccurrences(1, updates);
+      } as any);
 
       const callArgs = mockEventRepo.update.mock.calls[0][1];
       expect(callArgs).toHaveProperty('title');

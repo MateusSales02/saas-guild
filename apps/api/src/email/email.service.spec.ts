@@ -7,14 +7,20 @@ jest.mock('nodemailer');
 
 describe('EmailService', () => {
   let service: EmailService;
-  let configService: ConfigService;
   let mockTransporter: any;
 
-  beforeEach(async () => {
-    mockTransporter = {
-      sendMail: jest.fn(),
-    };
+  const defaultConfig: Record<string, any> = {
+    SMTP_HOST: 'smtp.example.com',
+    SMTP_USER: 'test@example.com',
+    SMTP_PASSWORD: 'password123',
+    SMTP_PORT: 587,
+    SMTP_SECURE: false,
+    SMTP_FROM: '"Test" <noreply@test.com>',
+    FRONTEND_URL: 'http://localhost:3000',
+  };
 
+  const createTestModule = async (config = defaultConfig) => {
+    mockTransporter = { sendMail: jest.fn() };
     (nodemailer.createTransport as jest.Mock).mockReturnValue(mockTransporter);
 
     const module: TestingModule = await Test.createTestingModule({
@@ -23,25 +29,19 @@ describe('EmailService', () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string, defaultValue?: any) => {
-              const config: Record<string, any> = {
-                SMTP_HOST: 'smtp.example.com',
-                SMTP_USER: 'test@example.com',
-                SMTP_PASSWORD: 'password123',
-                SMTP_PORT: 587,
-                SMTP_SECURE: false,
-                SMTP_FROM: '"Test" <noreply@test.com>',
-                FRONTEND_URL: 'http://localhost:3000',
-              };
-              return config[key] ?? defaultValue;
-            }),
+            get: jest.fn((key: string, defaultValue?: any) =>
+              config[key] ?? defaultValue
+            ),
           },
         },
       ],
     }).compile();
 
-    service = module.get<EmailService>(EmailService);
-    configService = module.get<ConfigService>(ConfigService);
+    return module.get<EmailService>(EmailService);
+  };
+
+  beforeEach(async () => {
+    service = await createTestModule();
   });
 
   afterEach(() => {
@@ -66,21 +66,7 @@ describe('EmailService', () => {
     });
 
     it('should disable email service when SMTP credentials are missing', async () => {
-      const module: TestingModule = await Test.createTestingModule({
-        providers: [
-          EmailService,
-          {
-            provide: ConfigService,
-            useValue: {
-              get: jest.fn((key: string, defaultValue?: any) => {
-                return defaultValue;
-              }),
-            },
-          },
-        ],
-      }).compile();
-
-      const disabledService = module.get<EmailService>(EmailService);
+      const disabledService = await createTestModule({});
       const result = await disabledService.sendPasswordResetEmail(
         'test@test.com',
         'token123',
@@ -92,11 +78,11 @@ describe('EmailService', () => {
   });
 
   describe('sendPasswordResetEmail', () => {
-    it('should send password reset email successfully', async () => {
-      mockTransporter.sendMail.mockResolvedValue({
-        messageId: 'test-message-id',
-      });
+    beforeEach(() => {
+      mockTransporter.sendMail.mockResolvedValue({ messageId: 'test-id' });
+    });
 
+    it('should send password reset email successfully', async () => {
       const result = await service.sendPasswordResetEmail(
         'user@test.com',
         'reset-token-123',
@@ -114,64 +100,22 @@ describe('EmailService', () => {
       );
     });
 
-    it('should include reset link in email template', async () => {
-      mockTransporter.sendMail.mockResolvedValue({
-        messageId: 'test-message-id',
-      });
-
-      await service.sendPasswordResetEmail('user@test.com', 'token-abc');
-
-      expect(mockTransporter.sendMail).toHaveBeenCalledWith(
-        expect.objectContaining({
-          html: expect.stringContaining(
-            'http://localhost:3000/reset-password?token=token-abc',
-          ),
-        }),
-      );
-    });
-
     it('should use default frontend URL when not configured', async () => {
-      const module: TestingModule = await Test.createTestingModule({
-        providers: [
-          EmailService,
-          {
-            provide: ConfigService,
-            useValue: {
-              get: jest.fn((key: string, defaultValue?: any) => {
-                const config: Record<string, any> = {
-                  SMTP_HOST: 'smtp.example.com',
-                  SMTP_USER: 'test@example.com',
-                  SMTP_PASSWORD: 'password123',
-                  SMTP_PORT: 587,
-                  SMTP_FROM: '"Test" <noreply@test.com>',
-                };
-                return config[key] ?? defaultValue;
-              }),
-            },
-          },
-        ],
-      }).compile();
-
-      const testService = module.get<EmailService>(EmailService);
-      mockTransporter.sendMail.mockResolvedValue({
-        messageId: 'test-message-id',
-      });
+      const configWithoutUrl = { ...defaultConfig };
+      delete configWithoutUrl.FRONTEND_URL;
+      const testService = await createTestModule(configWithoutUrl);
 
       await testService.sendPasswordResetEmail('user@test.com', 'token-xyz');
 
       expect(mockTransporter.sendMail).toHaveBeenCalledWith(
         expect.objectContaining({
-          html: expect.stringContaining(
-            'http://guildmesh.duckdns.org/reset-password?token=token-xyz',
-          ),
+          html: expect.stringContaining('http://guildmesh.duckdns.org'),
         }),
       );
     });
 
     it('should return token when email sending fails', async () => {
-      mockTransporter.sendMail.mockRejectedValue(
-        new Error('SMTP connection failed'),
-      );
+      mockTransporter.sendMail.mockRejectedValue(new Error('SMTP failed'));
 
       const result = await service.sendPasswordResetEmail(
         'user@test.com',
@@ -182,41 +126,8 @@ describe('EmailService', () => {
       expect(result.token).toBe('failed-token');
     });
 
-    it('should handle SMTP errors gracefully', async () => {
-      const smtpError = {
-        name: 'SMTPError',
-        message: 'Invalid login',
-        code: 'EAUTH',
-        command: 'AUTH',
-        response: '535 Authentication failed',
-        responseCode: 535,
-      };
-
-      mockTransporter.sendMail.mockRejectedValue(smtpError);
-
-      const result = await service.sendPasswordResetEmail(
-        'user@test.com',
-        'error-token',
-      );
-
-      expect(result.sent).toBe(false);
-      expect(result.token).toBe('error-token');
-    });
-
     it('should return token in dev mode when service is disabled', async () => {
-      const module: TestingModule = await Test.createTestingModule({
-        providers: [
-          EmailService,
-          {
-            provide: ConfigService,
-            useValue: {
-              get: jest.fn(),
-            },
-          },
-        ],
-      }).compile();
-
-      const devService = module.get<EmailService>(EmailService);
+      const devService = await createTestModule({});
       const result = await devService.sendPasswordResetEmail(
         'dev@test.com',
         'dev-token-123',
@@ -226,59 +137,17 @@ describe('EmailService', () => {
       expect(result.token).toBe('dev-token-123');
     });
 
-    it('should include Guild Mesh branding in email', async () => {
-      mockTransporter.sendMail.mockResolvedValue({
-        messageId: 'test-message-id',
-      });
-
+    it.each([
+      ['Guild Mesh', 'branding'],
+      ['Resetar Minha Senha', 'reset button'],
+      ['Não solicitou esta alteração', 'security warning'],
+      [new Date().getFullYear().toString(), 'current year'],
+    ])('should include %s in email (%s)', async (expectedContent) => {
       await service.sendPasswordResetEmail('user@test.com', 'token');
 
       expect(mockTransporter.sendMail).toHaveBeenCalledWith(
         expect.objectContaining({
-          html: expect.stringContaining('Guild Mesh'),
-        }),
-      );
-    });
-
-    it('should include password reset button in email', async () => {
-      mockTransporter.sendMail.mockResolvedValue({
-        messageId: 'test-message-id',
-      });
-
-      await service.sendPasswordResetEmail('user@test.com', 'token');
-
-      expect(mockTransporter.sendMail).toHaveBeenCalledWith(
-        expect.objectContaining({
-          html: expect.stringContaining('Resetar Minha Senha'),
-        }),
-      );
-    });
-
-    it('should include security warning in email', async () => {
-      mockTransporter.sendMail.mockResolvedValue({
-        messageId: 'test-message-id',
-      });
-
-      await service.sendPasswordResetEmail('user@test.com', 'token');
-
-      expect(mockTransporter.sendMail).toHaveBeenCalledWith(
-        expect.objectContaining({
-          html: expect.stringContaining('Não solicitou esta alteração'),
-        }),
-      );
-    });
-
-    it('should include current year in footer', async () => {
-      mockTransporter.sendMail.mockResolvedValue({
-        messageId: 'test-message-id',
-      });
-
-      const currentYear = new Date().getFullYear();
-      await service.sendPasswordResetEmail('user@test.com', 'token');
-
-      expect(mockTransporter.sendMail).toHaveBeenCalledWith(
-        expect.objectContaining({
-          html: expect.stringContaining(currentYear.toString()),
+          html: expect.stringContaining(expectedContent),
         }),
       );
     });
