@@ -59,7 +59,7 @@ export class EmailService {
 
     const frontendUrl =
       this.configService.get<string>('FRONTEND_URL') ||
-      'http://guildmesh.duckdns.org';
+      'https://guildmesh.duckdns.org';
     const resetLink = `${frontendUrl}/reset-password?token=${token}`;
 
     const htmlTemplate = this.getPasswordResetTemplate(resetLink);
@@ -167,7 +167,7 @@ export class EmailService {
                 © ${new Date().getFullYear()} Guild Mesh - Sistema de Gerenciamento de Clãs
               </p>
               <p style="margin: 10px 0 0; color: #999; font-size: 12px;">
-                <a href="http://guildmesh.duckdns.org" style="color: #667eea; text-decoration: none;">guildmesh.duckdns.org</a>
+                <a href="https://guildmesh.duckdns.org" style="color: #667eea; text-decoration: none;">guildmesh.duckdns.org</a>
               </p>
             </td>
           </tr>

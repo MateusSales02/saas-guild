@@ -7,7 +7,7 @@ import { auth, setSession } from '@/stores/auth'
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ??
-  (import.meta.env.PROD ? 'http://54.161.67.120:3000' : 'http://localhost:3000')
+  (import.meta.env.PROD ? 'https://54.161.67.120:3000' : 'http://localhost:3000')
 
 console.log('🔧 [API CONFIG] VITE_API_URL:', import.meta.env.VITE_API_URL)
 console.log('🔧 [API CONFIG] import.meta.env.PROD:', import.meta.env.PROD)

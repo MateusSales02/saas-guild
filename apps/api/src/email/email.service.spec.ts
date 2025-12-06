@@ -109,7 +109,7 @@ describe('EmailService', () => {
 
       expect(mockTransporter.sendMail).toHaveBeenCalledWith(
         expect.objectContaining({
-          html: expect.stringContaining('http://guildmesh.duckdns.org'),
+          html: expect.stringContaining('https://guildmesh.duckdns.org'),
         }),
       );
     });
