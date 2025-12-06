@@ -323,4 +323,151 @@ describe('AuthService', () => {
       );
     });
   });
+
+  describe('forgotPassword', () => {
+    it('should create reset token and send email when user exists', async () => {
+      mockUsersRepo.findOne.mockResolvedValue(mockUser);
+      mockResetTokenRepo.update.mockResolvedValue({ affected: 0 });
+      mockResetTokenRepo.save.mockResolvedValue({
+        id: 1,
+        token: 'reset-token-123',
+        user: mockUser,
+        expiresAt: new Date(),
+        used: false,
+      });
+      mockEmailService.sendPasswordResetEmail.mockResolvedValue({
+        sent: true,
+      });
+
+      const result = await service.forgotPassword('test@example.com');
+
+      expect(mockUsersRepo.findOne).toHaveBeenCalledWith({
+        where: { email: 'test@example.com' },
+      });
+      expect(mockResetTokenRepo.update).toHaveBeenCalledWith(
+        { user: { id: mockUser.id }, used: false },
+        { used: true },
+      );
+      expect(mockResetTokenRepo.save).toHaveBeenCalled();
+      expect(mockEmailService.sendPasswordResetEmail).toHaveBeenCalledWith(
+        mockUser.email,
+        expect.any(String),
+      );
+      expect(result.message).toBe(
+        'Se o email existir, você receberá um link de recuperação de senha.',
+      );
+      expect(result.token).toBeUndefined();
+    });
+
+    it('should return token when email sending fails', async () => {
+      mockUsersRepo.findOne.mockResolvedValue(mockUser);
+      mockResetTokenRepo.update.mockResolvedValue({ affected: 0 });
+      mockResetTokenRepo.save.mockResolvedValue({
+        id: 1,
+        token: 'reset-token-123',
+        user: mockUser,
+        expiresAt: new Date(),
+        used: false,
+      });
+      mockEmailService.sendPasswordResetEmail.mockResolvedValue({
+        sent: false,
+        token: 'reset-token-123',
+      });
+
+      const result = await service.forgotPassword('test@example.com');
+
+      expect(result.token).toBe('reset-token-123');
+    });
+
+    it('should return success message when user not found', async () => {
+      mockUsersRepo.findOne.mockResolvedValue(null);
+
+      const result = await service.forgotPassword('nonexistent@example.com');
+
+      expect(result.message).toBe(
+        'Se o email existir, você receberá um link de recuperação de senha.',
+      );
+      expect(result.token).toBeUndefined();
+      expect(mockResetTokenRepo.save).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('resetPassword', () => {
+    const mockResetToken = {
+      id: 1,
+      token: 'valid-token',
+      user: mockUser,
+      expiresAt: new Date(Date.now() + 3600000),
+      used: false,
+    };
+
+    it('should reset password with valid token', async () => {
+      mockResetTokenRepo.findOne.mockResolvedValue(mockResetToken);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('new_hashed_password');
+      mockUsersRepo.update.mockResolvedValue({ affected: 1 });
+      mockResetTokenRepo.update.mockResolvedValue({ affected: 1 });
+
+      const result = await service.resetPassword('valid-token', 'newPassword123');
+
+      expect(mockResetTokenRepo.findOne).toHaveBeenCalledWith({
+        where: { token: 'valid-token', used: false },
+        relations: ['user'],
+      });
+      expect(bcrypt.hash).toHaveBeenCalledWith('newPassword123', 12);
+      expect(mockUsersRepo.update).toHaveBeenCalledWith(mockUser.id, {
+        password_hash: 'new_hashed_password',
+      });
+      expect(mockResetTokenRepo.update).toHaveBeenCalledWith(1, { used: true });
+      expect(result.message).toBe(
+        'Senha alterada com sucesso! Você já pode fazer login.',
+      );
+    });
+
+    it('should throw BadRequestException for invalid token', async () => {
+      mockResetTokenRepo.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.resetPassword('invalid-token', 'newPassword'),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.resetPassword('invalid-token', 'newPassword'),
+      ).rejects.toThrow('Token inválido ou já utilizado');
+    });
+
+    it('should throw BadRequestException for expired token', async () => {
+      const expiredToken = {
+        ...mockResetToken,
+        expiresAt: new Date(Date.now() - 3600000),
+      };
+      mockResetTokenRepo.findOne.mockResolvedValue(expiredToken);
+
+      await expect(
+        service.resetPassword('expired-token', 'newPassword'),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.resetPassword('expired-token', 'newPassword'),
+      ).rejects.toThrow('Token expirado');
+    });
+  });
+
+  describe('cleanupExpiredTokens', () => {
+    it('should delete expired tokens and return count', async () => {
+      mockResetTokenRepo.delete.mockResolvedValue({ affected: 5 });
+
+      const result = await service.cleanupExpiredTokens();
+
+      expect(mockResetTokenRepo.delete).toHaveBeenCalledWith({
+        expiresAt: expect.any(Object),
+      });
+      expect(result).toBe(5);
+    });
+
+    it('should return 0 when no tokens deleted', async () => {
+      mockResetTokenRepo.delete.mockResolvedValue({ affected: 0 });
+
+      const result = await service.cleanupExpiredTokens();
+
+      expect(result).toBe(0);
+    });
+  });
 });

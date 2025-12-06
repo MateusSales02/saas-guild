@@ -130,9 +130,8 @@ export class AuthService {
       counter++;
     }
 
-    const password =
-      Math.random().toString(36).slice(-10) +
-      Math.random().toString(36).slice(-10);
+    // Generate a cryptographically secure random password
+    const password = crypto.randomBytes(16).toString('base64').slice(0, 20);
 
     return this.createPlayer(email, password, nickname);
   }
