@@ -254,4 +254,153 @@ describe('EventsService', () => {
       expect(result.status).toBe('confirmed');
     });
   });
+
+  describe('findDeleted', () => {
+    it('should return only deleted events', async () => {
+      const deletedEvent = {
+        ...mockEvent,
+        deleted_at: new Date(),
+      };
+      const activeEvent = {
+        ...mockEvent,
+        id: 2,
+        deleted_at: null,
+      };
+
+      mockEventRepo.find.mockResolvedValue([deletedEvent, activeEvent]);
+
+      const result = await service.findDeleted();
+
+      expect(mockEventRepo.find).toHaveBeenCalledWith({
+        where: {},
+        withDeleted: true,
+        relations: ['participants', 'participants.user', 'guild'],
+      });
+      expect(result).toHaveLength(1);
+      expect(result[0].deleted_at).toBeDefined();
+    });
+  });
+
+  describe('restore', () => {
+    it('should restore a deleted event', async () => {
+      mockEventRepo.restore.mockResolvedValue({ affected: 1 });
+
+      const result = await service.restore(1);
+
+      expect(mockEventRepo.restore).toHaveBeenCalledWith(1);
+      expect(result).toEqual({ restored: true });
+    });
+  });
+
+  describe('hardRemove', () => {
+    it('should permanently delete an event', async () => {
+      mockEventRepo.findOne.mockResolvedValue(mockEvent);
+      mockEventRepo.remove.mockResolvedValue(mockEvent);
+
+      const result = await service.hardRemove(1);
+
+      expect(mockEventRepo.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        withDeleted: true,
+      });
+      expect(mockEventRepo.remove).toHaveBeenCalledWith(mockEvent);
+      expect(result).toEqual({ deleted: true });
+    });
+
+    it('should throw NotFoundException if event not found', async () => {
+      mockEventRepo.findOne.mockResolvedValue(null);
+
+      await expect(service.hardRemove(999)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('create with recurring events', () => {
+    it('should create recurring occurrences when event is recurring', async () => {
+      const recurringDto = {
+        title: 'Recurring Event',
+        date: new Date(),
+        is_recurring: true,
+        recurrence_pattern: 'weekly',
+      };
+
+      mockGuildRepo.findOne.mockResolvedValue(mockGuild);
+      mockEventRepo.create.mockReturnValue({
+        ...mockEvent,
+        is_recurring: true,
+      });
+      mockEventRepo.save.mockResolvedValue({
+        ...mockEvent,
+        is_recurring: true,
+      });
+
+      await service.create(recurringDto as any, 1);
+
+      expect(mockRecurrenceService.createNextOccurrences).toHaveBeenCalled();
+    });
+  });
+
+  describe('update with recurring events', () => {
+    it('should update future occurrences for recurring events', async () => {
+      const recurringEvent = {
+        ...mockEvent,
+        is_recurring: true,
+        parent_event_id: null,
+      };
+
+      mockEventRepo.findOne
+        .mockResolvedValueOnce(recurringEvent)
+        .mockResolvedValueOnce(recurringEvent);
+      mockEventRepo.update.mockResolvedValue({ affected: 1 });
+
+      await service.update(1, { title: 'Updated Title' });
+
+      expect(mockRecurrenceService.updateFutureOccurrences).toHaveBeenCalled();
+    });
+
+    it('should not update future occurrences for single events', async () => {
+      mockEventRepo.findOne
+        .mockResolvedValueOnce({ ...mockEvent, is_recurring: false })
+        .mockResolvedValueOnce({ ...mockEvent, is_recurring: false });
+      mockEventRepo.update.mockResolvedValue({ affected: 1 });
+
+      await service.update(1, { title: 'Updated Title' });
+
+      expect(
+        mockRecurrenceService.updateFutureOccurrences,
+      ).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('remove with recurring events', () => {
+    it('should delete future occurrences for recurring events', async () => {
+      const recurringEvent = {
+        ...mockEvent,
+        is_recurring: true,
+        parent_event_id: null,
+      };
+
+      mockEventRepo.findOne.mockResolvedValue(recurringEvent);
+      mockEventRepo.softRemove.mockResolvedValue(recurringEvent);
+
+      await service.remove(1);
+
+      expect(mockRecurrenceService.deleteFutureOccurrences).toHaveBeenCalled();
+    });
+
+    it('should not delete future occurrences for single events', async () => {
+      mockEventRepo.findOne.mockResolvedValue({
+        ...mockEvent,
+        is_recurring: false,
+      });
+      mockEventRepo.softRemove.mockResolvedValue(mockEvent);
+
+      await service.remove(1);
+
+      expect(
+        mockRecurrenceService.deleteFutureOccurrences,
+      ).not.toHaveBeenCalled();
+    });
+  });
 });
