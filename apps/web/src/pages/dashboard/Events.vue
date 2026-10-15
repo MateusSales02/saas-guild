@@ -1,279 +1,229 @@
 <template>
-  <section
-    class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl p-4 sm:p-6 shadow-2xl"
-  >
-    <!-- HEADER -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-      <div>
-        <h2 class="text-2xl font-black bg-gradient-to-r from-[#C6A95D] via-amber-400 to-[#C6A95D] bg-clip-text text-transparent flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30">
-            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
-            </svg>
-          </div>
-          Eventos
-        </h2>
-        <p class="mt-2 text-sm text-slate-400">
-          Organize e acompanhe os eventos da sua guilda
-        </p>
-      </div>
+  <div class="page">
+    <PageHeader
+      :eyebrow="guild?.name ?? 'Guilda'"
+      title="Eventos"
+      subtitle="A agenda da guilda: raids, dungeons, coleta e PvP."
+    >
+      <template #actions>
+        <button type="button" class="btn btn-primary" :disabled="!guild" @click="openModal">
+          <AppIcon name="plus" :size="16" />
+          Novo evento
+        </button>
+      </template>
+    </PageHeader>
+
+    <div v-if="loadError" role="alert" class="alert alert-error">
+      <AppIcon name="alert" :size="18" class="mt-0.5" />
+      <p class="flex-1">{{ loadError }}</p>
+      <button type="button" class="btn btn-danger btn-sm" @click="load">Tentar novamente</button>
+    </div>
+
+    <!-- Filtro por tipo -->
+    <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Filtrar por tipo">
+      <button type="button" class="chip" :aria-pressed="typeFilter === 'ALL'" @click="typeFilter = 'ALL'">
+        Todos <span class="text-slate-500">{{ events.length }}</span>
+      </button>
       <button
-        @click="showForm = !showForm"
-        class="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-[#C6A95D] to-amber-500 text-slate-900 font-bold shadow-lg shadow-[#C6A95D]/30 hover:shadow-[#C6A95D]/50 hover:scale-105 transition-all duration-300"
+        v-for="t in TYPES"
+        :key="t.value"
+        type="button"
+        class="chip"
+        :aria-pressed="typeFilter === t.value"
+        @click="typeFilter = t.value"
       >
-        <svg v-if="!showForm" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/>
-        </svg>
-        <svg v-else class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-        </svg>
-        {{ showForm ? 'Fechar' : 'Novo Evento' }}
+        <span class="h-1.5 w-1.5 rounded-full" :class="t.dot" />
+        {{ t.label }}
+        <span class="text-slate-500">{{ countByType[t.value] ?? 0 }}</span>
       </button>
     </div>
 
-    <!-- FORM NOVO EVENTO -->
-    <div v-if="showForm" class="mb-6 p-5 rounded-xl bg-slate-800/40 border border-slate-700/50">
-      <h3 class="text-lg font-bold text-slate-50 mb-4">Criar Novo Evento</h3>
-      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <input
-          v-model="form.title"
-          type="text"
-          placeholder="Título do evento"
-          class="px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all md:col-span-2"
-        />
-        <input
-          v-model="form.description"
-          type="text"
-          placeholder="Descrição (opcional)"
-          class="px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all md:col-span-2"
-        />
-        <select
-          v-model="form.type"
-          class="px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
-        >
-          <option value="GATHERING">Reunião</option>
-          <option value="RAID">Raid</option>
-          <option value="DUNGEON">Dungeon</option>
-          <option value="PVP">PvP</option>
-        </select>
-        <input
-          v-model="form.date"
-          type="date"
-          :min="minDate"
-          class="px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
-        />
-        <input
-          v-model="form.time"
-          type="time"
-          class="px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
-        />
-        <input
-          v-model="form.location"
-          type="text"
-          placeholder="Local (opcional)"
-          class="px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
-        />
+    <!-- Carregando -->
+    <div v-if="loading" class="space-y-4">
+      <div v-for="i in 2" :key="i" class="panel p-5 space-y-3">
+        <div class="skeleton h-3 w-24" />
+        <div class="skeleton h-14" />
+        <div class="skeleton h-14" />
       </div>
-
-      <!-- Checkbox de Recorrência -->
-      <div class="mt-4 flex items-center gap-3 p-4 rounded-xl bg-[#C6A95D]/10 border border-[#C6A95D]/30">
-        <input
-          v-model="form.is_recurring"
-          type="checkbox"
-          id="recurring-checkbox"
-          class="w-5 h-5 rounded border-[#C6A95D]/50 bg-slate-800 text-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/50 cursor-pointer"
-        />
-        <label for="recurring-checkbox" class="flex items-center gap-2 text-sm font-semibold text-[#C6A95D] cursor-pointer">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
-          </svg>
-          Evento Recorrente
-        </label>
-      </div>
-
-      <!-- Campos de Recorrência (aparecem quando checkbox está marcado) -->
-      <div v-if="form.is_recurring" class="mt-4 grid gap-4 md:grid-cols-3 p-4 rounded-xl bg-[#C6A95D]/5 border border-[#C6A95D]/20">
-        <div>
-          <label class="block text-xs font-semibold text-amber-400 mb-2">Repetir</label>
-          <select
-            v-model="form.recurrence_pattern"
-            class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-[#C6A95D]/40 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
-          >
-            <option value="daily">Diariamente</option>
-            <option value="weekly">Semanalmente</option>
-            <option value="monthly">Mensalmente</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-amber-400 mb-2">A cada</label>
-          <input
-            v-model.number="form.recurrence_interval"
-            type="number"
-            min="1"
-            max="30"
-            placeholder="1"
-            class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-[#C6A95D]/40 text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
-          />
-          <p class="mt-1 text-xs text-slate-400">
-            {{ form.recurrence_pattern === 'daily' ? 'dia(s)' : form.recurrence_pattern === 'weekly' ? 'semana(s)' : 'mês(es)' }}
-          </p>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-amber-400 mb-2">Termina em (opcional)</label>
-          <input
-            v-model="form.recurrence_end_date"
-            type="date"
-            :min="minDate"
-            class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-[#C6A95D]/40 text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
-          />
-        </div>
-      </div>
-
-      <div class="mt-4">
-        <button
-          @click="createEvent"
-          :disabled="creating || !form.title || !form.date || !form.time || !guild"
-          class="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300"
-        >
-          {{ creating ? 'Criando...' : 'Criar Evento' }}
-        </button>
-      </div>
-      <p v-if="error" class="mt-3 flex items-center gap-2 text-sm text-rose-300">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-        </svg>
-        {{ error }}
-      </p>
     </div>
 
-    <!-- LOADING -->
-    <div v-if="loading" class="text-center py-8 text-slate-400">
-      <div class="inline-block h-8 w-8 border-4 border-[#C6A95D]/30 border-t-[#C6A95D] rounded-full animate-spin"></div>
-      <p class="mt-3">Carregando eventos...</p>
-    </div>
-
-    <!-- LISTA DE EVENTOS -->
-    <div v-else-if="events.length > 0" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <article
-        v-for="ev in events"
-        :key="ev.id"
-        class="group p-5 rounded-xl border border-slate-700/50 bg-slate-800/30 hover:bg-slate-800/50 hover:border-emerald-500/50 transition-all duration-300"
+    <div v-else-if="filtered.length === 0" class="panel">
+      <EmptyState
+        icon="calendar"
+        :title="events.length ? 'Nenhum evento deste tipo' : 'Nenhum evento agendado'"
+        :text="events.length ? 'Escolha outro filtro para ver mais eventos.' : 'Crie o primeiro evento para organizar as atividades da guilda.'"
       >
-        <div class="flex items-start justify-between mb-3">
-          <div class="flex flex-col gap-2">
-            <span
-              class="px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border"
-              :class="getTypeStyle(ev.type)"
-            >
-              {{ getTypeLabel(ev.type) }}
-            </span>
-            <!-- Badge de Recorrência -->
-            <span
-              v-if="ev.is_recurring && !ev.parent_event_id"
-              class="px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 bg-[#C6A95D]/20 border border-[#C6A95D]/40 text-[#C6A95D]"
-              :title="`Repete ${getRecurrenceLabel(ev.recurrence_pattern, ev.recurrence_interval)}`"
-            >
-              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
-              </svg>
-              {{ getRecurrenceLabel(ev.recurrence_pattern, ev.recurrence_interval) }}
-            </span>
-            <!-- Badge para Ocorrências Geradas -->
-            <span
-              v-if="ev.parent_event_id"
-              class="px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-slate-700/50 border border-slate-600 text-slate-300"
-              title="Ocorrência gerada automaticamente"
-            >
-              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
-              </svg>
-              Auto-gerado
-            </span>
-          </div>
-          <div
-            class="flex h-10 w-10 flex-col items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/30 to-teal-500/30 border border-emerald-500/40"
-          >
-            <span class="text-sm font-bold text-emerald-300">
-              {{ getDayOfMonth(ev.date) }}
-            </span>
-            <span class="text-[9px] text-slate-400 uppercase">
-              {{ getMonth(ev.date) }}
-            </span>
-          </div>
-        </div>
-
-        <h3 class="text-lg font-bold text-slate-50 mb-2 group-hover:text-emerald-300 transition-colors">
-          {{ ev.title }}
-        </h3>
-
-        <div class="space-y-2 text-sm text-slate-400 mb-4">
-          <div class="flex items-center gap-2">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-            </svg>
-            {{ formatDateTime(ev.date) }}
-          </div>
-          <div v-if="ev.location" class="flex items-center gap-2">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-            </svg>
-            {{ ev.location }}
-          </div>
-        </div>
-
-        <!-- Participantes -->
-        <div v-if="hasParticipants(ev)" class="flex items-center gap-2 mb-4">
-          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-            </svg>
-            {{ confirmedCount(ev) }} confirmados
-          </div>
-          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-700/50 border border-slate-600 text-slate-300 text-xs font-semibold">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
-            </svg>
-            {{ totalCount(ev) }} inscritos
-          </div>
-        </div>
-
-        <button
-          @click="finishEvent(ev.id)"
-          :disabled="deleting === ev.id"
-          class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-rose-500/50 bg-rose-500/10 text-rose-300 font-semibold text-sm hover:bg-rose-500/20 hover:border-rose-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-        >
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-          </svg>
-          {{ deleting === ev.id ? 'Finalizando...' : 'Finalizar Evento' }}
+        <button v-if="!events.length && guild" type="button" class="btn btn-secondary btn-sm" @click="openModal">
+          <AppIcon name="plus" :size="14" /> Novo evento
         </button>
-      </article>
+      </EmptyState>
     </div>
 
-    <!-- EMPTY STATE -->
-    <div v-else class="text-center py-12">
-      <div class="flex justify-center mb-4">
-        <div class="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30">
-          <svg class="w-10 h-10 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
-          </svg>
-        </div>
-      </div>
-      <h3 class="text-lg font-bold text-slate-200 mb-2">Nenhum evento agendado</h3>
-      <p class="text-sm text-slate-400 mb-4">
-        Crie o primeiro evento para começar a organizar as atividades da sua guilda
-      </p>
+    <!-- Agenda agrupada por dia -->
+    <div v-else class="space-y-6">
+      <section v-for="group in grouped" :key="group.key">
+        <h2 class="mb-2 flex items-baseline gap-2 px-1">
+          <span class="text-sm font-semibold text-slate-100">{{ group.title }}</span>
+          <span class="text-xs text-slate-500">{{ group.subtitle }}</span>
+        </h2>
+        <ul class="panel divide-y divide-white/[0.04] overflow-hidden">
+          <li v-for="ev in group.items" :key="ev.id" class="group flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-white/[0.015] sm:flex-row sm:items-center">
+            <div class="flex w-20 shrink-0 items-center gap-3 sm:block">
+              <p class="text-lg font-semibold tabular-nums text-slate-50">{{ time(ev.date) }}</p>
+              <p class="text-[11px] text-slate-500">{{ relative(ev.date) }}</p>
+            </div>
+            <span class="hidden h-10 w-px bg-white/[0.06] sm:block" aria-hidden="true" />
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="badge" :class="typeMeta(ev.type).badge">{{ typeMeta(ev.type).label }}</span>
+                <span v-if="ev.is_recurring && !ev.parent_event_id" class="badge badge-gold" :title="`Repete ${recurrenceLabel(ev).toLowerCase()}`">
+                  <AppIcon name="refresh" :size="10" /> {{ recurrenceLabel(ev) }}
+                </span>
+                <span v-if="ev.parent_event_id" class="badge badge-neutral" title="Ocorrência gerada automaticamente">Recorrência</span>
+              </div>
+              <p class="mt-1.5 truncate font-medium text-slate-100">{{ ev.title }}</p>
+              <p class="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-slate-500">
+                <span v-if="ev.location" class="flex items-center gap-1"><AppIcon name="map" :size="12" /> {{ ev.location }}</span>
+                <span v-if="ev.description && ev.description !== 'Evento da guilda'" class="truncate">{{ ev.description }}</span>
+              </p>
+            </div>
+            <div class="flex items-center gap-4">
+              <div v-if="totalCount(ev)" class="text-right text-xs">
+                <p class="font-semibold tabular-nums text-slate-200">{{ confirmedCount(ev) }}<span class="text-slate-500">/{{ totalCount(ev) }}</span></p>
+                <p class="text-slate-500">confirmados</p>
+              </div>
+              <button
+                type="button"
+                class="btn btn-ghost btn-sm opacity-70 group-hover:opacity-100"
+                :disabled="deleting === ev.id"
+                :aria-label="`Finalizar ${ev.title}`"
+                @click="finishEvent(ev)"
+              >
+                <AppIcon name="check" :size="15" />
+                <span class="hidden md:inline">Finalizar</span>
+              </button>
+            </div>
+          </li>
+        </ul>
+      </section>
     </div>
-  </section>
+
+    <!-- MODAL: Novo evento -->
+    <Teleport to="body">
+      <div v-if="showForm" class="modal-backdrop" @mousedown.self="closeModal" @keydown.esc="closeModal">
+        <form class="modal-panel max-w-xl" role="dialog" aria-modal="true" aria-labelledby="event-form-title" @submit.prevent="createEvent">
+          <header class="panel-header">
+            <div>
+              <h2 id="event-form-title" class="section-title">Novo evento</h2>
+              <p class="panel-subtitle">Aparece na agenda e no painel da guilda</p>
+            </div>
+            <button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Fechar" @click="closeModal">
+              <AppIcon name="x" />
+            </button>
+          </header>
+
+          <div class="space-y-4 p-5">
+            <div>
+              <p class="label">Tipo</p>
+              <div class="grid grid-cols-2 gap-2 sm:grid-cols-4" role="radiogroup" aria-label="Tipo do evento">
+                <button
+                  v-for="t in TYPES"
+                  :key="t.value"
+                  type="button"
+                  role="radio"
+                  :aria-checked="form.type === t.value"
+                  class="inset flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:border-white/20"
+                  :class="{ '!border-gold-500/50 !bg-gold-500/[0.07] !text-gold-100': form.type === t.value }"
+                  @click="form.type = t.value"
+                >
+                  <span class="h-2 w-2 rounded-full" :class="t.dot" /> {{ t.label }}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label for="ev-title" class="label">Título</label>
+              <input id="ev-title" ref="titleInput" v-model="form.title" type="text" required maxlength="80" placeholder="Ex: ZvZ territorial" class="input" />
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-3">
+              <div>
+                <label for="ev-date" class="label">Data</label>
+                <input id="ev-date" v-model="form.date" type="date" required :min="minDate" class="input" />
+              </div>
+              <div>
+                <label for="ev-time" class="label">Hora</label>
+                <input id="ev-time" v-model="form.time" type="time" required class="input" />
+              </div>
+              <div>
+                <label for="ev-location" class="label">Local</label>
+                <input id="ev-location" v-model="form.location" type="text" list="event-locations" placeholder="Opcional" class="input" />
+                <datalist id="event-locations">
+                  <option v-for="c in LOCATIONS" :key="c" :value="c" />
+                </datalist>
+              </div>
+            </div>
+
+            <div>
+              <label for="ev-desc" class="label">Descrição <span class="text-slate-600">(opcional)</span></label>
+              <textarea id="ev-desc" v-model="form.description" rows="2" maxlength="200" class="textarea" placeholder="Requisitos, ponto de encontro, build sugerida..." />
+            </div>
+
+            <div class="inset p-4">
+              <label class="check font-medium">
+                <input v-model="form.is_recurring" type="checkbox" />
+                Repetir este evento
+              </label>
+              <div v-if="form.is_recurring" class="mt-4 grid gap-4 sm:grid-cols-3">
+                <div>
+                  <label for="ev-pattern" class="label">Frequência</label>
+                  <select id="ev-pattern" v-model="form.recurrence_pattern" class="select">
+                    <option value="daily">Diária</option>
+                    <option value="weekly">Semanal</option>
+                    <option value="monthly">Mensal</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="ev-interval" class="label">A cada</label>
+                  <div class="flex items-center gap-2">
+                    <input id="ev-interval" v-model.number="form.recurrence_interval" type="number" min="1" max="30" class="input w-20" />
+                    <span class="text-xs text-slate-500">{{ unitLabel }}</span>
+                  </div>
+                </div>
+                <div>
+                  <label for="ev-end" class="label">Termina em</label>
+                  <input id="ev-end" v-model="form.recurrence_end_date" type="date" :min="form.date || minDate" class="input" />
+                </div>
+              </div>
+            </div>
+
+            <p v-if="formError" role="alert" class="alert alert-error">{{ formError }}</p>
+          </div>
+
+          <footer class="flex justify-end gap-2 border-t border-white/[0.06] p-4">
+            <button type="button" class="btn btn-ghost" @click="closeModal">Cancelar</button>
+            <button type="submit" class="btn btn-primary" :disabled="creating || !form.title.trim() || !form.date || !form.time">
+              <span v-if="creating" class="h-4 w-4 animate-spin rounded-full border-2 border-ink-950/40 border-t-ink-950" />
+              {{ creating ? 'Criando...' : 'Criar evento' }}
+            </button>
+          </footer>
+        </form>
+      </div>
+    </Teleport>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { auth } from '@/stores/auth'
+import { computed, nextTick, onMounted, ref } from 'vue'
+import AppIcon from '@/components/ui/AppIcon.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { EventsApi } from '@/lib/api'
+import { friendlyError } from '@/lib/errors'
+import { confirmAction, toast } from '@/lib/toast'
+import { auth } from '@/stores/auth'
 
+type EventType = 'RAID' | 'GATHERING' | 'DUNGEON' | 'PVP'
 type Participant = { id?: number; status?: 'confirmed' | 'declined' | 'pending'; user?: any }
 type EventItem = {
   id: number
@@ -289,21 +239,20 @@ type EventItem = {
   parent_event_id?: number | null
 }
 
-const guild = ref<any>(null)
-const events = ref<EventItem[]>([])
-const loading = ref(true)
-const error = ref('')
+const TYPES: Array<{ value: EventType; label: string; dot: string; badge: string }> = [
+  { value: 'RAID', label: 'Raid', dot: 'bg-rose-400', badge: 'badge-danger' },
+  { value: 'DUNGEON', label: 'Dungeon', dot: 'bg-violet-400', badge: 'badge-info' },
+  { value: 'PVP', label: 'PvP', dot: 'bg-amber-400', badge: 'badge-warning' },
+  { value: 'GATHERING', label: 'Reunião', dot: 'bg-emerald-400', badge: 'badge-success' },
+]
+const LOCATIONS = ['Caerleon', 'Bridgewatch', 'Fort Sterling', 'Lymhurst', 'Martlock', 'Thetford', 'Brecilien', 'Roads of Avalon', 'Mists', 'Discord']
 
-const showForm = ref(false)
-const creating = ref(false)
-const deleting = ref<number | null>(null)
-
-const form = ref({
+const emptyForm = () => ({
   title: '',
   description: '',
   date: '',
-  time: '',
-  type: 'GATHERING' as 'RAID' | 'GATHERING' | 'DUNGEON' | 'PVP',
+  time: '20:00',
+  type: 'GATHERING' as EventType,
   location: '',
   is_recurring: false,
   recurrence_pattern: 'weekly' as 'daily' | 'weekly' | 'monthly',
@@ -311,105 +260,140 @@ const form = ref({
   recurrence_end_date: '',
 })
 
+const guild = computed(() => auth.guild)
+const events = ref<EventItem[]>([])
+const loading = ref(true)
+const loadError = ref('')
+const typeFilter = ref<EventType | 'ALL'>('ALL')
+
+const showForm = ref(false)
+const creating = ref(false)
+const formError = ref('')
+const deleting = ref<number | null>(null)
+const titleInput = ref<HTMLInputElement | null>(null)
+const form = ref(emptyForm())
+
+const minDate = (() => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+})()
+
+const unitLabel = computed(() => {
+  const n = form.value.recurrence_interval || 1
+  if (form.value.recurrence_pattern === 'daily') return n === 1 ? 'dia' : 'dias'
+  if (form.value.recurrence_pattern === 'weekly') return n === 1 ? 'semana' : 'semanas'
+  return n === 1 ? 'mês' : 'meses'
+})
+
+const countByType = computed(() => {
+  const counts: Record<string, number> = {}
+  for (const e of events.value) counts[e.type] = (counts[e.type] ?? 0) + 1
+  return counts
+})
+
+const filtered = computed(() =>
+  typeFilter.value === 'ALL' ? events.value : events.value.filter((e) => e.type === typeFilter.value),
+)
+
+/** Agrupa por dia: "Hoje", "Amanhã", "Sexta-feira" ... */
+const grouped = computed(() => {
+  const groups = new Map<string, { key: string; title: string; subtitle: string; items: EventItem[] }>()
+  for (const ev of filtered.value) {
+    const d = new Date(ev.date)
+    const key = d.toDateString()
+    if (!groups.has(key)) groups.set(key, { key, ...dayTitle(d), items: [] })
+    groups.get(key)!.items.push(ev)
+  }
+  return [...groups.values()]
+})
+
 onMounted(load)
 
 async function load() {
   loading.value = true
-  error.value = ''
+  loadError.value = ''
   try {
-    // Usa a guilda do usuário autenticado
-    guild.value = auth.guild
     if (!guild.value) {
       events.value = []
       return
     }
-
-    const all = await EventsApi.listByGuild(guild.value.id)
+    const all: EventItem[] = (await EventsApi.listByGuild(guild.value.id)) ?? []
     const now = Date.now()
     events.value = all
-      .filter((e: any) => new Date(e.date).getTime() >= now)
-      .sort((a: any, b: any) => +new Date(a.date) - +new Date(b.date))
-  } catch (e: any) {
-    error.value = e?.response?.data?.message ?? e?.message ?? 'Falha ao carregar eventos'
+      .filter((e) => new Date(e.date).getTime() >= now)
+      .sort((a, b) => +new Date(a.date) - +new Date(b.date))
+  } catch (e) {
+    loadError.value = friendlyError(e, 'Não foi possível carregar os eventos.')
   } finally {
     loading.value = false
   }
 }
 
+function openModal() {
+  form.value = emptyForm()
+  formError.value = ''
+  showForm.value = true
+  nextTick(() => titleInput.value?.focus())
+}
+
+function closeModal() {
+  if (!creating.value) showForm.value = false
+}
+
+/** Data/hora locais → ISO em UTC (o horário que o jogador digitou é o que aparece depois) */
 function toISO(date: string, time: string) {
   const [y, m, d] = date.split('-').map(Number)
   const [hh, mm] = time.split(':').map(Number)
-  const local = new Date(y, m - 1, d, hh, mm, 0)
-  return new Date(local.getTime() - local.getTimezoneOffset() * 60000).toISOString()
+  return new Date(y, m - 1, d, hh, mm, 0).toISOString()
 }
-
-const today = new Date()
-today.setHours(0, 0, 0, 0)
-const minDate = today.toISOString().slice(0, 10)
 
 async function createEvent() {
   if (!guild.value) return
   creating.value = true
-  error.value = ''
+  formError.value = ''
   try {
     const payload: any = {
       title: form.value.title.trim(),
-      description: form.value.description?.trim() || 'Evento da guilda',
+      description: form.value.description.trim() || 'Evento da guilda',
       date: toISO(form.value.date, form.value.time),
       type: form.value.type,
-      location: form.value.location?.trim() || undefined,
+      location: form.value.location.trim() || undefined,
       guildId: guild.value.id,
     }
-
-    // Adiciona campos de recorrência se o evento for recorrente
     if (form.value.is_recurring) {
       payload.is_recurring = true
       payload.recurrence_pattern = form.value.recurrence_pattern
       payload.recurrence_interval = form.value.recurrence_interval || 1
-      if (form.value.recurrence_end_date) {
-        payload.recurrence_end_date = form.value.recurrence_end_date
-      }
+      if (form.value.recurrence_end_date) payload.recurrence_end_date = form.value.recurrence_end_date
     }
-
     await EventsApi.create(payload)
     showForm.value = false
-    form.value = {
-      title: '',
-      description: '',
-      date: '',
-      time: '',
-      type: 'GATHERING',
-      location: '',
-      is_recurring: false,
-      recurrence_pattern: 'weekly',
-      recurrence_interval: 1,
-      recurrence_end_date: '',
-    }
+    toast('Evento criado', { text: payload.title })
     await load()
-  } catch (e: any) {
-    error.value = e?.response?.data?.message ?? e?.message ?? 'Falha ao criar evento'
+  } catch (e) {
+    formError.value = friendlyError(e, 'Não foi possível criar o evento.')
   } finally {
     creating.value = false
   }
 }
 
-async function finishEvent(eventId: number) {
-  if (!confirm('Tem certeza que deseja finalizar este evento?')) return
-
-  deleting.value = eventId
-  error.value = ''
+async function finishEvent(ev: EventItem) {
+  const ok = await confirmAction({
+    title: `Finalizar "${ev.title}"?`,
+    text: 'O evento sai da agenda da guilda.',
+    confirmLabel: 'Finalizar evento',
+  })
+  if (!ok) return
+  deleting.value = ev.id
   try {
-    await EventsApi.remove(eventId)
-    await load()
-  } catch (e: any) {
-    error.value = e?.response?.data?.message ?? e?.message ?? 'Falha ao finalizar evento'
+    await EventsApi.remove(ev.id)
+    events.value = events.value.filter((e) => e.id !== ev.id)
+    toast('Evento finalizado')
+  } catch (e) {
+    toast('Não foi possível finalizar', { tone: 'error', text: friendlyError(e) })
   } finally {
     deleting.value = null
   }
-}
-
-function hasParticipants(ev: EventItem) {
-  return Array.isArray(ev.participants) && ev.participants.length > 0
 }
 
 function totalCount(ev: EventItem) {
@@ -417,72 +401,49 @@ function totalCount(ev: EventItem) {
 }
 
 function confirmedCount(ev: EventItem) {
-  return Array.isArray(ev.participants)
-    ? ev.participants.filter((p) => p.status === 'confirmed').length
-    : 0
+  return Array.isArray(ev.participants) ? ev.participants.filter((p) => p.status === 'confirmed').length : 0
 }
 
-function formatDateTime(iso: string) {
-  try {
-    return new Date(iso).toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  } catch {
-    return iso
+function typeMeta(type: string) {
+  return TYPES.find((t) => t.value === type) ?? { label: type, badge: 'badge-neutral' }
+}
+
+function recurrenceLabel(ev: EventItem) {
+  const n = ev.recurrence_interval || 1
+  switch (ev.recurrence_pattern) {
+    case 'daily':
+      return n === 1 ? 'Diário' : `A cada ${n} dias`
+    case 'weekly':
+      return n === 1 ? 'Semanal' : `A cada ${n} semanas`
+    case 'monthly':
+      return n === 1 ? 'Mensal' : `A cada ${n} meses`
+    default:
+      return 'Recorrente'
   }
 }
 
-function getDayOfMonth(iso: string) {
-  try {
-    return new Date(iso).getDate().toString().padStart(2, '0')
-  } catch {
-    return '?'
-  }
+function time(iso: string) {
+  return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
 }
 
-function getMonth(iso: string) {
-  try {
-    return new Date(iso).toLocaleDateString('pt-BR', { month: 'short' })
-  } catch {
-    return '?'
-  }
+function relative(iso: string) {
+  const diff = new Date(iso).getTime() - Date.now()
+  const rtf = new Intl.RelativeTimeFormat('pt-BR', { numeric: 'auto' })
+  const hours = Math.round(diff / 3_600_000)
+  if (Math.abs(hours) < 24) return rtf.format(hours, 'hour')
+  return rtf.format(Math.round(diff / 86_400_000), 'day')
 }
 
-function getTypeLabel(type: string) {
-  const labels: Record<string, string> = {
-    GATHERING: 'Reunião',
-    RAID: 'Raid',
-    DUNGEON: 'Dungeon',
-    PVP: 'PvP',
-  }
-  return labels[type] || type
-}
-
-function getTypeStyle(type: string) {
-  const styles: Record<string, string> = {
-    GATHERING: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40',
-    RAID: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
-    DUNGEON: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
-    PVP: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-  }
-  return styles[type] || 'bg-slate-700/50 text-slate-300 border-slate-600'
-}
-
-function getRecurrenceLabel(pattern?: string, interval?: number) {
-  if (!pattern) return 'Recorrente'
-
-  const num = interval || 1
-
-  const labels: Record<string, string> = {
-    daily: num === 1 ? 'Diário' : `A cada ${num} dias`,
-    weekly: num === 1 ? 'Semanal' : `A cada ${num} semanas`,
-    monthly: num === 1 ? 'Mensal' : `A cada ${num} meses`,
-  }
-
-  return labels[pattern] || 'Recorrente'
+function dayTitle(d: Date) {
+  const start = new Date()
+  start.setHours(0, 0, 0, 0)
+  const target = new Date(d)
+  target.setHours(0, 0, 0, 0)
+  const days = Math.round((target.getTime() - start.getTime()) / 86_400_000)
+  const date = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })
+  const weekday = d.toLocaleDateString('pt-BR', { weekday: 'long' })
+  if (days === 0) return { title: 'Hoje', subtitle: `${weekday}, ${date}` }
+  if (days === 1) return { title: 'Amanhã', subtitle: `${weekday}, ${date}` }
+  return { title: weekday.charAt(0).toUpperCase() + weekday.slice(1), subtitle: date }
 }
 </script>

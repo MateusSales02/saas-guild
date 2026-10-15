@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
+  type FindOptionsSelect,
 } from 'typeorm';
 
 // papéis possíveis dentro do SISTEMA (não confundir com member/leader/officer da guild)
@@ -19,7 +20,9 @@ export class User {
   @Column({ type: 'varchar', unique: true })
   email: string;
 
-  @Column({ type: 'varchar' })
+  // Nunca carregado por padrão (nem em relações como build.author);
+  // quem precisa do hash pede explicitamente com USER_SELECT_WITH_PASSWORD
+  @Column({ type: 'varchar', select: false })
   password_hash: string;
 
   @Column({ type: 'varchar', unique: true, nullable: true })
@@ -38,3 +41,15 @@ export class User {
   @UpdateDateColumn()
   updated_at: Date;
 }
+
+/** Todas as colunas do usuário, incluindo o hash da senha (só para login) */
+export const USER_SELECT_WITH_PASSWORD: FindOptionsSelect<User> = {
+  id: true,
+  email: true,
+  password_hash: true,
+  uid: true,
+  nickname: true,
+  role: true,
+  created_at: true,
+  updated_at: true,
+};

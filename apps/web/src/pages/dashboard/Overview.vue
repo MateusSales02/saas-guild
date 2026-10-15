@@ -1,522 +1,292 @@
 <template>
-  <div class="space-y-6">
-    <!-- HEADER -->
-    <header class="mb-2 flex items-center justify-between">
-      <div>
-        <h1 class="text-3xl font-black bg-gradient-to-r from-[#C6A95D] via-amber-400 to-[#C6A95D] bg-clip-text text-transparent">
-          Dashboard
-        </h1>
-        <p class="text-sm text-slate-400 mt-2">
-          Visão geral da {{ guild?.name || 'sua guilda' }}
-        </p>
+  <div class="page">
+    <PageHeader :eyebrow="guild?.name ?? 'Painel'" title="Visão geral" :subtitle="todayLabel">
+      <template #actions>
+        <button type="button" class="btn btn-secondary btn-sm" @click="showCustomizeModal = true">
+          <AppIcon name="settings" :size="16" />
+          Personalizar
+        </button>
+      </template>
+    </PageHeader>
+
+    <div v-if="err" role="alert" class="alert alert-error">
+      <AppIcon name="alert" :size="18" class="mt-0.5" />
+      <div class="flex-1">
+        <p class="font-medium">Não foi possível carregar o painel</p>
+        <p class="mt-0.5 text-rose-200/80">{{ err }}</p>
       </div>
-
-      <button
-        @click="showCustomizeModal = true"
-        class="px-4 py-2 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300 hover:border-[#C6A95D] hover:text-[#C6A95D] transition-all flex items-center gap-2"
-      >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-        </svg>
-        Personalizar
-      </button>
-    </header>
-
-    <!-- ERRO -->
-    <div
-      v-if="err"
-      class="rounded-lg border border-rose-500/70 bg-rose-950/70 px-4 py-3 text-sm text-rose-100"
-    >
-      ⚠️ {{ err }}
+      <button type="button" class="btn btn-danger btn-sm" @click="load">Tentar novamente</button>
     </div>
 
     <!-- SEM GUILDA -->
-    <div
-      v-if="!loading && !guild"
-      class="rounded-xl border border-amber-500/50 bg-amber-950/20 p-8 text-center"
-    >
-      <div class="text-6xl mb-4">🏰</div>
-      <h2 class="text-2xl font-bold text-amber-400 mb-2">Nenhuma Guilda Encontrada</h2>
-      <p class="text-slate-400 mb-4">
-        Você ainda não faz parte de nenhuma guilda. Crie uma nova ou peça para ser convidado!
-      </p>
+    <div v-if="!loading && !guild" class="panel">
+      <EmptyState
+        icon="shield"
+        title="Nenhuma guilda encontrada"
+        text="Você ainda não faz parte de nenhuma guilda. Crie uma nova ou peça um convite ao líder."
+      />
     </div>
 
-    <!-- LOADING -->
-    <div v-if="loading" class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-      <div
-        v-for="i in 4"
-        :key="i"
-        class="rounded-xl border border-slate-800 bg-slate-900/40 p-5 animate-pulse"
-      >
-        <div class="h-4 w-20 bg-slate-800 rounded mb-3" />
-        <div class="h-8 w-24 bg-slate-700 rounded" />
-      </div>
-    </div>
-
-    <!-- KPIs -->
-    <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-      <!-- Membros -->
-      <div
-        v-if="widgets.members"
-        class="group relative rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 p-6 shadow-lg hover:border-indigo-500/50 transition-all duration-300"
-      >
-        <div class="absolute -inset-0.5 bg-gradient-to-r from-indigo-500/20 to-sky-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div class="relative flex items-center justify-between">
-          <div>
-            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Membros
-            </p>
-            <p class="mt-2 text-3xl font-black text-slate-50">{{ kpis.members }}</p>
+    <template v-else>
+      <!-- KPIs -->
+      <div v-if="visibleKpis.length" class="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+        <template v-if="loading">
+          <div v-for="i in visibleKpis.length" :key="i" class="stat">
+            <div class="skeleton h-4 w-24" />
+            <div class="skeleton mt-3 h-7 w-20" />
           </div>
-          <div
-            class="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-sky-500 shadow-lg shadow-indigo-500/30"
-          >
-            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      <!-- Eventos (7 dias) -->
-      <div
-        v-if="widgets.events"
-        class="group relative rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 p-6 shadow-lg hover:border-emerald-500/50 transition-all duration-300"
-      >
-        <div class="absolute -inset-0.5 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div class="relative flex items-center justify-between">
-          <div>
-            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Eventos (7d)
-            </p>
-            <p class="mt-2 text-3xl font-black text-slate-50">{{ kpis.events }}</p>
-          </div>
-          <div
-            class="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30"
-          >
-            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tesouraria -->
-      <div
-        v-if="widgets.treasury"
-        class="group relative rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 p-6 shadow-lg hover:border-[#C6A95D]/50 transition-all duration-300"
-      >
-        <div class="absolute -inset-0.5 bg-gradient-to-r from-[#C6A95D]/20 to-amber-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div class="relative flex items-center justify-between">
-          <div class="flex-1 pr-2">
-            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Tesouraria
-            </p>
-            <p class="mt-2 text-2xl font-black text-[#C6A95D] break-words">{{ toGold(kpis.treasury) }}</p>
-          </div>
-          <div
-            class="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#C6A95D] to-amber-500 shadow-lg shadow-[#C6A95D]/30"
-          >
-            <svg class="w-8 h-8 text-slate-900" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      <!-- Builds -->
-      <div
-        v-if="widgets.builds"
-        class="group relative rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 p-6 shadow-lg hover:border-rose-500/50 transition-all duration-300"
-      >
-        <div class="absolute -inset-0.5 bg-gradient-to-r from-rose-500/20 to-pink-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div class="relative flex items-center justify-between">
-          <div>
-            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Builds
-            </p>
-            <p class="mt-2 text-3xl font-black text-slate-50">{{ kpis.builds }}</p>
-          </div>
-          <div
-            class="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-pink-500 shadow-lg shadow-rose-500/30"
-          >
-            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" clip-rule="evenodd"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- GRÁFICOS -->
-    <div class="grid gap-6" :class="{'lg:grid-cols-2': widgets.eventsChart && widgets.treasuryChart}">
-      <!-- Gráfico de Eventos -->
-      <div
-        v-if="widgets.eventsChart"
-        class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl p-6 shadow-2xl"
-      >
-        <div class="flex items-center justify-between mb-6">
-          <div>
-            <h2 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent">
-              Eventos
-            </h2>
-            <p class="text-xs text-slate-400 mt-1">Últimos {{ eventRange === '7d' ? '7' : '30' }} dias</p>
-          </div>
-          <select
-            v-model="eventRange"
-            class="text-xs px-3 py-2 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
-          >
-            <option value="7d">7 dias</option>
-            <option value="30d">30 dias</option>
-          </select>
-        </div>
-
-        <div class="relative">
-          <svg viewBox="0 0 400 160" class="w-full h-40">
-            <line
-              v-for="i in 5"
-              :key="i"
-              x1="0"
-              :y1="i * 40"
-              x2="400"
-              :y2="i * 40"
-              stroke="#1e293b"
-              stroke-width="1"
-              stroke-dasharray="4 4"
-            />
-            <path :d="eventAreaPath" fill="url(#eventGradient)" opacity="0.3" />
-            <path :d="eventLinePath" fill="none" stroke="#10b981" stroke-width="3" />
-            <g v-for="(p, i) in eventPoints" :key="i">
-              <circle
-                :cx="p.x"
-                :cy="p.y"
-                r="12"
-                fill="transparent"
-                class="cursor-pointer"
-                @mouseenter="showEventTooltip(p, i)"
-                @mouseleave="hideEventTooltip"
-              />
-              <circle
-                :cx="p.x"
-                :cy="p.y"
-                r="6"
-                :fill="eventTooltip && eventTooltip.x === p.x ? '#34d399' : '#10b981'"
-                class="pointer-events-none transition-all"
-              />
-            </g>
-            <defs>
-              <linearGradient id="eventGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="#10b981" stop-opacity="0.6" />
-                <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
-              </linearGradient>
-            </defs>
-          </svg>
-
-          <!-- Tooltip -->
-          <div
-            v-if="eventTooltip"
-            class="absolute z-10 px-3 py-2 bg-slate-800 border border-emerald-500/50 rounded-lg shadow-xl pointer-events-none"
-            :style="{ left: eventTooltip.x + 'px', top: eventTooltip.y + 'px', transform: 'translate(-50%, -100%) translateY(-10px)' }"
-          >
-            <p class="text-xs text-slate-400 mb-1">{{ eventTooltip.date }}</p>
-            <p class="text-sm font-bold text-emerald-400">{{ eventTooltip.value }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Gráfico de Tesouraria -->
-      <div
-        v-if="widgets.treasuryChart"
-        class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl p-6 shadow-2xl"
-      >
-        <div class="flex items-center justify-between mb-6">
-          <div>
-            <h2 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent">
-              Evolução da Tesouraria
-            </h2>
-            <p class="text-xs text-slate-400 mt-1">Últimos {{ treasuryRange === '7d' ? '7' : '30' }} dias</p>
-          </div>
-          <select
-            v-model="treasuryRange"
-            class="text-xs px-3 py-2 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
-          >
-            <option value="7d">7 dias</option>
-            <option value="30d">30 dias</option>
-          </select>
-        </div>
-
-        <div class="relative">
-          <svg viewBox="0 0 400 160" class="w-full h-40">
-            <line
-              v-for="i in 5"
-              :key="i"
-              x1="0"
-              :y1="i * 40"
-              x2="400"
-              :y2="i * 40"
-              stroke="#1e293b"
-              stroke-width="1"
-              stroke-dasharray="4 4"
-            />
-            <path :d="treasuryAreaPath" fill="url(#treasuryGradient)" opacity="0.3" />
-            <path :d="treasuryLinePath" fill="none" stroke="#C6A95D" stroke-width="3" />
-            <g v-for="(p, i) in treasuryPoints" :key="i">
-              <circle
-                :cx="p.x"
-                :cy="p.y"
-                r="12"
-                fill="transparent"
-                class="cursor-pointer"
-                @mouseenter="showTreasuryTooltip(p, i)"
-                @mouseleave="hideTreasuryTooltip"
-              />
-              <circle
-                :cx="p.x"
-                :cy="p.y"
-                r="6"
-                :fill="treasuryTooltip && treasuryTooltip.x === p.x ? '#FFA500' : '#C6A95D'"
-                class="pointer-events-none transition-all"
-              />
-            </g>
-            <defs>
-              <linearGradient id="treasuryGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="#C6A95D" stop-opacity="0.6" />
-                <stop offset="100%" stop-color="#C6A95D" stop-opacity="0" />
-              </linearGradient>
-            </defs>
-          </svg>
-
-          <!-- Tooltip -->
-          <div
-            v-if="treasuryTooltip"
-            class="absolute z-10 px-3 py-2 bg-slate-800 border border-[#C6A95D]/50 rounded-lg shadow-xl pointer-events-none"
-            :style="{ left: treasuryTooltip.x + 'px', top: treasuryTooltip.y + 'px', transform: 'translate(-50%, -100%) translateY(-10px)' }"
-          >
-            <p class="text-xs text-slate-400 mb-1">{{ treasuryTooltip.date }}</p>
-            <p class="text-sm font-bold text-[#C6A95D]">{{ treasuryTooltip.value }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Próximos Eventos -->
-    <div
-      v-if="widgets.upcomingEvents"
-      class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl p-6 shadow-2xl"
-    >
-      <h2 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent mb-6">
-        Próximos Eventos
-      </h2>
-
-      <div v-if="upcoming.length === 0" class="text-sm text-slate-400 text-center py-8">
-        Nenhum evento agendado
-      </div>
-
-      <div v-else class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-        <div
-          v-for="ev in upcoming"
-          :key="ev.id"
-          class="group flex items-start gap-3 p-3 rounded-lg bg-slate-800/40 border border-slate-700/50 hover:border-emerald-500/50 hover:bg-slate-800/60 transition-all duration-300"
+        </template>
+        <RouterLink
+          v-for="kpi in visibleKpis"
+          v-else
+          :key="kpi.key"
+          :to="kpi.to"
+          class="stat group transition-colors hover:border-gold-500/25"
         >
-          <div
-            class="flex h-12 w-12 flex-col items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/30 to-teal-500/30 border border-emerald-500/40 group-hover:border-emerald-400 group-hover:shadow-lg group-hover:shadow-emerald-500/20 transition-all"
-          >
-            <span class="text-sm font-bold text-emerald-300">
-              {{ dayOfMonth(ev.date) }}
-            </span>
-            <span class="text-[10px] text-slate-400 uppercase">
-              {{ new Date(ev.date).toLocaleDateString('pt-BR', { month: 'short' }) }}
+          <div class="flex items-start justify-between gap-3">
+            <p class="stat-label">{{ kpi.label }}</p>
+            <span class="icon-tile">
+              <AppIcon :name="kpi.icon" :size="17" />
             </span>
           </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-slate-50 truncate">{{ ev.title }}</p>
-            <p class="text-xs text-slate-400">
-              {{ shortTime(ev.date) }}
-              <span v-if="ev.location" class="ml-2">• {{ ev.location }}</span>
-            </p>
-          </div>
-        </div>
+          <p class="stat-value" :class="kpi.accent ? 'text-gold-200' : ''">{{ kpi.value }}</p>
+          <p class="stat-meta flex items-center gap-1">
+            {{ kpi.meta }}
+            <AppIcon name="arrow-up-right" :size="12" class="opacity-0 transition-opacity group-hover:opacity-100" />
+          </p>
+        </RouterLink>
       </div>
-    </div>
 
-    <!-- MEMBROS E BUILDS RECENTES -->
-    <div class="grid gap-6" :class="{'lg:grid-cols-2': widgets.membersList && widgets.buildsList}">
-      <!-- Membros Recentes -->
-      <div
-        v-if="widgets.membersList"
-        class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl p-6 shadow-2xl"
-      >
-        <h2 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent mb-6">
-          Membros da Guilda
-        </h2>
-
-        <div v-if="members.length === 0" class="text-sm text-slate-400 text-center py-8">
-          Nenhum membro ainda
-        </div>
-
-        <div v-else class="space-y-2">
-          <div
-            v-for="m in members.slice(0, 6)"
-            :key="m.id"
-            class="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800/60 border border-transparent hover:border-indigo-500/30 transition-all duration-300"
-          >
-            <div
-              class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-sky-500 text-sm font-bold text-white shadow-lg shadow-indigo-500/30"
-            >
-              {{ (m.user?.nickname || m.user?.email || '?').charAt(0).toUpperCase() }}
+      <!-- GRÁFICOS -->
+      <div v-if="widgets.eventsChart || widgets.treasuryChart" class="grid gap-4" :class="{ 'xl:grid-cols-2': widgets.eventsChart && widgets.treasuryChart }">
+        <section v-if="widgets.eventsChart" class="panel">
+          <header class="panel-header">
+            <div>
+              <h2 class="panel-title">Atividade de eventos</h2>
+              <p class="panel-subtitle">{{ eventsInRange }} {{ eventsInRange === 1 ? 'evento' : 'eventos' }} nos últimos {{ rangeDays(eventRange) }} dias</p>
             </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-slate-50 truncate">
-                {{ m.user?.nickname || m.user?.email || '—' }}
+            <RangeToggle v-model="eventRange" />
+          </header>
+          <div class="panel-body">
+            <div v-if="loading" class="skeleton h-[200px]" />
+            <TrendChart v-else type="bar" :points="eventSeries" aria-label="Eventos por dia" :format-value="formatEvents" />
+          </div>
+        </section>
+
+        <section v-if="widgets.treasuryChart" class="panel">
+          <header class="panel-header">
+            <div>
+              <h2 class="panel-title">Evolução da tesouraria</h2>
+              <p class="panel-subtitle">
+                <template v-if="treasuryDelta !== null">
+                  <span :class="treasuryDelta >= 0 ? 'text-emerald-300' : 'text-rose-300'">
+                    {{ treasuryDelta >= 0 ? '+' : '' }}{{ toGold(treasuryDelta) }}
+                  </span>
+                  nos últimos {{ rangeDays(treasuryRange) }} dias
+                </template>
+                <template v-else>Saldo diário</template>
               </p>
-              <p class="text-xs text-slate-400">{{ roleLabel(m.role) }}</p>
             </div>
+            <RangeToggle v-model="treasuryRange" />
+          </header>
+          <div class="panel-body">
+            <div v-if="loading" class="skeleton h-[200px]" />
+            <TrendChart v-else-if="treasurySeries.length" :points="treasurySeries" aria-label="Saldo da tesouraria" :format-value="toGold" />
+            <EmptyState v-else icon="coins" title="Sem movimentações no período" />
           </div>
-          <div v-if="members.length > 6" class="text-xs text-slate-400 text-center pt-3 border-t border-slate-800 mt-3">
-            +{{ members.length - 6 }} membros
-          </div>
-        </div>
+        </section>
       </div>
 
-      <!-- Builds Recentes -->
-      <div
-        v-if="widgets.buildsList"
-        class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl p-6 shadow-2xl"
-      >
-        <h2 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent mb-6">
-          Builds Recentes
-        </h2>
-
-        <div v-if="recentBuilds.length === 0" class="text-sm text-slate-400 text-center py-8">
-          Nenhuma build criada ainda
+      <!-- PRÓXIMOS EVENTOS -->
+      <section v-if="widgets.upcomingEvents" class="panel">
+        <header class="panel-header">
+          <div>
+            <h2 class="panel-title">Próximos eventos</h2>
+            <p class="panel-subtitle">Agenda da guilda</p>
+          </div>
+          <RouterLink :to="{ name: 'events' }" class="btn btn-ghost btn-sm">
+            Ver agenda <AppIcon name="chevron-right" :size="14" />
+          </RouterLink>
+        </header>
+        <div v-if="loading" class="grid gap-3 p-5 md:grid-cols-2 xl:grid-cols-3">
+          <div v-for="i in 3" :key="i" class="skeleton h-16" />
         </div>
+        <EmptyState v-else-if="upcoming.length === 0" icon="calendar" title="Nenhum evento agendado" text="Crie um evento para reunir a guilda.">
+          <RouterLink :to="{ name: 'events' }" class="btn btn-secondary btn-sm"><AppIcon name="plus" :size="14" /> Novo evento</RouterLink>
+        </EmptyState>
+        <ul v-else class="grid gap-3 p-5 md:grid-cols-2 xl:grid-cols-3">
+          <li v-for="ev in upcoming" :key="ev.id" class="inset flex items-center gap-4 p-3 transition-colors hover:border-gold-500/20">
+            <div class="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-lg border border-gold-500/25 bg-gold-500/[0.06]">
+              <span class="text-base font-semibold leading-none tabular-nums text-gold-200">{{ dayOfMonth(ev.date) }}</span>
+              <span class="mt-1 text-[9px] font-semibold uppercase tracking-wider text-gold-500/80">{{ monthShort(ev.date) }}</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-semibold text-slate-100">{{ ev.title }}</p>
+              <p class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
+                <AppIcon name="clock" :size="12" /> {{ weekdayTime(ev.date) }}
+                <template v-if="ev.location"><span aria-hidden="true">·</span><span class="truncate">{{ ev.location }}</span></template>
+              </p>
+            </div>
+            <span v-if="ev.type" class="badge badge-neutral">{{ eventTypeLabel(ev.type) }}</span>
+          </li>
+        </ul>
+      </section>
 
-        <div v-else class="space-y-3">
-          <div
-            v-for="build in recentBuilds"
-            :key="build.id"
-            class="group p-4 rounded-lg bg-slate-800/40 border border-slate-700/50 hover:border-rose-500/50 hover:bg-slate-800/60 transition-all duration-300"
-          >
-            <div class="flex items-start justify-between gap-2">
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-slate-50 truncate group-hover:text-rose-300 transition-colors">
-                  {{ build.name }}
-                </p>
-                <p class="text-xs text-slate-400 mt-1">
-                  {{ build.class?.name || 'Sem classe' }}
-                  <span v-if="build.spec"> • {{ build.spec.name }}</span>
+      <!-- MEMBROS E BUILDS -->
+      <div v-if="widgets.membersList || widgets.buildsList" class="grid gap-4" :class="{ 'xl:grid-cols-2': widgets.membersList && widgets.buildsList }">
+        <section v-if="widgets.membersList" class="panel">
+          <header class="panel-header">
+            <div>
+              <h2 class="panel-title">Membros da guilda</h2>
+              <p class="panel-subtitle">{{ members.length }} no total</p>
+            </div>
+            <RouterLink :to="{ name: 'members' }" class="btn btn-ghost btn-sm">
+              Gerenciar <AppIcon name="chevron-right" :size="14" />
+            </RouterLink>
+          </header>
+          <div v-if="loading" class="space-y-2 p-5">
+            <div v-for="i in 4" :key="i" class="skeleton h-11" />
+          </div>
+          <EmptyState v-else-if="members.length === 0" icon="users" title="Nenhum membro ainda" />
+          <ul v-else class="divide-y divide-white/[0.04] px-2 py-2">
+            <li v-for="m in members.slice(0, 6)" :key="m.id" class="flex items-center gap-3 rounded-lg px-3 py-2.5">
+              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-ink-700 text-xs font-semibold text-slate-200">
+                {{ initial(m) }}
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-medium text-slate-100">{{ m.user?.nickname || m.user?.email || '—' }}</p>
+                <p class="truncate text-xs text-slate-500">{{ m.user?.email }}</p>
+              </div>
+              <span class="badge" :class="roleBadge(m.role)">{{ roleLabel(m.role) }}</span>
+            </li>
+          </ul>
+          <footer v-if="members.length > 6" class="panel-footer justify-center">
+            +{{ members.length - 6 }} membros
+          </footer>
+        </section>
+
+        <section v-if="widgets.buildsList" class="panel">
+          <header class="panel-header">
+            <div>
+              <h2 class="panel-title">Builds recentes</h2>
+              <p class="panel-subtitle">Equipamentos montados pela guilda</p>
+            </div>
+            <RouterLink :to="{ name: 'builds' }" class="btn btn-ghost btn-sm">
+              Ver builds <AppIcon name="chevron-right" :size="14" />
+            </RouterLink>
+          </header>
+          <div v-if="loading" class="space-y-2 p-5">
+            <div v-for="i in 4" :key="i" class="skeleton h-11" />
+          </div>
+          <EmptyState v-else-if="recentBuilds.length === 0" icon="hammer" title="Nenhuma build criada ainda">
+            <RouterLink :to="{ name: 'builds' }" class="btn btn-secondary btn-sm"><AppIcon name="plus" :size="14" /> Criar build</RouterLink>
+          </EmptyState>
+          <ul v-else class="divide-y divide-white/[0.04] px-2 py-2">
+            <li v-for="build in recentBuilds" :key="build.id" class="flex items-center gap-3 rounded-lg px-3 py-2.5">
+              <span class="icon-tile"><AppIcon name="swords" :size="16" /></span>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-medium text-slate-100">{{ build.name }}</p>
+                <p class="truncate text-xs text-slate-500">
+                  {{ build.class?.name || 'Sem classe' }}<template v-if="build.spec"> · {{ build.spec.name }}</template>
+                  <template v-if="build.member"> · por {{ build.member.user?.nickname || build.member.user?.email }}</template>
                 </p>
               </div>
-              <span
-                class="px-2.5 py-1 rounded-lg text-[10px] font-medium whitespace-nowrap border"
-                :class="build.is_public ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-slate-700/50 text-slate-300 border-slate-600'"
-              >
+              <span class="badge" :class="build.is_public ? 'badge-success' : 'badge-neutral'">
                 {{ build.is_public ? 'Pública' : 'Privada' }}
               </span>
-            </div>
-            <p v-if="build.member" class="mt-2 text-xs text-slate-500">
-              Por: {{ build.member.user?.nickname || build.member.user?.email }}
-            </p>
-          </div>
-        </div>
+            </li>
+          </ul>
+        </section>
       </div>
-    </div>
+    </template>
 
     <!-- MODAL DE PERSONALIZAÇÃO -->
-    <div
-      v-if="showCustomizeModal"
-      class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-      @click.self="showCustomizeModal = false"
-    >
-      <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
-        <div class="p-6 border-b border-slate-700">
-          <h2 class="text-2xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent">
-            Personalizar Dashboard
-          </h2>
-          <p class="text-sm text-slate-400 mt-1">Escolha quais widgets você quer ver</p>
-        </div>
-
-        <div class="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-200px)]">
-          <div
-            v-for="(value, key) in widgets"
-            :key="key"
-            class="flex items-center justify-between p-4 rounded-lg bg-slate-800/40 border border-slate-700/50 hover:border-slate-600 transition-all"
-          >
-            <div class="flex-1">
-              <p class="text-sm font-semibold text-slate-200">{{ getWidgetLabel(key) }}</p>
-              <p class="text-xs text-slate-400 mt-0.5">{{ getWidgetDescription(key) }}</p>
+    <Teleport to="body">
+      <div v-if="showCustomizeModal" class="modal-backdrop" @mousedown.self="showCustomizeModal = false" @keydown.esc="showCustomizeModal = false">
+        <div class="modal-panel max-w-lg" role="dialog" aria-modal="true" aria-labelledby="customize-title">
+          <header class="panel-header">
+            <div>
+              <h2 id="customize-title" class="section-title">Personalizar painel</h2>
+              <p class="panel-subtitle">Escolha o que aparece na visão geral</p>
             </div>
-            <button
-              @click="widgets[key] = !widgets[key]"
-              class="relative w-14 h-7 rounded-full transition-colors"
-              :class="value ? 'bg-[#C6A95D]' : 'bg-slate-700'"
-            >
-              <div
-                class="absolute top-1 w-5 h-5 rounded-full bg-white shadow-lg transition-transform"
-                :class="value ? 'translate-x-8' : 'translate-x-1'"
-              />
+            <button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Fechar" @click="showCustomizeModal = false">
+              <AppIcon name="x" />
             </button>
-          </div>
-        </div>
-
-        <div class="p-6 border-t border-slate-700 flex gap-3">
-          <button
-            @click="resetWidgets"
-            class="flex-1 px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:border-slate-600 transition-all"
-          >
-            Resetar Padrão
-          </button>
-          <button
-            @click="saveWidgets"
-            class="flex-1 px-4 py-3 rounded-lg bg-gradient-to-r from-[#C6A95D] to-amber-500 text-slate-900 font-semibold hover:shadow-lg hover:shadow-[#C6A95D]/30 transition-all"
-          >
-            Salvar
-          </button>
+          </header>
+          <ul class="divide-y divide-white/[0.05] px-5">
+            <li v-for="(value, key) in widgets" :key="key" class="flex items-center justify-between gap-4 py-3">
+              <div>
+                <p class="text-sm font-medium text-slate-200">{{ WIDGET_META[key].label }}</p>
+                <p class="text-xs text-slate-500">{{ WIDGET_META[key].description }}</p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                :aria-checked="value"
+                :aria-label="WIDGET_META[key].label"
+                class="relative h-6 w-11 shrink-0 rounded-full border transition-colors"
+                :class="value ? 'border-gold-500/60 bg-gold-500/80' : 'border-white/10 bg-ink-700'"
+                @click="widgets[key] = !widgets[key]"
+              >
+                <span
+                  class="absolute top-0.5 h-[18px] w-[18px] rounded-full bg-white shadow transition-transform"
+                  :class="value ? 'translate-x-[22px]' : 'translate-x-0.5'"
+                />
+              </button>
+            </li>
+          </ul>
+          <footer class="flex gap-2 border-t border-white/[0.06] p-4">
+            <button type="button" class="btn btn-ghost flex-1" @click="resetWidgets">Restaurar padrão</button>
+            <button type="button" class="btn btn-primary flex-1" @click="saveWidgets">Salvar</button>
+          </footer>
         </div>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed, watch } from 'vue'
+import { computed, defineComponent, h, onMounted, ref, watch } from 'vue'
+import { RouterLink, type RouteLocationRaw } from 'vue-router'
+import AppIcon from '@/components/ui/AppIcon.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import TrendChart from '@/components/ui/TrendChart.vue'
+import type { IconName } from '@/components/ui/icons'
+import { BuildsApi, EventsApi, FinanceApi, MembersApi } from '@/lib/api'
+import { friendlyError } from '@/lib/errors'
 import { auth } from '@/stores/auth'
 
-import {
-  MembersApi,
-  EventsApi,
-  FinanceApi,
-  BuildsApi,
-} from '@/lib/api'
-
+type Range = '7d' | '30d'
 type Member = { id: number; role: string; user: { id: number; email: string; nickname?: string } }
-type EventItem = {
-  id: number
-  title: string
-  date: string
-  description?: string
-  location?: string
-  type?: string
-}
+type EventItem = { id: number; title: string; date: string; description?: string; location?: string; type?: string }
 
-const eventRange = ref<'7d' | '30d'>('7d')
-const treasuryRange = ref<'7d' | '30d'>('7d')
-const kpis = ref({ members: 0, online: 0, events: 0, treasury: 0, builds: 0 })
-const members = ref<Member[]>([])
-const events = ref<EventItem[]>([])
-const guild = ref<any>(null)
-const loading = ref(true)
-const err = ref('')
-const recentBuilds = ref<any[]>([])
-const showCustomizeModal = ref(false)
-const treasuryTooltip = ref<{ date: string; value: string; x: number; y: number } | null>(null)
-const treasuryHistoryData = ref<Array<{ date: string; balance: number }>>([])
-const eventTooltip = ref<{ date: string; value: string; x: number; y: number } | null>(null)
-const eventHistoryData = ref<Array<{ date: string; count: number }>>([])
+/** Alternador 7d / 30d */
+const RangeToggle = defineComponent({
+  props: { modelValue: { type: String, required: true } },
+  emits: ['update:modelValue'],
+  setup(props, { emit }) {
+    return () =>
+      h(
+        'div',
+        { class: 'seg', role: 'group', 'aria-label': 'Período' },
+        (['7d', '30d'] as const).map((r) =>
+          h(
+            'button',
+            {
+              type: 'button',
+              class: 'seg-item',
+              'aria-pressed': props.modelValue === r,
+              onClick: () => emit('update:modelValue', r),
+            },
+            r === '7d' ? '7 dias' : '30 dias',
+          ),
+        ),
+      )
+  },
+})
 
-const widgets = ref({
+const DEFAULT_WIDGETS = {
   members: true,
   events: true,
   treasury: true,
@@ -526,6 +296,49 @@ const widgets = ref({
   upcomingEvents: true,
   membersList: true,
   buildsList: true,
+}
+type WidgetKey = keyof typeof DEFAULT_WIDGETS
+
+const WIDGET_META: Record<WidgetKey, { label: string; description: string }> = {
+  members: { label: 'Indicador de membros', description: 'Total de membros da guilda' },
+  events: { label: 'Indicador de eventos', description: 'Eventos dos últimos 7 dias' },
+  treasury: { label: 'Indicador de tesouraria', description: 'Saldo atual da tesouraria' },
+  builds: { label: 'Indicador de builds', description: 'Total de builds criadas' },
+  eventsChart: { label: 'Gráfico de eventos', description: 'Eventos por dia' },
+  treasuryChart: { label: 'Gráfico de tesouraria', description: 'Evolução do saldo' },
+  upcomingEvents: { label: 'Próximos eventos', description: 'Agenda da guilda' },
+  membersList: { label: 'Lista de membros', description: 'Membros da guilda' },
+  buildsList: { label: 'Builds recentes', description: 'Últimas builds criadas' },
+}
+
+const EVENT_TYPES: Record<string, string> = { RAID: 'Raid', GATHERING: 'Coleta', DUNGEON: 'Dungeon', PVP: 'PvP' }
+
+const eventRange = ref<Range>('7d')
+const treasuryRange = ref<Range>('7d')
+const kpis = ref({ members: 0, events: 0, treasury: 0, builds: 0 })
+const members = ref<Member[]>([])
+const events = ref<EventItem[]>([])
+const guild = ref<{ id: number; name: string } | null>(null)
+const loading = ref(true)
+const err = ref('')
+const recentBuilds = ref<any[]>([])
+const showCustomizeModal = ref(false)
+const treasuryHistoryData = ref<Array<{ date: string; balance: number }>>([])
+const widgets = ref({ ...DEFAULT_WIDGETS })
+
+const todayLabel = computed(() => {
+  const text = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
+  return text.charAt(0).toUpperCase() + text.slice(1)
+})
+
+const visibleKpis = computed(() => {
+  const all: Array<{ key: WidgetKey; label: string; value: string; meta: string; icon: IconName; to: RouteLocationRaw; accent?: boolean }> = [
+    { key: 'members', label: 'Membros', value: String(kpis.value.members), meta: 'na guilda', icon: 'users', to: { name: 'members' } },
+    { key: 'events', label: 'Eventos', value: String(kpis.value.events), meta: 'nos últimos 7 dias', icon: 'calendar', to: { name: 'events' } },
+    { key: 'treasury', label: 'Tesouraria', value: toGold(kpis.value.treasury), meta: 'saldo atual', icon: 'coins', to: { name: 'treasury' }, accent: true },
+    { key: 'builds', label: 'Builds', value: String(kpis.value.builds), meta: 'montadas', icon: 'hammer', to: { name: 'builds' } },
+  ]
+  return all.filter((k) => widgets.value[k.key])
 })
 
 onMounted(() => {
@@ -535,135 +348,122 @@ onMounted(() => {
 
 watch(treasuryRange, async () => {
   if (!guild.value) return
-  const days = treasuryRange.value === '7d' ? 7 : 30
-  treasuryHistoryData.value = await FinanceApi.dailyHistory(guild.value.id, days)
+  try {
+    treasuryHistoryData.value = await FinanceApi.dailyHistory(guild.value.id, rangeDays(treasuryRange.value))
+  } catch {
+    treasuryHistoryData.value = []
+  }
 })
 
 function loadWidgetPreferences() {
-  const saved = localStorage.getItem('dashboard_widgets')
-  if (saved) {
-    try {
-      widgets.value = { ...widgets.value, ...JSON.parse(saved) }
-    } catch (e) {
-      console.error('Failed to load widget preferences', e)
-    }
+  try {
+    const saved = localStorage.getItem('dashboard_widgets')
+    if (saved) widgets.value = { ...DEFAULT_WIDGETS, ...JSON.parse(saved) }
+  } catch {
+    // Preferências inválidas: usa o padrão
   }
 }
 
 function saveWidgets() {
-  localStorage.setItem('dashboard_widgets', JSON.stringify(widgets.value))
+  try {
+    localStorage.setItem('dashboard_widgets', JSON.stringify(widgets.value))
+  } catch {
+    // Storage indisponível
+  }
   showCustomizeModal.value = false
 }
 
 function resetWidgets() {
-  widgets.value = {
-    members: true,
-    events: true,
-    treasury: true,
-    builds: true,
-    eventsChart: true,
-    treasuryChart: true,
-    upcomingEvents: true,
-    membersList: true,
-    buildsList: true,
-  }
-}
-
-function getWidgetLabel(key: string): string {
-  const labels: Record<string, string> = {
-    members: 'Card de Membros',
-    events: 'Card de Eventos',
-    treasury: 'Card de Tesouraria',
-    builds: 'Card de Builds',
-    eventsChart: 'Gráfico de Eventos',
-    treasuryChart: 'Gráfico de Tesouraria',
-    upcomingEvents: 'Próximos Eventos',
-    membersList: 'Lista de Membros',
-    buildsList: 'Lista de Builds',
-  }
-  return labels[key] || key
-}
-
-function getWidgetDescription(key: string): string {
-  const descriptions: Record<string, string> = {
-    members: 'Total de membros da guilda',
-    events: 'Eventos dos últimos 7 dias',
-    treasury: 'Saldo atual da tesouraria',
-    builds: 'Total de builds criadas',
-    eventsChart: 'Evolução de eventos ao longo do tempo',
-    treasuryChart: 'Evolução do saldo da tesouraria',
-    upcomingEvents: 'Eventos agendados para o futuro',
-    membersList: 'Membros recentes da guilda',
-    buildsList: 'Builds criadas recentemente',
-  }
-  return descriptions[key] || ''
+  widgets.value = { ...DEFAULT_WIDGETS }
 }
 
 async function load() {
   loading.value = true
   err.value = ''
-
   try {
     guild.value = auth.guild
-
     if (!guild.value) {
       members.value = []
       events.value = []
-      kpis.value = { members: 0, online: 0, events: 0, treasury: 0, builds: 0 }
+      kpis.value = { members: 0, events: 0, treasury: 0, builds: 0 }
       return
     }
 
-    const days = treasuryRange.value === '7d' ? 7 : 30
-    const [memb, evs, fin, buildsRes, treasuryHistory] = await Promise.all([
+    const [memb, evs, fin, buildsRes, history] = await Promise.all([
       MembersApi.listByGuild(guild.value.id),
       EventsApi.listByGuild(guild.value.id),
       FinanceApi.summary(guild.value.id),
       BuildsApi.list({ guildId: guild.value.id }),
-      FinanceApi.dailyHistory(guild.value.id, days),
+      FinanceApi.dailyHistory?.(guild.value.id, rangeDays(treasuryRange.value)) ?? [],
     ])
 
-    members.value = memb
-    events.value = evs
+    members.value = memb ?? []
+    events.value = evs ?? []
     recentBuilds.value = (buildsRes as any[])?.slice(0, 6) ?? []
-    treasuryHistoryData.value = treasuryHistory
-
-    kpis.value.members = memb.length
-    kpis.value.online = 0
-    kpis.value.events = countEventsInLastDays(evs, 7)
-    kpis.value.treasury = fin?.balance ?? 0
-    kpis.value.builds = (buildsRes as any[])?.length ?? 0
-
-  } catch (e: any) {
-    err.value = e.message || 'Falha ao carregar dashboard'
+    treasuryHistoryData.value = history ?? []
+    kpis.value = {
+      members: members.value.length,
+      events: countEventsInLastDays(events.value, 7),
+      treasury: fin?.balance ?? 0,
+      builds: (buildsRes as any[])?.length ?? 0,
+    }
+  } catch (e) {
+    err.value = friendlyError(e)
   } finally {
     loading.value = false
   }
 }
 
-function toGold(n: number) {
-  return new Intl.NumberFormat('pt-BR').format(n) + 'g'
-}
-function dayOfMonth(iso: string) {
-  return new Date(iso).getDate().toString().padStart(2, '0')
-}
-function shortTime(iso: string) {
-  return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+// ---------- Séries ----------
+function rangeDays(range: Range): number {
+  return range === '7d' ? 7 : 30
 }
 
-function countEventsInLastDays(list: EventItem[], days: number) {
-  const now = Date.now()
-  const cutoff = now - days * 24 * 3600 * 1000
-  return list.filter((e) => new Date(e.date).getTime() >= cutoff).length
-}
+const eventSeries = computed(() => {
+  const days = rangeDays(eventRange.value)
+  const start = new Date()
+  start.setHours(0, 0, 0, 0)
+  start.setDate(start.getDate() - (days - 1))
 
-function roleLabel(role: string) {
-  switch (role) {
-    case 'leader': return 'Líder'
-    case 'officer': return 'Oficial'
-    case 'líder': return 'Líder'
-    default: return 'Membro'
+  const buckets = new Map<string, number>()
+  for (let i = 0; i < days; i++) {
+    const d = new Date(start)
+    d.setDate(start.getDate() + i)
+    buckets.set(dayKey(d), 0)
   }
-}
+  for (const ev of events.value) {
+    const d = new Date(ev.date)
+    if (Number.isNaN(d.getTime())) continue
+    const key = dayKey(d)
+    if (buckets.has(key)) buckets.set(key, buckets.get(key)! + 1)
+  }
+  return [...buckets].map(([key, value]) => {
+    const d = new Date(`${key}T12:00:00`)
+    return {
+      value,
+      label: d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' }),
+      short: d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+    }
+  })
+})
+
+const eventsInRange = computed(() => eventSeries.value.reduce((sum, p) => sum + p.value, 0))
+
+const treasurySeries = computed(() =>
+  treasuryHistoryData.value.map((d) => {
+    const date = new Date(d.date)
+    return {
+      value: d.balance,
+      label: date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' }),
+      short: date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+    }
+  }),
+)
+
+const treasuryDelta = computed(() => {
+  const s = treasuryHistoryData.value
+  return s.length >= 2 ? s[s.length - 1].balance - s[0].balance : null
+})
 
 const upcoming = computed(() => {
   const now = Date.now()
@@ -673,130 +473,66 @@ const upcoming = computed(() => {
     .slice(0, 6)
 })
 
-const eventPoints = computed(() => {
-  const days = eventRange.value === '7d' ? 7 : 30
-  const series = buildDailySeries(events.value, days)
-  const maxY = Math.max(1, ...series) * 1.2
-  const stepX = 400 / (series.length - 1 || 1)
-  return series.map((v, i) => ({
-    x: i * stepX,
-    y: 160 - (v / maxY) * 140 - 10,
-  }))
-})
+// ---------- Formatação ----------
+function dayKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 
-const eventLinePath = computed(() =>
-  eventPoints.value.map((p, i) => (i ? `L ${p.x} ${p.y}` : `M ${p.x} ${p.y}`)).join(' ')
-)
+function toGold(n: number) {
+  return `${new Intl.NumberFormat('pt-BR').format(n)}g`
+}
 
-const eventAreaPath = computed(() => {
-  if (eventPoints.value.length === 0) return 'M 0 160 L 400 160 Z'
-  const start = `M 0 160 L 0 ${eventPoints.value[0].y}`
-  const line = eventPoints.value.map((p) => `L ${p.x} ${p.y}`).join(' ')
-  const end = 'L 400 160 Z'
-  return `${start} ${line} ${end}`
-})
+function formatEvents(n: number) {
+  return `${n} ${n === 1 ? 'evento' : 'eventos'}`
+}
 
-const treasuryPoints = computed(() => {
-  if (treasuryHistoryData.value.length === 0) {
-    return []
-  }
+function dayOfMonth(iso: string) {
+  return new Date(iso).getDate().toString().padStart(2, '0')
+}
 
-  const series = treasuryHistoryData.value.map(d => d.balance)
-  const maxY = Math.max(1, ...series) * 1.2
-  const stepX = 400 / (series.length - 1 || 1)
-  return series.map((v, i) => ({
-    x: i * stepX,
-    y: 160 - (v / maxY) * 140 - 10,
-  }))
-})
+function monthShort(iso: string) {
+  return new Date(iso).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')
+}
 
-const treasuryLinePath = computed(() =>
-  treasuryPoints.value.map((p, i) => (i ? `L ${p.x} ${p.y}` : `M ${p.x} ${p.y}`)).join(' ')
-)
+function weekdayTime(iso: string) {
+  const d = new Date(iso)
+  return `${d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '')} · ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+}
 
-const treasuryAreaPath = computed(() => {
-  if (treasuryPoints.value.length === 0) return 'M 0 160 L 400 160 Z'
-  const start = `M 0 160 L 0 ${treasuryPoints.value[0].y}`
-  const line = treasuryPoints.value.map((p) => `L ${p.x} ${p.y}`).join(' ')
-  const end = 'L 400 160 Z'
-  return `${start} ${line} ${end}`
-})
+function eventTypeLabel(type: string) {
+  return EVENT_TYPES[type] ?? type
+}
 
-function showTreasuryTooltip(point: { x: number; y: number }, index: number) {
-  if (index < 0 || index >= treasuryHistoryData.value.length) return
+function countEventsInLastDays(list: EventItem[], days: number) {
+  const now = Date.now()
+  const cutoff = now - days * 86_400_000
+  // Só eventos já realizados no período (os futuros aparecem em "Próximos eventos")
+  return list.filter((e) => {
+    const t = new Date(e.date).getTime()
+    return t >= cutoff && t <= now
+  }).length
+}
 
-  const data = treasuryHistoryData.value[index]
-  const date = new Date(data.date)
-  const dateStr = date.toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  })
+function initial(m: Member) {
+  return (m.user?.nickname || m.user?.email || '?').charAt(0).toUpperCase()
+}
 
-  treasuryTooltip.value = {
-    date: dateStr,
-    value: toGold(data.balance),
-    x: point.x,
-    y: point.y
+function roleLabel(role: string) {
+  switch (role?.toLowerCase()) {
+    case 'leader':
+    case 'líder':
+      return 'Líder'
+    case 'officer':
+      return 'Oficial'
+    default:
+      return 'Membro'
   }
 }
 
-function hideTreasuryTooltip() {
-  treasuryTooltip.value = null
-}
-
-function showEventTooltip(point: { x: number; y: number }, index: number) {
-  if (index < 0 || index >= eventHistoryData.value.length) return
-
-  const data = eventHistoryData.value[index]
-  const date = new Date(data.date)
-  const dateStr = date.toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  })
-
-  const eventText = data.count === 1 ? 'evento' : 'eventos'
-
-  eventTooltip.value = {
-    date: dateStr,
-    value: `${data.count} ${eventText}`,
-    x: point.x,
-    y: point.y
-  }
-}
-
-function hideEventTooltip() {
-  eventTooltip.value = null
-}
-
-function buildDailySeries(list: EventItem[], days: number) {
-  const now = new Date()
-  const start = new Date(now)
-  start.setDate(now.getDate() - (days - 1))
-  start.setHours(0, 0, 0, 0)
-
-  const buckets: Record<string, number> = {}
-  for (let i = 0; i < days; i++) {
-    const d = new Date(start)
-    d.setDate(start.getDate() + i)
-    buckets[d.toISOString().slice(0, 10)] = 0
-  }
-
-  for (const ev of list) {
-    if (!ev.date) continue
-    const date = new Date(ev.date)
-    if (isNaN(date.getTime())) continue
-    const key = date.toISOString().slice(0, 10)
-    if (key in buckets) buckets[key]++
-  }
-
-  const result: Array<{ date: string; count: number }> = []
-  for (const [date, count] of Object.entries(buckets)) {
-    result.push({ date, count })
-  }
-
-  eventHistoryData.value = result
-  return result.map(d => d.count)
+function roleBadge(role: string) {
+  const r = role?.toLowerCase()
+  if (r === 'leader' || r === 'líder') return 'badge-gold'
+  if (r === 'officer') return 'badge-info'
+  return 'badge-neutral'
 }
 </script>

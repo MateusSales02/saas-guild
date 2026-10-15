@@ -1,179 +1,137 @@
 <template>
-  <div class="space-y-6">
-    <!-- HEADER -->
-    <header class="mb-2">
-      <h1 class="text-3xl font-black bg-gradient-to-r from-[#C6A95D] via-amber-400 to-[#C6A95D] bg-clip-text text-transparent">
-        Logs de Auditoria
-      </h1>
-      <p class="text-sm text-slate-400 mt-2">
-        Visualize todas as ações realizadas no sistema
-      </p>
-    </header>
+  <div class="page">
+    <PageHeader eyebrow="Administração" title="Auditoria" subtitle="Registro de todas as ações realizadas no sistema." />
 
-    <!-- FILTROS -->
-    <div class="bg-slate-900/40 border border-slate-800 rounded-xl p-4">
-      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        <!-- Filtro por Ação -->
-        <div>
-          <label class="block text-sm font-medium text-slate-400 mb-2">Ação</label>
-          <select
-            v-model="filters.action"
-            @change="loadLogs"
-            class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:border-[#C6A95D] focus:ring-1 focus:ring-[#C6A95D] outline-none"
-          >
-            <option value="">Todas</option>
-            <option value="CREATE">Criação</option>
-            <option value="UPDATE">Atualização</option>
-            <option value="DELETE">Exclusão</option>
-            <option value="LOGIN">Login</option>
-            <option value="LOGOUT">Logout</option>
-            <option value="EXPORT">Exportação</option>
-            <option value="VIEW">Visualização</option>
-          </select>
-        </div>
-
-        <!-- Filtro por Entidade -->
-        <div>
-          <label class="block text-sm font-medium text-slate-400 mb-2">Entidade</label>
-          <select
-            v-model="filters.entityType"
-            @change="loadLogs"
-            class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:border-[#C6A95D] focus:ring-1 focus:ring-[#C6A95D] outline-none"
-          >
-            <option value="">Todas</option>
-            <option value="User">Usuário</option>
-            <option value="Guild">Guilda</option>
-            <option value="Event">Evento</option>
-            <option value="Finance">Finanças</option>
-            <option value="Build">Build</option>
-          </select>
-        </div>
-
-        <!-- Data Início -->
-        <div>
-          <label class="block text-sm font-medium text-slate-400 mb-2">Data Início</label>
-          <input
-            type="date"
-            v-model="filters.startDate"
-            @change="loadLogs"
-            class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:border-[#C6A95D] focus:ring-1 focus:ring-[#C6A95D] outline-none"
-          />
-        </div>
-
-        <!-- Data Fim -->
-        <div>
-          <label class="block text-sm font-medium text-slate-400 mb-2">Data Fim</label>
-          <input
-            type="date"
-            v-model="filters.endDate"
-            @change="loadLogs"
-            class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:border-[#C6A95D] focus:ring-1 focus:ring-[#C6A95D] outline-none"
-          />
-        </div>
-
-        <!-- Botão Limpar Filtros -->
-        <div class="flex items-end">
-          <button
-            @click="clearFilters"
-            class="w-full px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-300 hover:border-[#C6A95D] hover:text-[#C6A95D] transition-all"
-          >
-            Limpar Filtros
-          </button>
-        </div>
+    <!-- Filtros -->
+    <div class="panel grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,1fr))_auto] lg:items-end">
+      <div>
+        <label for="audit-action" class="label">Ação</label>
+        <select id="audit-action" v-model="filters.action" class="select" @change="reload">
+          <option value="">Todas</option>
+          <option v-for="(meta, key) in ACTIONS" :key="key" :value="key">{{ meta.label }}</option>
+        </select>
       </div>
-    </div>
-
-    <!-- ERRO -->
-    <div
-      v-if="error"
-      class="rounded-lg border border-rose-500/70 bg-rose-950/70 px-4 py-3 text-sm text-rose-100"
-    >
-      ⚠️ {{ error }}
-    </div>
-
-    <!-- LOADING -->
-    <div v-if="loading" class="bg-slate-900/40 border border-slate-800 rounded-xl p-6 animate-pulse">
-      <div class="h-4 bg-slate-800 rounded w-1/4 mb-4"></div>
-      <div class="space-y-3">
-        <div v-for="i in 5" :key="i" class="h-12 bg-slate-800 rounded"></div>
+      <div>
+        <label for="audit-entity" class="label">Entidade</label>
+        <select id="audit-entity" v-model="filters.entityType" class="select" @change="reload">
+          <option value="">Todas</option>
+          <option v-for="(label, key) in ENTITIES" :key="key" :value="key">{{ label }}</option>
+        </select>
       </div>
+      <div>
+        <label for="audit-start" class="label">De</label>
+        <input id="audit-start" v-model="filters.startDate" type="date" class="input" @change="reload" />
+      </div>
+      <div>
+        <label for="audit-end" class="label">Até</label>
+        <input id="audit-end" v-model="filters.endDate" type="date" class="input" @change="reload" />
+      </div>
+      <button type="button" class="btn btn-ghost" :disabled="!hasFilters" @click="clearFilters">
+        <AppIcon name="x" :size="15" /> Limpar
+      </button>
     </div>
 
-    <!-- TABELA DE LOGS -->
-    <div v-else class="bg-slate-900/40 border border-slate-800 rounded-xl overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead class="bg-slate-800/50 border-b border-slate-700">
+    <div v-if="error" role="alert" class="alert alert-error">
+      <AppIcon name="alert" :size="18" class="mt-0.5" />
+      <p class="flex-1">{{ error }}</p>
+      <button type="button" class="btn btn-danger btn-sm" @click="loadLogs">Tentar novamente</button>
+    </div>
+
+    <section class="panel overflow-hidden">
+      <div v-if="loading" class="space-y-2 p-5">
+        <div v-for="i in 6" :key="i" class="skeleton h-11" />
+      </div>
+
+      <EmptyState
+        v-else-if="!logs.length"
+        icon="list"
+        title="Nenhum registro encontrado"
+        :text="hasFilters ? 'Nenhuma ação corresponde aos filtros escolhidos.' : 'As ações realizadas no sistema aparecerão aqui.'"
+      />
+
+      <div v-else class="overflow-x-auto">
+        <table class="table min-w-[760px]">
+          <thead>
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Data/Hora</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Usuário</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Ação</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Entidade</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">IP</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Detalhes</th>
+              <th scope="col">Quando</th>
+              <th scope="col">Usuário</th>
+              <th scope="col">Ação</th>
+              <th scope="col">Entidade</th>
+              <th scope="col">IP</th>
+              <th scope="col"><span class="sr-only">Detalhes</span></th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-800">
-            <tr
-              v-for="log in logs"
-              :key="log.id"
-              class="hover:bg-slate-800/30 transition-colors"
-            >
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
-                {{ formatDate(log.created_at) }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm">
-                <span class="text-slate-300">{{ log.user_email || 'Sistema' }}</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span :class="getActionBadgeClass(log.action)" class="px-2 py-1 text-xs font-semibold rounded-full">
-                  {{ getActionLabel(log.action) }}
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
-                {{ log.entity_type }}
-                <span v-if="log.entity_id" class="text-slate-500">#{{ log.entity_id }}</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                {{ log.ip_address || '-' }}
-              </td>
-              <td class="px-6 py-4 text-sm text-slate-400 max-w-xs truncate">
-                {{ log.details || '-' }}
-              </td>
-            </tr>
+          <tbody>
+            <template v-for="log in logs" :key="log.id">
+              <tr>
+                <td class="whitespace-nowrap">
+                  <span class="block text-slate-200">{{ relative(log.created_at) }}</span>
+                  <span class="text-xs text-slate-500">{{ formatDate(log.created_at) }}</span>
+                </td>
+                <td class="whitespace-nowrap">
+                  <span class="flex items-center gap-2">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-ink-700 text-[10px] font-semibold text-slate-300">
+                      {{ (log.user_email || 'S').charAt(0).toUpperCase() }}
+                    </span>
+                    <span class="text-slate-300">{{ log.user_email || 'Sistema' }}</span>
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" :class="actionMeta(log.action).badge">{{ actionMeta(log.action).label }}</span>
+                </td>
+                <td class="whitespace-nowrap text-slate-300">
+                  {{ ENTITIES[log.entity_type] ?? log.entity_type }}
+                  <span v-if="log.entity_id" class="text-slate-500">#{{ log.entity_id }}</span>
+                </td>
+                <td class="whitespace-nowrap font-mono text-xs text-slate-500">{{ log.ip_address || '—' }}</td>
+                <td class="text-right">
+                  <button
+                    v-if="log.details"
+                    type="button"
+                    class="btn btn-ghost btn-sm"
+                    :aria-expanded="expanded === log.id"
+                    @click="expanded = expanded === log.id ? null : log.id"
+                  >
+                    Detalhes
+                    <AppIcon name="chevron-down" :size="14" class="transition-transform" :class="{ 'rotate-180': expanded === log.id }" />
+                  </button>
+                </td>
+              </tr>
+              <tr v-if="expanded === log.id">
+                <td colspan="6" class="!bg-ink-850">
+                  <pre class="max-h-64 overflow-auto whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-slate-400">{{ prettyDetails(log.details) }}</pre>
+                  <p v-if="log.user_agent" class="mt-2 text-[11px] text-slate-600">{{ log.user_agent }}</p>
+                </td>
+              </tr>
+            </template>
           </tbody>
         </table>
       </div>
 
-      <!-- PAGINAÇÃO -->
-      <div class="bg-slate-800/30 px-6 py-4 flex items-center justify-between border-t border-slate-700">
-        <div class="text-sm text-slate-400">
-          Mostrando {{ logs.length }} registros
-        </div>
+      <footer v-if="!loading && (logs.length || filters.offset > 0)" class="panel-footer">
+        <span>
+          Registros {{ filters.offset + 1 }}–{{ filters.offset + logs.length }}
+        </span>
         <div class="flex gap-2">
-          <button
-            @click="previousPage"
-            :disabled="filters.offset === 0"
-            class="px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-300 hover:border-[#C6A95D] hover:text-[#C6A95D] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Anterior
+          <button type="button" class="btn btn-secondary btn-sm" :disabled="filters.offset === 0" @click="previousPage">
+            <AppIcon name="arrow-left" :size="14" /> Anterior
           </button>
-          <button
-            @click="nextPage"
-            :disabled="logs.length < filters.limit"
-            class="px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-300 hover:border-[#C6A95D] hover:text-[#C6A95D] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Próxima
+          <button type="button" class="btn btn-secondary btn-sm" :disabled="logs.length < filters.limit" @click="nextPage">
+            Próxima <AppIcon name="arrow-right" :size="14" />
           </button>
         </div>
-      </div>
-    </div>
+      </footer>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import AppIcon from '@/components/ui/AppIcon.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { api } from '@/lib/api'
+import { friendlyError } from '@/lib/errors'
 
 interface AuditLog {
   id: number
@@ -188,113 +146,98 @@ interface AuditLog {
   created_at: string
 }
 
-interface Filters {
-  action: string
-  entityType: string
-  startDate: string
-  endDate: string
-  limit: number
-  offset: number
+const ACTIONS: Record<string, { label: string; badge: string }> = {
+  CREATE: { label: 'Criação', badge: 'badge-success' },
+  UPDATE: { label: 'Atualização', badge: 'badge-info' },
+  DELETE: { label: 'Exclusão', badge: 'badge-danger' },
+  LOGIN: { label: 'Login', badge: 'badge-gold' },
+  LOGOUT: { label: 'Logout', badge: 'badge-neutral' },
+  EXPORT: { label: 'Exportação', badge: 'badge-warning' },
+  VIEW: { label: 'Visualização', badge: 'badge-neutral' },
+}
+const ENTITIES: Record<string, string> = {
+  User: 'Usuário',
+  Guild: 'Guilda',
+  Event: 'Evento',
+  Finance: 'Finanças',
+  Build: 'Build',
 }
 
 const logs = ref<AuditLog[]>([])
-const loading = ref(false)
+const loading = ref(true)
 const error = ref('')
+const expanded = ref<number | null>(null)
+const filters = ref({ action: '', entityType: '', startDate: '', endDate: '', limit: 50, offset: 0 })
 
-const filters = ref<Filters>({
-  action: '',
-  entityType: '',
-  startDate: '',
-  endDate: '',
-  limit: 50,
-  offset: 0
-})
+const hasFilters = computed(() => !!(filters.value.action || filters.value.entityType || filters.value.startDate || filters.value.endDate))
 
-const loadLogs = async () => {
+async function loadLogs() {
   loading.value = true
   error.value = ''
-
+  expanded.value = null
   try {
-    const params: any = {
-      limit: filters.value.limit,
-      offset: filters.value.offset
-    }
-
-    if (filters.value.action) params.action = filters.value.action
-    if (filters.value.entityType) params.entityType = filters.value.entityType
-    if (filters.value.startDate) params.startDate = filters.value.startDate
-    if (filters.value.endDate) params.endDate = filters.value.endDate
-
+    const { action, entityType, startDate, endDate, limit, offset } = filters.value
+    const params: Record<string, unknown> = { limit, offset }
+    if (action) params.action = action
+    if (entityType) params.entityType = entityType
+    if (startDate) params.startDate = startDate
+    if (endDate) params.endDate = endDate
     const response = await api.get('/audit', { params })
-    logs.value = response.data.logs || []
-  } catch (err: any) {
-    error.value = err.response?.data?.message || 'Erro ao carregar logs de auditoria'
+    logs.value = response.data?.logs ?? []
+  } catch (e) {
+    error.value = friendlyError(e, 'Não foi possível carregar a auditoria.')
   } finally {
     loading.value = false
   }
 }
 
-const clearFilters = () => {
-  filters.value = {
-    action: '',
-    entityType: '',
-    startDate: '',
-    endDate: '',
-    limit: 50,
-    offset: 0
-  }
+function reload() {
+  filters.value.offset = 0
   loadLogs()
 }
 
-const previousPage = () => {
-  if (filters.value.offset >= filters.value.limit) {
-    filters.value.offset -= filters.value.limit
-    loadLogs()
-  }
+function clearFilters() {
+  filters.value = { action: '', entityType: '', startDate: '', endDate: '', limit: 50, offset: 0 }
+  loadLogs()
 }
 
-const nextPage = () => {
+function previousPage() {
+  filters.value.offset = Math.max(0, filters.value.offset - filters.value.limit)
+  loadLogs()
+}
+
+function nextPage() {
   filters.value.offset += filters.value.limit
   loadLogs()
 }
 
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+function actionMeta(action: string) {
+  return ACTIONS[action] ?? { label: action, badge: 'badge-neutral' }
 }
 
-const getActionLabel = (action: string) => {
-  const labels: Record<string, string> = {
-    CREATE: 'Criação',
-    UPDATE: 'Atualização',
-    DELETE: 'Exclusão',
-    LOGIN: 'Login',
-    LOGOUT: 'Logout',
-    EXPORT: 'Exportação',
-    VIEW: 'Visualização'
+function formatDate(date: string) {
+  return new Date(date).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
+function relative(date: string) {
+  const diff = new Date(date).getTime() - Date.now()
+  const rtf = new Intl.RelativeTimeFormat('pt-BR', { numeric: 'auto' })
+  const mins = Math.round(diff / 60_000)
+  if (Math.abs(mins) < 60) return rtf.format(mins, 'minute')
+  const hours = Math.round(mins / 60)
+  if (Math.abs(hours) < 24) return rtf.format(hours, 'hour')
+  return rtf.format(Math.round(hours / 24), 'day')
+}
+
+/** Detalhes costumam vir como JSON em texto: formata para leitura */
+function prettyDetails(details: string | null) {
+  if (!details) return ''
+  try {
+    return JSON.stringify(typeof details === 'string' ? JSON.parse(details) : details, null, 2)
+  } catch {
+    return details
   }
-  return labels[action] || action
 }
 
-const getActionBadgeClass = (action: string) => {
-  const classes: Record<string, string> = {
-    CREATE: 'bg-green-500/20 text-green-400 border border-green-500/30',
-    UPDATE: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
-    DELETE: 'bg-red-500/20 text-red-400 border border-red-500/30',
-    LOGIN: 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
-    LOGOUT: 'bg-gray-500/20 text-gray-400 border border-gray-500/30',
-    EXPORT: 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
-    VIEW: 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-  }
-  return classes[action] || 'bg-slate-500/20 text-slate-400 border border-slate-500/30'
-}
-
-onMounted(() => {
-  loadLogs()
-})
+onMounted(loadLogs)
 </script>

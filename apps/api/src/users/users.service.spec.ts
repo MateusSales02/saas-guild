@@ -179,6 +179,7 @@ describe('UsersService', () => {
 
       expect(mockUsersRepo.findOne).toHaveBeenCalledWith({
         where: { email: 'test@example.com' },
+        select: expect.objectContaining({ password_hash: true }),
       });
       expect(result).toHaveProperty('password_hash');
     });

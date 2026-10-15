@@ -1,74 +1,44 @@
 <template>
-  <RouterLink
-    :to="to"
-    class="group relative flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-slate-100 transition-all duration-300"
-    active-class="!text-[#C6A95D] bg-gradient-to-r from-[#C6A95D]/10 to-amber-500/10 border border-[#C6A95D]/30 shadow-lg shadow-[#C6A95D]/20"
-    :class="{'hover:bg-slate-800/50': true}"
-  >
-    <!-- Glow effect on hover -->
-    <div class="absolute -inset-1 bg-gradient-to-r from-[#C6A95D]/20 to-amber-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      class="relative z-10 w-5 h-5 stroke-[2] group-hover:scale-110 transition-transform duration-300"
-      fill="none"
-      stroke="currentColor"
+  <RouterLink v-slot="{ href, navigate, isActive, isExactActive }" :to="to" custom>
+    <a
+      :href="href"
+      :aria-current="(exact ? isExactActive : isActive) ? 'page' : undefined"
+      class="group relative flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors"
+      :class="(exact ? isExactActive : isActive)
+        ? 'bg-gradient-to-r from-gold-500/[0.14] via-gold-500/[0.05] to-transparent text-gold-100'
+        : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-100'"
+      @click="navigate"
     >
-      <template v-if="icon === 'chart'">
-        <path d="M3 3v18h18" />
-        <path d="M18 17V9M13 17V5M8 17v-3" />
-      </template>
-      <template v-else-if="icon === 'users'">
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-        <path d="M16.87 3.13a4 4 0 0 1 0 7.75" />
-      </template>
-      <template v-else-if="icon === 'swords'">
-        <path d="m14.5 17.5 2 2 5-5-2-2-5 5z" />
-        <path d="M18 13 7 2H2v5l11 11" />
-        <path d="M2 2l7 7" />
-      </template>
-      <template v-else-if="icon === 'calendar'">
-        <rect x="3" y="4" width="18" height="18" rx="2" />
-        <path d="M16 2v4M8 2v4M3 10h18" />
-      </template>
-      <template v-else-if="icon === 'treasure'">
-        <path d="M2 7h20v10H2z" />
-        <path d="M6 7V5h12v2" />
-        <path d="M7 12h10M9 15h6" />
-      </template>
-      <template v-else-if="icon === 'hammer'">
-        <path d="M2 21h4l9-9-4-4-9 9v4z" />
-        <path d="m14.5 5.5 2-2 3 3-2 2z" />
-      </template>
-      <template v-else-if="icon === 'market'">
-        <circle cx="12" cy="12" r="8" />
-        <path d="M12 2v20M2 12h20" />
-        <path d="M12 6a6 6 0 0 0 0 12M12 6a6 6 0 0 1 0 12" />
-      </template>
-      <template v-else-if="icon === 'list'">
-        <line x1="8" y1="6" x2="21" y2="6" />
-        <line x1="8" y1="12" x2="21" y2="12" />
-        <line x1="8" y1="18" x2="21" y2="18" />
-        <line x1="3" y1="6" x2="3.01" y2="6" />
-        <line x1="3" y1="12" x2="3.01" y2="12" />
-        <line x1="3" y1="18" x2="3.01" y2="18" />
-      </template>
-      <template v-else>
-        <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-        <path
-          d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V22a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H2a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V2a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c0 .64.37 1.22.95 1.49.37.17.77.26 1.18.26a2 2 0 1 1 0 4h-.09c-.66 0-1.26.26-1.7.7-.44.44-.7 1.04-.7 1.7z"
-        />
-      </template>
-    </svg>
-    <span class="relative z-10 text-sm font-semibold tracking-wide">{{ label }}</span>
+      <span
+        v-if="exact ? isExactActive : isActive"
+        class="absolute inset-y-2 left-0 w-[2px] rounded-full bg-gold-400 shadow-[0_0_12px_rgba(198,169,93,0.8)]"
+        aria-hidden="true"
+      />
+      <AppIcon
+        :name="icon"
+        :size="18"
+        :class="(exact ? isExactActive : isActive) ? 'text-gold-400' : 'text-slate-500 group-hover:text-slate-300'"
+      />
+      <span class="truncate">{{ label }}</span>
+      <span v-if="badge" class="ml-auto badge badge-gold">{{ badge }}</span>
+    </a>
   </RouterLink>
 </template>
 
 <script setup lang="ts">
 import { RouterLink, type RouteLocationRaw } from 'vue-router'
-type IconName = 'chart' | 'users' | 'swords' | 'calendar' | 'treasure' | 'settings' | 'hammer' | 'market' | 'list'
-defineProps<{ icon: IconName; label: string; to: RouteLocationRaw }>()
+import AppIcon from '@/components/ui/AppIcon.vue'
+import type { IconName } from '@/components/ui/icons'
+
+withDefaults(
+  defineProps<{
+    icon: IconName
+    label: string
+    to: RouteLocationRaw
+    /** Ativo só na rota exata (ex: a raiz do painel) */
+    exact?: boolean
+    badge?: string
+  }>(),
+  { exact: false, badge: '' },
+)
 </script>

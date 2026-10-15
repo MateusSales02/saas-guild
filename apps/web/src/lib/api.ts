@@ -181,7 +181,7 @@ export type BuildPayload = {
   name: string
   description?: string
   role?: string
-  classId: number
+  classId?: number
   specId?: number
   itemIds?: number[]
   guildId?: number
@@ -189,11 +189,32 @@ export type BuildPayload = {
   memberId?: number
   is_public?: boolean
   price?: number
+  category?: string
+  tags?: string[]
+  loadout?: Record<string, unknown>
+  author_name?: string
+  videos?: string[]
+  status?: 'draft' | 'published'
+}
+
+export type BuildFilters = {
+  search?: string
+  guildId?: number
+  authorId?: number
+  voterId?: number
+  category?: string
+  sort?: 'popular' | 'name' | 'recent'
 }
 
 export const BuildsApi = {
-  list(params?: Partial<BuildPayload> & { search?: string }) {
+  list(params?: BuildFilters) {
     return api.get('/builds', { params }).then((r) => r.data)
+  },
+  vote(id: number): Promise<{ voted: boolean; vote_count: number }> {
+    return api.post(`/builds/${id}/vote`).then((r) => r.data)
+  },
+  myVotes(): Promise<number[]> {
+    return api.get('/builds/votes/mine').then((r) => r.data)
   },
   get(id: number) {
     return api.get(`/builds/${id}`).then((r) => r.data)
@@ -231,6 +252,18 @@ export const IntegrationsApi = {
 // Documentação: https://www.albion-online-data.com/api-site/api.html
 const ALBION_DATA_API = 'https://www.albion-online-data.com/api/v2/stats'
 
+export type AlbionRegion = 'west' | 'europe' | 'east'
+
+const ALBION_REGION_HOSTS: Record<AlbionRegion, string> = {
+  west: 'https://west.albion-online-data.com/api/v2/stats',
+  europe: 'https://europe.albion-online-data.com/api/v2/stats',
+  east: 'https://east.albion-online-data.com/api/v2/stats',
+}
+
+function albionBaseUrl(region?: AlbionRegion): string {
+  return region ? ALBION_REGION_HOSTS[region] : ALBION_DATA_API
+}
+
 export interface AlbionPriceData {
   item_id: string
   city: string
@@ -267,6 +300,7 @@ export const AlbionDataApi = {
     items: string[],
     locations?: string[],
     qualities?: number[],
+    region?: AlbionRegion,
   ): Promise<AlbionPriceData[]> {
     const itemsParam = items.join(',')
     const params = new URLSearchParams()
@@ -278,9 +312,33 @@ export const AlbionDataApi = {
       params.append('qualities', qualities.join(','))
     }
 
-    const url = `${ALBION_DATA_API}/prices/${itemsParam}.json${params.toString() ? '?' + params.toString() : ''}`
+    const url = `${albionBaseUrl(region)}/prices/${itemsParam}.json${params.toString() ? '?' + params.toString() : ''}`
     const response = await axios.get<AlbionPriceData[]>(url)
     return response.data
+  },
+
+  /**
+   * Busca preços de muitos itens dividindo em lotes (a URL tem limite de tamanho).
+   * Os lotes são sequenciais para respeitar o limite de requisições da API.
+   */
+  async getPricesBatch(
+    items: string[],
+    locations?: string[],
+    qualities?: number[],
+    region?: AlbionRegion,
+    options: { chunkSize?: number; onProgress?: (done: number, total: number) => void } = {},
+  ): Promise<AlbionPriceData[]> {
+    const chunkSize = options.chunkSize ?? 100
+    const unique = [...new Set(items)]
+    const total = Math.ceil(unique.length / chunkSize)
+    const results: AlbionPriceData[] = []
+    for (let i = 0; i < unique.length; i += chunkSize) {
+      results.push(
+        ...(await this.getPrices(unique.slice(i, i + chunkSize), locations, qualities, region)),
+      )
+      options.onProgress?.(i / chunkSize + 1, total)
+    }
+    return results
   },
 
   /**
@@ -296,6 +354,7 @@ export const AlbionDataApi = {
       locations?: string[]
       qualities?: number[]
       timeScale?: number // 1=hourly, 6=6hours, 24=daily
+      region?: AlbionRegion
     },
   ): Promise<AlbionHistoryData[]> {
     const itemsParam = items.join(',')
@@ -313,7 +372,7 @@ export const AlbionDataApi = {
       params.append('time-scale', options.timeScale.toString())
     }
 
-    const url = `${ALBION_DATA_API}/history/${itemsParam}.json${params.toString() ? '?' + params.toString() : ''}`
+    const url = `${albionBaseUrl(options?.region)}/history/${itemsParam}.json${params.toString() ? '?' + params.toString() : ''}`
     const response = await axios.get<AlbionHistoryData[]>(url)
     return response.data
   },

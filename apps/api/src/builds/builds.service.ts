@@ -9,6 +9,7 @@ import { UpdateBuildDto } from './dto/update-build.dto';
 import { BuildClass } from './build-class.entity';
 import { BuildSpec } from './build-spec.entity';
 import { BuildItem } from './build-item.entity';
+import { BuildVote } from './build-vote.entity';
 import { FilterBuildsDto } from './dto/filter-builds.dto';
 import { Guild } from '../guilds/guild.entity';
 import { User } from '../users/user.entity';
@@ -91,6 +92,8 @@ export class BuildsService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(GuildMember)
     private readonly memberRepo: Repository<GuildMember>,
+    @InjectRepository(BuildVote)
+    private readonly voteRepo: Repository<BuildVote>,
     @Inject(CACHE_MANAGER)
     private readonly cacheManager: Cache,
   ) {}
@@ -104,8 +107,20 @@ export class BuildsService {
       .leftJoinAndSelect('build.guild', 'guild')
       .leftJoinAndSelect('build.author', 'author')
       .leftJoinAndSelect('build.member', 'member')
-      .leftJoinAndSelect('member.user', 'memberUser')
-      .orderBy('build.created_at', 'DESC');
+      .leftJoinAndSelect('member.user', 'memberUser');
+
+    if (filters.sort === 'popular') {
+      qb.orderBy('build.vote_count', 'DESC').addOrderBy(
+        'build.created_at',
+        'DESC',
+      );
+    } else if (filters.sort === 'name') {
+      qb.orderBy('build.name', 'ASC');
+    } else if (filters.sort === 'recent') {
+      qb.orderBy('build.updated_at', 'DESC');
+    } else {
+      qb.orderBy('build.created_at', 'DESC');
+    }
 
     if (filters.search) {
       qb.andWhere('(build.name ILIKE :q OR build.description ILIKE :q)', {
@@ -124,6 +139,20 @@ export class BuildsService {
     if (filters.authorId)
       qb.andWhere('author.id = :authorId', { authorId: filters.authorId });
     if (filters.onlyPublic) qb.andWhere('build.is_public = true');
+    if (filters.category)
+      qb.andWhere('build.category = :category', {
+        category: filters.category,
+      });
+    if (filters.voterId)
+      qb.innerJoin(
+        BuildVote,
+        'vote',
+        'vote.build_id = build.id AND vote.user_id = :voterId',
+        { voterId: filters.voterId },
+      );
+    // Rascunhos só aparecem para o próprio autor
+    if (!filters.authorId)
+      qb.andWhere("(build.status IS NULL OR build.status <> 'draft')");
 
     return qb.getMany();
   }
@@ -152,6 +181,12 @@ export class BuildsService {
       role: dto.role,
       is_public: dto.is_public ?? true,
       price: dto.price,
+      category: dto.category,
+      tags: dto.tags,
+      loadout: dto.loadout,
+      author_name: dto.author_name,
+      videos: dto.videos,
+      status: dto.status ?? 'published',
     });
 
     await this.applyRelations(build, dto);
@@ -166,9 +201,47 @@ export class BuildsService {
     if (dto.role !== undefined) build.role = dto.role;
     if (dto.is_public !== undefined) build.is_public = dto.is_public;
     if (dto.price !== undefined) build.price = dto.price;
+    if (dto.category !== undefined) build.category = dto.category;
+    if (dto.tags !== undefined) build.tags = dto.tags;
+    if (dto.loadout !== undefined) build.loadout = dto.loadout;
+    if (dto.author_name !== undefined) build.author_name = dto.author_name;
+    if (dto.videos !== undefined) build.videos = dto.videos;
+    if (dto.status !== undefined) build.status = dto.status;
 
     await this.applyRelations(build, dto);
     return this.buildRepo.save(build);
+  }
+
+  // --- Votos ---
+  async toggleVote(buildId: number, userId: number) {
+    await this.findOne(buildId);
+    const existing = await this.voteRepo.findOne({
+      where: { build: { id: buildId }, user: { id: userId } },
+    });
+    if (existing) {
+      await this.voteRepo.remove(existing);
+    } else {
+      await this.voteRepo.save(
+        this.voteRepo.create({
+          build: { id: buildId } as Build,
+          user: { id: userId } as User,
+        }),
+      );
+    }
+    const voteCount = await this.voteRepo.count({
+      where: { build: { id: buildId } },
+    });
+    await this.buildRepo.update(buildId, { vote_count: voteCount });
+    return { voted: !existing, vote_count: voteCount };
+  }
+
+  async votedBuildIds(userId: number): Promise<number[]> {
+    const rows = await this.voteRepo
+      .createQueryBuilder('vote')
+      .select('vote.build_id', 'id')
+      .where('vote.user_id = :userId', { userId })
+      .getRawMany<{ id: number }>();
+    return rows.map((r) => Number(r.id));
   }
 
   async remove(id: number) {

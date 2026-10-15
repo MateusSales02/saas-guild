@@ -63,8 +63,12 @@ const router = createRouter({
         { path: 'raids', name: 'raids', component: () => import('@/pages/dashboard/Raids.vue') },
         {
           path: 'builds',
-          name: 'builds',
-          component: () => import('@/pages/dashboard/Builds.vue'),
+          children: [
+            { path: '', name: 'builds', component: () => import('@/pages/dashboard/Builds.vue') },
+            { path: 'nova', name: 'builds.new', component: () => import('@/pages/dashboard/BuildEditor.vue') },
+            { path: ':id(\\d+)', name: 'builds.detail', component: () => import('@/pages/dashboard/BuildDetail.vue') },
+            { path: ':id(\\d+)/editar', name: 'builds.edit', component: () => import('@/pages/dashboard/BuildEditor.vue') },
+          ],
         },
         {
           path: 'eventos',
@@ -80,6 +84,11 @@ const router = createRouter({
           path: 'mercado',
           name: 'market',
           component: () => import('@/pages/dashboard/Market.vue'),
+        },
+        {
+          path: 'calculadora',
+          name: 'calculator',
+          component: () => import('@/pages/dashboard/Calculator.vue'),
         },
         {
           path: 'itens',

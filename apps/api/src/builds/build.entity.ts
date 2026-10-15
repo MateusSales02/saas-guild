@@ -77,6 +77,32 @@ export class Build {
   @Column({ type: 'int', nullable: true })
   price?: number;
 
+  /** Tipo de conteúdo (ex: "Fama Solo", "ZvZ") */
+  @Column({ nullable: true })
+  category?: string;
+
+  @Column({ type: 'jsonb', nullable: true })
+  tags?: string[] | null;
+
+  /** Equipamento, consumíveis, habilidades e características (ids do Albion) */
+  @Column({ type: 'jsonb', nullable: true })
+  loadout?: Record<string, unknown> | null;
+
+  /** Nome exibido como autor, independente da conta */
+  @Column({ name: 'author_name', length: 15, nullable: true })
+  author_name?: string;
+
+  /** IDs de vídeos do YouTube */
+  @Column({ type: 'jsonb', nullable: true })
+  videos?: string[] | null;
+
+  /** 'draft' (rascunho) ou 'published' */
+  @Column({ default: 'published' })
+  status?: string;
+
+  @Column({ type: 'int', default: 0 })
+  vote_count?: number;
+
   @CreateDateColumn()
   created_at: Date;
 

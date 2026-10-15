@@ -7,6 +7,7 @@ import { Build } from './build.entity';
 import { BuildClass } from './build-class.entity';
 import { BuildSpec } from './build-spec.entity';
 import { BuildItem } from './build-item.entity';
+import { BuildVote } from './build-vote.entity';
 import { Guild } from '../guilds/guild.entity';
 import { User } from '../users/user.entity';
 import { GuildMember } from '../guilds/guild-member.entity';
@@ -21,6 +22,7 @@ describe('BuildsService', () => {
   let mockUserRepo: any;
   let mockMemberRepo: any;
   let mockCacheManager: any;
+  let mockVoteRepo: any;
 
   const mockClass: BuildClass = {
     id: 1,
@@ -114,6 +116,16 @@ describe('BuildsService', () => {
       findOne: jest.fn(),
     };
 
+    mockVoteRepo = {
+      findOne: jest.fn(),
+      create: jest.fn((v) => v),
+      save: jest.fn(),
+      remove: jest.fn(),
+      count: jest.fn(),
+      createQueryBuilder: jest.fn(),
+    };
+    mockBuildRepo.update = jest.fn();
+
     mockCacheManager = {
       get: jest.fn(),
       set: jest.fn(),
@@ -130,6 +142,7 @@ describe('BuildsService', () => {
         { provide: getRepositoryToken(Guild), useValue: mockGuildRepo },
         { provide: getRepositoryToken(User), useValue: mockUserRepo },
         { provide: getRepositoryToken(GuildMember), useValue: mockMemberRepo },
+        { provide: getRepositoryToken(BuildVote), useValue: mockVoteRepo },
         { provide: CACHE_MANAGER, useValue: mockCacheManager },
       ],
     }).compile();
@@ -257,6 +270,59 @@ describe('BuildsService', () => {
       await expect(service.create(createDto)).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  describe('toggleVote', () => {
+    it('should add a vote when the user has not voted yet', async () => {
+      mockBuildRepo.findOne.mockResolvedValue(mockBuild);
+      mockVoteRepo.findOne.mockResolvedValue(null);
+      mockVoteRepo.count.mockResolvedValue(3);
+
+      const result = await service.toggleVote(1, 7);
+
+      expect(mockVoteRepo.save).toHaveBeenCalledWith({
+        build: { id: 1 },
+        user: { id: 7 },
+      });
+      expect(mockBuildRepo.update).toHaveBeenCalledWith(1, { vote_count: 3 });
+      expect(result).toEqual({ voted: true, vote_count: 3 });
+    });
+
+    it('should remove the vote when the user already voted', async () => {
+      const vote = { id: 5 };
+      mockBuildRepo.findOne.mockResolvedValue(mockBuild);
+      mockVoteRepo.findOne.mockResolvedValue(vote);
+      mockVoteRepo.count.mockResolvedValue(0);
+
+      const result = await service.toggleVote(1, 7);
+
+      expect(mockVoteRepo.remove).toHaveBeenCalledWith(vote);
+      expect(mockVoteRepo.save).not.toHaveBeenCalled();
+      expect(result).toEqual({ voted: false, vote_count: 0 });
+    });
+
+    it('should throw NotFoundException if build not found', async () => {
+      mockBuildRepo.findOne.mockResolvedValue(null);
+      await expect(service.toggleVote(99, 7)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('votedBuildIds', () => {
+    it('should return the ids of builds voted by the user', async () => {
+      const qb = {
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getRawMany: jest.fn().mockResolvedValue([{ id: '2' }, { id: 4 }]),
+      };
+      mockVoteRepo.createQueryBuilder.mockReturnValue(qb);
+
+      await expect(service.votedBuildIds(7)).resolves.toEqual([2, 4]);
+      expect(qb.where).toHaveBeenCalledWith('vote.user_id = :userId', {
+        userId: 7,
+      });
     });
   });
 
@@ -496,6 +562,8 @@ describe('BuildsService', () => {
       const mockQb = {
         leftJoinAndSelect: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
+        addOrderBy: jest.fn().mockReturnThis(),
+        innerJoin: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
         getMany: jest.fn().mockResolvedValue([mockBuild]),
       };
@@ -567,7 +635,30 @@ describe('BuildsService', () => {
       });
 
       const qb = mockBuildRepo.createQueryBuilder();
-      expect(qb.andWhere).toHaveBeenCalledTimes(3);
+      // 3 filtros + exclusão de rascunhos (sem authorId)
+      expect(qb.andWhere).toHaveBeenCalledTimes(4);
+    });
+
+    it('should hide drafts unless filtering by author', async () => {
+      const qb = mockBuildRepo.createQueryBuilder();
+      const draftClause = "(build.status IS NULL OR build.status <> 'draft')";
+
+      await service.findAll({});
+      expect(qb.andWhere).toHaveBeenCalledWith(draftClause);
+
+      qb.andWhere.mockClear();
+      await service.findAll({ authorId: 1 });
+      expect(qb.andWhere).not.toHaveBeenCalledWith(draftClause);
+    });
+
+    it('should filter by category and sort by popularity', async () => {
+      const qb = mockBuildRepo.createQueryBuilder();
+      await service.findAll({ category: 'ZvZ', sort: 'popular' });
+
+      expect(qb.andWhere).toHaveBeenCalledWith('build.category = :category', {
+        category: 'ZvZ',
+      });
+      expect(qb.orderBy).toHaveBeenCalledWith('build.vote_count', 'DESC');
     });
   });
 

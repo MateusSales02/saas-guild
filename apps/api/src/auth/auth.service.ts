@@ -9,7 +9,7 @@ import { Repository, LessThan } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '../users/user.entity';
+import { User, USER_SELECT_WITH_PASSWORD } from '../users/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { GuildsService } from '../guilds/guilds.service';
@@ -70,6 +70,7 @@ export class AuthService {
   async login(dto: LoginDto) {
     const user = await this.usersRepo.findOne({
       where: { email: dto.email },
+      select: USER_SELECT_WITH_PASSWORD,
     });
     if (!user) {
       throw new UnauthorizedException('Credenciais inválidas');

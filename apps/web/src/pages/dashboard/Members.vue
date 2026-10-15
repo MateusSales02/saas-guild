@@ -1,322 +1,286 @@
 <template>
-  <section
-    class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-xl px-4 py-5 sm:px-6 sm:py-6 shadow-2xl"
-  >
-    <!-- HEADER -->
-    <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
-      <div>
-        <h2 class="text-2xl font-black bg-gradient-to-r from-[#C6A95D] via-amber-400 to-[#C6A95D] bg-clip-text text-transparent flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-sky-500 shadow-lg shadow-indigo-500/30">
-            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
-            </svg>
-          </div>
-          Membros da Guilda
-        </h2>
-        <p class="mt-2 text-sm text-slate-400">
-          Gerencie quem faz parte da sua guilda e os cargos de cada jogador.
+  <div class="page">
+    <PageHeader
+      :eyebrow="guild?.name ?? 'Guilda'"
+      title="Membros"
+      subtitle="Gerencie quem faz parte da guilda e o cargo de cada jogador."
+    >
+      <template #actions>
+        <button type="button" class="btn btn-primary" @click="openModal">
+          <AppIcon name="plus" :size="16" />
+          Adicionar membro
+        </button>
+      </template>
+    </PageHeader>
+
+    <div v-if="error" role="alert" class="alert alert-error">
+      <AppIcon name="alert" :size="18" class="mt-0.5" />
+      <p class="flex-1">{{ error }}</p>
+      <button type="button" class="btn btn-danger btn-sm" @click="load">Tentar novamente</button>
+    </div>
+
+    <!-- Resumo por cargo -->
+    <div class="grid grid-cols-3 gap-3 sm:gap-4">
+      <button
+        v-for="r in ROLE_FILTERS"
+        :key="r.value"
+        type="button"
+        class="stat text-left transition-colors hover:border-gold-500/25"
+        :class="{ '!border-gold-500/40': roleFilter === r.value }"
+        :aria-pressed="roleFilter === r.value"
+        @click="roleFilter = roleFilter === r.value ? 'all' : r.value"
+      >
+        <p class="stat-label">
+          <span class="h-1.5 w-1.5 rounded-full" :class="r.dot" />
+          {{ r.plural }}
         </p>
-      </div>
+        <p class="stat-value">
+          <span v-if="loading" class="skeleton inline-block h-7 w-10 align-middle" />
+          <template v-else>{{ countByRole[r.value] }}</template>
+        </p>
+      </button>
+    </div>
 
-      <div class="flex flex-wrap items-center gap-3 justify-between sm:justify-end">
-        <!-- contador -->
-        <div class="flex flex-col items-start sm:items-end text-slate-300 text-sm">
-          <span class="text-[10px] uppercase tracking-wide text-slate-500">Total</span>
-          <span class="text-base font-semibold text-slate-50">
-            {{ members.length }}
-            <span class="ml-1 text-xs font-normal text-slate-400">
-              {{ members.length === 1 ? 'membro' : 'membros' }}
-            </span>
-          </span>
-        </div>
-
-        <!-- seleção de cargo padrão + botão -->
-        <div class="flex items-center gap-2">
-          <select
-            v-model="quickRole"
-            class="text-sm px-3 py-2 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
-          >
-            <!-- value em inglês, label em PT-BR -->
-            <option value="member">Membro</option>
-            <option value="leader">Líder</option>
-            <option value="officer">Oficial</option>
-          </select>
-
-          <!-- BOTÃO: sempre clicável -->
+    <section class="panel overflow-hidden">
+      <header class="panel-header">
+        <label class="relative block w-full sm:w-72">
+          <span class="sr-only">Buscar membro</span>
+          <AppIcon name="search" :size="16" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+          <input v-model="search" type="search" placeholder="Buscar por nome ou e-mail" class="input !pl-9" />
+        </label>
+        <div class="seg" role="group" aria-label="Filtrar por cargo">
+          <button type="button" class="seg-item" :aria-pressed="roleFilter === 'all'" @click="roleFilter = 'all'">
+            Todos <span class="ml-1 text-slate-500">{{ members.length }}</span>
+          </button>
           <button
+            v-for="r in ROLE_FILTERS"
+            :key="r.value"
             type="button"
-            @click="openModal"
-            class="group inline-flex items-center gap-2 text-xs sm:text-sm px-4 py-2 rounded-lg
-                   bg-gradient-to-r from-[#C6A95D] to-amber-500 text-slate-900 font-bold
-                   shadow-lg shadow-[#C6A95D]/30 hover:shadow-[#C6A95D]/50 hover:scale-105 transition-all duration-300"
+            class="seg-item"
+            :aria-pressed="roleFilter === r.value"
+            @click="roleFilter = r.value"
           >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/>
-            </svg>
-            Adicionar Membro
+            {{ r.plural }}
           </button>
         </div>
-      </div>
-    </header>
+      </header>
 
-    <!-- ERRO -->
-    <div
-      v-if="error"
-      class="mb-4 rounded-lg border border-rose-500/70 bg-rose-950/70 px-4 py-3 text-xs sm:text-sm text-rose-100 flex gap-2"
-    >
-      <span class="mt-0.5">⚠️</span>
-      <div>
-        <p class="font-medium">Ocorreu um erro.</p>
-        <p class="text-rose-200/90">{{ error }}</p>
-      </div>
-    </div>
-
-    <!-- LOADING -->
-    <div v-if="loading" class="space-y-2">
-      <div class="h-3 w-24 rounded bg-slate-800/80 animate-pulse" />
-      <div
-        class="overflow-hidden rounded-xl border border-slate-800/80 bg-slate-950/80 divide-y divide-slate-900/80"
-      >
-        <div
-          v-for="i in 3"
-          :key="i"
-          class="grid grid-cols-12 gap-3 px-4 py-3 animate-pulse"
-        >
-          <div class="col-span-6 sm:col-span-5 flex items-center gap-3">
-            <div class="h-9 w-9 rounded-full bg-slate-800/80" />
-            <div class="space-y-2 flex-1">
-              <div class="h-3 w-32 rounded bg-slate-800/80" />
-              <div class="h-2 w-40 rounded bg-slate-900/90" />
-            </div>
+      <!-- Carregando -->
+      <div v-if="loading" class="divide-y divide-white/[0.04]">
+        <div v-for="i in 4" :key="i" class="flex items-center gap-3 px-5 py-4">
+          <div class="skeleton h-9 w-9 rounded-full" />
+          <div class="flex-1 space-y-2">
+            <div class="skeleton h-3 w-36" />
+            <div class="skeleton h-2.5 w-48" />
           </div>
-          <div class="col-span-3 hidden sm:flex items-center">
-            <div class="h-6 w-24 rounded bg-slate-800/80" />
-          </div>
-          <div class="col-span-6 sm:col-span-4 flex items-center justify-end gap-2">
-            <div class="h-7 w-16 rounded bg-slate-800/80" />
-            <div class="h-7 w-20 rounded bg-slate-800/80" />
-          </div>
+          <div class="skeleton h-6 w-20" />
         </div>
       </div>
-    </div>
 
-    <!-- CONTEÚDO -->
-    <div
-      v-else
-      class="overflow-hidden rounded-xl border border-slate-700/50 bg-slate-800/30 shadow-lg"
-    >
-      <table class="w-full text-xs sm:text-sm">
-        <thead class="bg-slate-800/60 border-b border-slate-700/50">
-          <tr class="text-left text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-300">
-            <th class="px-4 py-3.5">Usuário</th>
-            <th class="px-4 py-3.5">Cargo</th>
-            <th class="px-4 py-3.5 text-right">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- LINHAS -->
-          <tr
-            v-for="m in members"
-            :key="m.id"
-            class="border-t border-slate-700/30 hover:bg-slate-800/50 transition-all duration-200"
-            :class="{ 'bg-indigo-500/10 border-indigo-500/30': m.user?.id === currentUserId }"
-          >
-            <td class="px-4 py-3">
-              <div class="flex items-center gap-3">
-                <div
-                  class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-sky-500 text-sm font-bold text-white shadow-lg shadow-indigo-500/30"
-                >
-                  {{ (m.user?.nickname || m.user?.email || '?').charAt(0).toUpperCase() }}
-                </div>
-                <div class="min-w-0">
-                  <div class="font-medium text-slate-50 truncate">
-                    {{ m.user?.nickname || m.user?.email || '—' }}
-                    <span
-                      v-if="m.user?.id === currentUserId"
-                      class="ml-1 rounded-full bg-indigo-500/20 px-2 py-0.5 text-[10px] font-semibold text-indigo-200"
-                    >
-                      Você
-                    </span>
+      <EmptyState
+        v-else-if="members.length === 0"
+        icon="users"
+        title="Nenhum membro ainda"
+        text="Adicione o primeiro jogador para começar a organizar a guilda."
+      >
+        <button type="button" class="btn btn-secondary btn-sm" @click="openModal">
+          <AppIcon name="plus" :size="14" /> Adicionar membro
+        </button>
+      </EmptyState>
+
+      <EmptyState
+        v-else-if="filtered.length === 0"
+        icon="search"
+        title="Nenhum membro encontrado"
+        text="Tente outro nome ou remova o filtro de cargo."
+      />
+
+      <div v-else class="overflow-x-auto">
+        <table class="table min-w-[560px]">
+          <thead>
+            <tr>
+              <th scope="col">Jogador</th>
+              <th scope="col">Cargo</th>
+              <th scope="col" class="!text-right"><span class="sr-only">Ações</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="m in filtered" :key="m.id">
+              <td>
+                <div class="flex items-center gap-3">
+                  <span
+                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-xs font-semibold"
+                    :class="m.role === 'leader' ? 'border-gold-500/40 bg-gold-500/10 text-gold-200' : 'border-white/10 bg-ink-700 text-slate-200'"
+                  >
+                    {{ initial(m) }}
+                  </span>
+                  <div class="min-w-0">
+                    <p class="flex items-center gap-2 truncate font-medium text-slate-100">
+                      {{ m.user?.nickname || m.user?.email || '—' }}
+                      <span v-if="m.user?.id === currentUserId" class="badge badge-gold">Você</span>
+                    </p>
+                    <p class="truncate text-xs text-slate-500">{{ m.user?.email || 'Sem e-mail' }}</p>
                   </div>
-                  <div class="opacity-70 text-[11px] text-slate-400 truncate">
-                    {{ m.user?.email || 'Sem e-mail' }}
-                  </div>
                 </div>
-              </div>
-            </td>
-
-            <td class="px-4 py-3 align-middle">
-              <div class="flex items-center gap-2">
-                <span
-                  class="inline-flex items-center rounded-lg bg-slate-700/50 border border-slate-600 px-3 py-1 text-xs font-semibold text-slate-200"
-                  :class="{
-                    'bg-[#C6A95D]/20 border-[#C6A95D]/40 text-[#C6A95D]': m.role === 'leader',
-                    'bg-indigo-500/20 border-indigo-500/40 text-indigo-300': m.role === 'officer'
-                  }"
-                >
-                  {{ roleLabel(m.role) }}
-                </span>
-
+              </td>
+              <td>
                 <select
                   v-if="canManage"
                   :value="m.role"
-                  @change="(e: any) => updateRole(m.id, e.target.value)"
-                  class="px-2 py-1.5 rounded-lg bg-slate-800/60 border border-slate-700 text-slate-300 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none text-xs transition-all"
+                  class="select input-sm w-36"
+                  :aria-label="`Cargo de ${m.user?.nickname || m.user?.email}`"
+                  :disabled="updatingId === m.id"
+                  @change="updateRole(m, ($event.target as HTMLSelectElement).value as GuildMemberRole)"
                 >
-                  <option value="member">Membro</option>
-                  <option value="leader">Líder</option>
-                  <option value="officer">Oficial</option>
+                  <option v-for="r in ROLE_FILTERS" :key="r.value" :value="r.value">{{ r.label }}</option>
                 </select>
-              </div>
-            </td>
+                <span v-else class="badge" :class="roleBadge(m.role)">{{ roleLabel(m.role) }}</span>
+              </td>
+              <td class="text-right">
+                <button
+                  v-if="canManage && m.user?.id !== currentUserId"
+                  type="button"
+                  class="btn btn-ghost btn-sm hover:!text-rose-300"
+                  :aria-label="`Remover ${m.user?.nickname || m.user?.email}`"
+                  @click="removeMember(m)"
+                >
+                  <AppIcon name="trash" :size="15" />
+                  <span class="hidden sm:inline">Remover</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-            <td class="px-4 py-3 text-right align-middle">
-              <button
-                v-if="canManage"
-                @click="removeMember(m.id)"
-                class="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/50 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-300 hover:bg-rose-500/20 hover:border-rose-400 transition-all duration-200"
-              >
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                </svg>
-                <span class="hidden sm:inline">Remover</span>
-              </button>
-            </td>
-          </tr>
-
-          <!-- ESTADO VAZIO -->
-          <tr v-if="members.length === 0">
-            <td class="px-4 py-8 text-center text-slate-400 text-xs sm:text-sm" colspan="3">
-              <div class="flex flex-col items-center gap-2">
-                <span class="text-2xl">✨</span>
-                <span class="font-medium text-slate-200">Nenhum membro ainda.</span>
-                <span class="text-xs text-slate-400">
-                  Use o botão <strong>“Adicionar-me”</strong> para adicionar o primeiro jogador.
-                </span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <footer v-if="!loading && members.length" class="panel-footer">
+        <span>{{ filtered.length }} de {{ members.length }} {{ members.length === 1 ? 'membro' : 'membros' }}</span>
+        <span v-if="!canManage" class="flex items-center gap-1.5"><AppIcon name="lock" :size="12" /> Só líderes e oficiais podem alterar cargos</span>
+      </footer>
+    </section>
 
     <!-- MODAL: Novo membro -->
-    <div
-      v-if="showAddMemberModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
-    >
-      <div
-        class="relative w-[90%] max-w-md rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-700/50 p-6 shadow-2xl animate-fade-in-up"
-      >
-        <!-- Glow Effect -->
-        <div class="absolute -inset-1 bg-gradient-to-r from-[#C6A95D]/20 to-indigo-500/20 rounded-2xl blur-xl opacity-50" />
-
-        <div class="relative">
-          <header class="mb-6 flex items-center justify-between">
-            <h3 class="text-xl font-bold bg-gradient-to-r from-[#C6A95D] to-amber-400 bg-clip-text text-transparent">
-              Adicionar Membro
-            </h3>
-            <button
-              type="button"
-              class="text-slate-400 hover:text-slate-200 transition-colors"
-              @click="closeModal"
-            >
-              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-              </svg>
+    <Teleport to="body">
+      <div v-if="showAddMemberModal" class="modal-backdrop" @mousedown.self="closeModal" @keydown.esc="closeModal">
+        <form class="modal-panel max-w-md" role="dialog" aria-modal="true" aria-labelledby="add-member-title" @submit.prevent="submitNewMember">
+          <header class="panel-header">
+            <div>
+              <h2 id="add-member-title" class="section-title">Adicionar membro</h2>
+              <p class="panel-subtitle">O jogador entra direto na {{ guild?.name ?? 'guilda' }}</p>
+            </div>
+            <button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Fechar" @click="closeModal">
+              <AppIcon name="x" />
             </button>
           </header>
 
-          <form class="space-y-5" @submit.prevent="submitNewMember">
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-300">Nome do jogador</label>
+          <div class="space-y-4 p-5">
+            <div>
+              <label for="new-member-name" class="label">Nome do jogador</label>
               <input
+                id="new-member-name"
+                ref="nameInput"
                 v-model="newMemberName"
                 type="text"
                 required
-                class="w-full rounded-xl bg-slate-800/50 border border-slate-700 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
-                placeholder="Ex.: Guerreiro Supremo"
+                maxlength="40"
+                class="input"
+                placeholder="Nick no Albion"
               />
             </div>
-
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-300">Cargo</label>
-              <select
-                v-model="newMemberRole"
-                class="w-full rounded-xl bg-slate-800/50 border border-slate-700 px-4 py-3 text-sm text-slate-100 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
-              >
-                <option value="member">Membro</option>
-                <option value="leader">Líder</option>
-                <option value="officer">Oficial</option>
-              </select>
+            <div>
+              <p class="label">Cargo</p>
+              <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Cargo">
+                <button
+                  v-for="r in ROLE_FILTERS"
+                  :key="r.value"
+                  type="button"
+                  role="radio"
+                  :aria-checked="newMemberRole === r.value"
+                  class="inset flex flex-col items-start gap-1 p-3 text-left transition-colors hover:border-white/20"
+                  :class="{ '!border-gold-500/50 !bg-gold-500/[0.07]': newMemberRole === r.value }"
+                  @click="newMemberRole = r.value"
+                >
+                  <span class="text-sm font-medium text-slate-100">{{ r.label }}</span>
+                  <span class="text-[11px] leading-snug text-slate-500">{{ r.hint }}</span>
+                </button>
+              </div>
             </div>
+          </div>
 
-            <div class="mt-6 flex justify-end gap-3">
-              <button
-                type="button"
-                class="px-4 py-2.5 text-sm rounded-xl border-2 border-slate-600 bg-slate-800/30 text-slate-200 font-semibold hover:bg-slate-800/50 hover:border-slate-500 transition-all"
-                @click="closeModal"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                :disabled="saving || !newMemberName.trim()"
-                class="inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-xl
-                       bg-gradient-to-r from-[#C6A95D] to-amber-500 text-slate-900 font-bold
-                       shadow-lg shadow-[#C6A95D]/30 hover:shadow-[#C6A95D]/50 hover:scale-105
-                       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300"
-              >
-                <span
-                  v-if="saving"
-                  class="h-4 w-4 rounded-full border-2 border-slate-900/60 border-t-transparent animate-spin"
-                />
-                <span v-else>Salvar Membro</span>
-              </button>
-            </div>
-          </form>
-        </div>
+          <footer class="flex justify-end gap-2 border-t border-white/[0.06] p-4">
+            <button type="button" class="btn btn-ghost" @click="closeModal">Cancelar</button>
+            <button type="submit" class="btn btn-primary" :disabled="saving || !newMemberName.trim()">
+              <span v-if="saving" class="h-4 w-4 animate-spin rounded-full border-2 border-ink-950/40 border-t-ink-950" />
+              {{ saving ? 'Salvando...' : 'Adicionar' }}
+            </button>
+          </footer>
+        </form>
       </div>
-    </div>
-  </section>
+    </Teleport>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
+import AppIcon from '@/components/ui/AppIcon.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { MembersApi, postJSON } from '@/lib/api'
+import { friendlyError } from '@/lib/errors'
+import { confirmAction, toast } from '@/lib/toast'
+import { normalizeText } from '@/lib/market'
 import { auth } from '@/stores/auth'
 
 type GuildMemberRole = 'member' | 'leader' | 'officer'
+type Member = { id: number; role: GuildMemberRole; user: { id: number; email: string; nickname?: string } }
+type PlayerUser = { id: number; email: string; nickname?: string }
 
-type Member = {
-  id: number
-  role: GuildMemberRole
-  user: { id: number; email: string; nickname?: string }
-}
-
-type PlayerUser = {
-  id: number
-  email: string
-  nickname?: string
-}
+const ROLE_FILTERS: Array<{ value: GuildMemberRole; label: string; plural: string; hint: string; dot: string }> = [
+  { value: 'leader', label: 'Líder', plural: 'Líderes', hint: 'Controle total', dot: 'bg-gold-400' },
+  { value: 'officer', label: 'Oficial', plural: 'Oficiais', hint: 'Gerencia membros', dot: 'bg-sky-400' },
+  { value: 'member', label: 'Membro', plural: 'Membros', hint: 'Acesso padrão', dot: 'bg-slate-400' },
+]
 
 const guild = computed(() => auth.guild)
 const members = ref<Member[]>([])
 const loading = ref(true)
 const saving = ref(false)
+const updatingId = ref<number | null>(null)
 const error = ref('')
+const search = ref('')
+const roleFilter = ref<GuildMemberRole | 'all'>('all')
 
-// cargo padrão sugerido
-const quickRole = ref<GuildMemberRole>('member')
-
-// modal
 const showAddMemberModal = ref(false)
 const newMemberName = ref('')
 const newMemberRole = ref<GuildMemberRole>('member')
+const nameInput = ref<HTMLInputElement | null>(null)
 
-const currentUserId = computed(() => {
-  if (!auth.user?.id) return -1
-  return Number(auth.user.id)
+const currentUserId = computed(() => (auth.user?.id ? Number(auth.user.id) : -1))
+
+const countByRole = computed(() => {
+  const counts: Record<GuildMemberRole, number> = { leader: 0, officer: 0, member: 0 }
+  for (const m of members.value) counts[m.role in counts ? m.role : 'member']++
+  return counts
+})
+
+// Ordem: você primeiro, depois por cargo e nome
+const ROLE_ORDER: Record<string, number> = { leader: 0, officer: 1, member: 2 }
+const filtered = computed(() => {
+  const needle = normalizeText(search.value)
+  return members.value
+    .filter((m) => roleFilter.value === 'all' || m.role === roleFilter.value)
+    .filter((m) => !needle || normalizeText(`${m.user?.nickname ?? ''} ${m.user?.email ?? ''}`).includes(needle))
+    .sort(
+      (a, b) =>
+        Number(b.user?.id === currentUserId.value) - Number(a.user?.id === currentUserId.value) ||
+        (ROLE_ORDER[a.role] ?? 3) - (ROLE_ORDER[b.role] ?? 3) ||
+        (a.user?.nickname ?? '').localeCompare(b.user?.nickname ?? ''),
+    )
+})
+
+const canManage = computed(() => {
+  const me = members.value.find((m) => m.user?.id === currentUserId.value)
+  return me?.role === 'leader' || me?.role === 'officer'
 })
 
 onMounted(load)
@@ -325,109 +289,90 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    if (guild.value) {
-      members.value = await MembersApi.listByGuild(guild.value.id)
-    } else {
-      // Se não houver guilda, simplesmente não carrega membros
-      members.value = []
-    }
-  } catch (e: any) {
-    error.value = e.message || 'Falha ao carregar membros'
+    members.value = guild.value ? await MembersApi.listByGuild(guild.value.id) : []
+  } catch (e) {
+    error.value = friendlyError(e, 'Não foi possível carregar os membros.')
   } finally {
     loading.value = false
   }
 }
 
-async function updateRole(id: number, role: string) {
+async function updateRole(member: Member, role: GuildMemberRole) {
+  const previous = member.role
+  member.role = role
+  updatingId.value = member.id
   try {
-    await MembersApi.update(id, role as GuildMemberRole)
-  } catch (e: any) {
-    error.value = e.message || 'Falha ao atualizar cargo'
-    await load()
+    await MembersApi.update(member.id, role)
+    toast('Cargo atualizado', { text: `${member.user?.nickname ?? 'Jogador'} agora é ${roleLabel(role).toLowerCase()}.` })
+  } catch (e) {
+    member.role = previous
+    toast('Não foi possível alterar o cargo', { tone: 'error', text: friendlyError(e) })
+  } finally {
+    updatingId.value = null
   }
 }
 
-async function removeMember(id: number) {
+async function removeMember(member: Member) {
+  const name = member.user?.nickname || member.user?.email || 'este jogador'
+  const ok = await confirmAction({
+    title: `Remover ${name} da guilda?`,
+    text: 'O jogador perde acesso ao painel da guilda. Você pode adicioná-lo novamente depois.',
+    confirmLabel: 'Remover',
+    danger: true,
+  })
+  if (!ok) return
   try {
-    await MembersApi.remove(id)
-    members.value = members.value.filter((m) => m.id !== id)
-  } catch (e: any) {
-    error.value = e.message || 'Falha ao remover membro'
+    await MembersApi.remove(member.id)
+    members.value = members.value.filter((m) => m.id !== member.id)
+    toast('Membro removido', { text: name })
+  } catch (e) {
+    toast('Não foi possível remover', { tone: 'error', text: friendlyError(e) })
   }
 }
 
 function openModal() {
   newMemberName.value = ''
-  newMemberRole.value = quickRole.value
+  newMemberRole.value = 'member'
   showAddMemberModal.value = true
+  nextTick(() => nameInput.value?.focus())
 }
 
 function closeModal() {
-  if (saving.value) return
-  showAddMemberModal.value = false
+  if (!saving.value) showAddMemberModal.value = false
 }
 
-// submit do formulário de novo membro
 async function submitNewMember() {
   if (!guild.value) {
-    error.value = 'Crie uma guilda antes de adicionar membros.'
+    toast('Crie uma guilda antes de adicionar membros', { tone: 'error' })
     return
   }
-  if (!newMemberName.value.trim()) return
+  const nickname = newMemberName.value.trim()
+  if (!nickname) return
 
   saving.value = true
-  error.value = ''
-
   try {
-    // chama o endpoint /auth/create-player (apenas nickname, resto o back gera)
-    const created = await postJSON<PlayerUser>('/auth/create-player', {
-      nickname: newMemberName.value.trim(),
-    })
-
+    // O back gera e-mail e senha a partir do nickname
+    const created = await postJSON<PlayerUser>('/auth/create-player', { nickname })
     await MembersApi.add(created.id, guild.value.id, newMemberRole.value)
-
     showAddMemberModal.value = false
+    toast('Membro adicionado', { text: `${nickname} entrou na guilda.` })
     await load()
-  } catch (e: any) {
-    error.value = e.message || 'Falha ao criar membro'
+  } catch (e) {
+    toast('Não foi possível adicionar', { tone: 'error', text: friendlyError(e) })
   } finally {
     saving.value = false
   }
 }
 
-// quem pode gerenciar cargos/remover
-const canManage = computed(() => {
-  if (!auth.user?.id) return false
-  const myId = Number(auth.user.id)
-  const me = members.value.find((m) => m.user?.id === myId)
-  return me?.role === 'leader' || me?.role === 'officer'
-})
+function initial(m: Member) {
+  return (m.user?.nickname || m.user?.email || '?').charAt(0).toUpperCase()
+}
 
 function roleLabel(role: GuildMemberRole) {
-  switch (role) {
-    case 'leader':
-      return 'Líder'
-    case 'officer':
-      return 'Oficial'
-    default:
-      return 'Membro'
-  }
+  return ROLE_FILTERS.find((r) => r.value === role)?.label ?? 'Membro'
+}
+
+function roleBadge(role: GuildMemberRole) {
+  return role === 'leader' ? 'badge-gold' : role === 'officer' ? 'badge-info' : 'badge-neutral'
 }
 </script>
-
-<style scoped>
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.3s ease-out;
-}
-</style>

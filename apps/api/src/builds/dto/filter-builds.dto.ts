@@ -1,4 +1,10 @@
-import { IsBoolean, IsInt, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class FilterBuildsDto {
@@ -30,4 +36,18 @@ export class FilterBuildsDto {
   @IsBoolean()
   @Type(() => Boolean)
   onlyPublic?: boolean;
+
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  /** Builds votadas por este usuário */
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  voterId?: number;
+
+  @IsOptional()
+  @IsIn(['popular', 'name', 'recent'])
+  sort?: 'popular' | 'name' | 'recent';
 }

@@ -1,511 +1,349 @@
 <template>
-  <section
-    class="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-950/90 px-4 py-5 sm:px-6 sm:py-6 shadow-2xl"
-  >
-    <!-- HEADER -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-      <div>
-        <h2 class="text-2xl font-black bg-gradient-to-r from-[#C6A95D] via-amber-400 to-[#C6A95D] bg-clip-text text-transparent flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 shadow-lg shadow-purple-500/30">
-            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M3 12v3c0 1.657 3.134 3 7 3s7-1.343 7-3v-3c0 1.657-3.134 3-7 3s-7-1.343-7-3z"/>
-              <path d="M3 7v3c0 1.657 3.134 3 7 3s7-1.343 7-3V7c0 1.657-3.134 3-7 3S3 8.657 3 7z"/>
-              <path d="M17 5c0 1.657-3.134 3-7 3S3 6.657 3 5s3.134-3 7-3 7 1.343 7 3z"/>
-            </svg>
+  <div class="page">
+    <PageHeader
+      eyebrow="Ferramentas"
+      title="Catálogo de itens"
+      :subtitle="`${CATALOG.length} itens negociáveis do Albion Online, com nomes oficiais em português.`"
+    >
+      <template #actions>
+        <button type="button" class="btn btn-secondary" :disabled="!filtered.length" @click="showExportModal = true">
+          <AppIcon name="download" :size="16" />
+          Exportar
+        </button>
+      </template>
+    </PageHeader>
+
+    <!-- Filtros -->
+    <div class="panel space-y-4 p-4">
+      <div class="flex flex-col gap-3 lg:flex-row lg:items-center">
+        <label class="relative block lg:w-80">
+          <span class="sr-only">Buscar item</span>
+          <AppIcon name="search" :size="16" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+          <input v-model="search" type="search" placeholder="Buscar por nome ou ID" class="input !pl-9" />
+        </label>
+        <div class="flex flex-wrap items-center gap-3 lg:ml-auto">
+          <div class="seg" role="group" aria-label="Tier exibido">
+            <button v-for="t in [4, 5, 6, 7, 8]" :key="t" type="button" class="seg-item" :aria-pressed="tier === t" @click="tier = t">
+              T{{ t }}
+            </button>
           </div>
-          Catálogo de Itens Albion
-        </h2>
-        <p class="mt-2 text-sm text-slate-400">
-          Referência completa de IDs - {{ items.length }} itens
-        </p>
+          <div class="seg" role="group" aria-label="Modo de exibição">
+            <button type="button" class="seg-item" :aria-pressed="view === 'grid'" aria-label="Grade" @click="view = 'grid'">
+              <AppIcon name="dashboard" :size="14" />
+            </button>
+            <button type="button" class="seg-item" :aria-pressed="view === 'list'" aria-label="Lista" @click="view = 'list'">
+              <AppIcon name="list" :size="14" />
+            </button>
+          </div>
+        </div>
       </div>
+      <div class="flex gap-1.5 overflow-x-auto no-scrollbar" role="group" aria-label="Grupo">
+        <button type="button" class="chip" :aria-pressed="group === ''" @click="setGroup('')">Todos</button>
+        <button v-for="g in ITEM_GROUPS" :key="g" type="button" class="chip" :aria-pressed="group === g" @click="setGroup(g)">
+          {{ g }} <span class="text-slate-500">{{ countByGroup[g] ?? 0 }}</span>
+        </button>
+      </div>
+      <div v-if="group && categories.length > 1" class="flex gap-1.5 overflow-x-auto no-scrollbar border-t border-white/[0.05] pt-3">
+        <button type="button" class="chip !h-6 !text-[11px]" :aria-pressed="category === ''" @click="category = ''">Todas</button>
+        <button v-for="c in categories" :key="c" type="button" class="chip !h-6 !text-[11px]" :aria-pressed="category === c" @click="category = c">
+          {{ c }}
+        </button>
+      </div>
+    </div>
 
-      <button
-        @click="openModal"
-        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-xs shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:scale-105 transition-all duration-300"
+    <div v-if="!filtered.length" class="panel">
+      <EmptyState icon="search" title="Nenhum item encontrado" text="Tente outro nome ou limpe os filtros." />
+    </div>
+
+    <!-- Grade -->
+    <div v-else-if="view === 'grid'" class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
+      <article
+        v-for="item in paged"
+        :key="item.baseId"
+        class="panel group flex flex-col items-center p-4 text-center transition-colors hover:border-gold-500/25"
       >
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"/>
-        </svg>
-        Exportar
-      </button>
+        <ItemIcon :item-id="idFor(item)" :size="72" :alt="itemName(item, tierFor(item))" class="transition-transform group-hover:scale-105" />
+        <p class="mt-2 line-clamp-2 min-h-[2.5rem] text-sm font-medium leading-tight text-slate-100">{{ itemName(item, tierFor(item)) }}</p>
+        <p class="mt-1 truncate text-[11px] text-slate-500">{{ item.category }}</p>
+        <div class="mt-3 flex w-full gap-1.5 opacity-80 transition-opacity group-hover:opacity-100">
+          <RouterLink :to="{ name: 'market', query: { item: idFor(item) } }" class="btn btn-secondary btn-sm flex-1 !px-2" title="Ver preços no mercado">
+            <AppIcon name="market" :size="14" /> Preços
+          </RouterLink>
+          <RouterLink
+            v-if="isCraftable(item)"
+            :to="{ name: 'calculator', query: { item: idFor(item) } }"
+            class="btn btn-ghost btn-icon btn-sm"
+            title="Calcular craft"
+            :aria-label="`Calcular craft de ${item.name}`"
+          >
+            <AppIcon name="calculator" :size="14" />
+          </RouterLink>
+        </div>
+      </article>
     </div>
 
-    <!-- Search Filter -->
-    <div class="mb-4 relative z-10">
-      <label for="search-items" class="sr-only">Buscar itens</label>
-      <input
-        id="search-items"
-        v-model="searchQuery"
-        type="text"
-        placeholder="Buscar por nome ou ID..."
-        class="w-full px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        autocomplete="off"
-        @input="currentPage = 1"
-        @focus="console.log('Input focused, searchQuery:', searchQuery)"
-        @keydown="console.log('Key pressed:', $event.key)"
-      />
-    </div>
-
-    <!-- Items Table -->
-    <div class="overflow-hidden rounded-xl border border-slate-700/50 bg-slate-800/30 mb-4">
+    <!-- Lista -->
+    <section v-else class="panel overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead class="bg-slate-800/50">
+        <table class="table min-w-[640px]">
+          <thead>
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-bold text-slate-300 uppercase">ID</th>
-              <th class="px-4 py-3 text-left text-xs font-bold text-slate-300 uppercase">Nome</th>
-              <th class="px-4 py-3 text-left text-xs font-bold text-slate-300 uppercase">Categoria</th>
-              <th class="px-4 py-3 text-left text-xs font-bold text-slate-300 uppercase">Tier</th>
+              <th scope="col">Item</th>
+              <th scope="col">Categoria</th>
+              <th scope="col">Tiers</th>
+              <th scope="col">ID</th>
+              <th scope="col"><span class="sr-only">Ações</span></th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-700/50">
-            <tr v-for="item in paginatedItems" :key="item.id" class="hover:bg-slate-700/30 transition-colors">
-              <td class="px-4 py-3 text-sm text-slate-400 font-mono">{{ item.id }}</td>
-              <td class="px-4 py-3 text-sm text-slate-200">{{ item.name }}</td>
-              <td class="px-4 py-3 text-sm text-slate-300">{{ item.category }}</td>
-              <td class="px-4 py-3 text-sm text-indigo-400 font-semibold">{{ item.tier }}</td>
+          <tbody>
+            <tr v-for="item in paged" :key="item.baseId">
+              <td>
+                <div class="flex items-center gap-3">
+                  <ItemIcon :item-id="idFor(item)" :size="36" />
+                  <span class="font-medium text-slate-100">{{ itemName(item, tierFor(item)) }}</span>
+                </div>
+              </td>
+              <td class="text-slate-400">{{ item.category }}</td>
+              <td class="tabular-nums text-slate-400">T{{ item.tiers[0] }}–T{{ item.tiers[item.tiers.length - 1] }}</td>
+              <td>
+                <button type="button" class="font-mono text-xs text-slate-500 hover:text-gold-300" title="Copiar ID" @click="copy(idFor(item))">
+                  {{ idFor(item) }}
+                </button>
+              </td>
+              <td class="text-right">
+                <RouterLink :to="{ name: 'market', query: { item: idFor(item) } }" class="btn btn-ghost btn-sm">
+                  Preços <AppIcon name="chevron-right" :size="14" />
+                </RouterLink>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
+    </section>
+
+    <div v-if="filtered.length" class="flex flex-col items-center gap-2 text-xs text-slate-500">
+      <span>Mostrando {{ paged.length }} de {{ filtered.length }} itens</span>
+      <button v-if="paged.length < filtered.length" type="button" class="btn btn-secondary btn-sm" @click="pageSize += PAGE">
+        Carregar mais
+      </button>
     </div>
 
-    <!-- Pagination -->
-    <div class="flex items-center justify-between">
-      <div class="text-sm text-slate-400">
-        Mostrando {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, filteredItems.length) }} de {{ filteredItems.length }} itens
-      </div>
-      <div class="flex gap-2">
-        <button
-          @click="currentPage--"
-          :disabled="currentPage === 1"
-          class="px-3 py-1 rounded bg-slate-700 text-slate-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-600 transition-colors"
-        >
-          Anterior
-        </button>
-        <span class="px-3 py-1 text-sm text-slate-300">Página {{ currentPage }} de {{ totalPages }}</span>
-        <button
-          @click="currentPage++"
-          :disabled="currentPage === totalPages"
-          class="px-3 py-1 rounded bg-slate-700 text-slate-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-600 transition-colors"
-        >
-          Próxima
-        </button>
-      </div>
-    </div>
-
-    <!-- EXPORT MODAL -->
-    <div
-      v-if="showExportModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-      @click.self="closeModal"
-    >
-      <div class="w-full max-w-2xl rounded-2xl border border-slate-700 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-2xl">
-        <!-- Modal Header -->
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="text-xl font-bold text-slate-50">Escolha o formato de exportação</h3>
-          <button
-            @click="closeModal"
-            class="p-2 rounded-lg hover:bg-slate-800 transition-colors"
-          >
-            <svg class="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-            </svg>
-          </button>
-        </div>
-
-        <!-- Category Selector for PDF (shown only when needed) -->
-        <div v-if="showCategorySelector" class="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
-          <h4 class="text-sm font-bold text-emerald-300 mb-3">Selecione as categorias:</h4>
-          <div class="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
-            <label v-for="cat in availableCategories" :key="cat" class="flex items-center gap-2 text-sm text-slate-300 cursor-pointer hover:text-emerald-300 transition-colors">
-              <input
-                type="checkbox"
-                :value="cat"
-                v-model="selectedCategories"
-                class="rounded border-slate-600 text-emerald-500 focus:ring-emerald-500"
-              />
-              {{ cat }}
-            </label>
-          </div>
-          <div class="flex gap-2 mt-4">
-            <button
-              @click="generateFilteredPDF"
-              :disabled="selectedCategories.length === 0"
-              class="flex-1 px-4 py-2 bg-emerald-500 text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-600 transition-colors"
-            >
-              Gerar PDF
+    <!-- EXPORTAR -->
+    <Teleport to="body">
+      <div v-if="showExportModal" class="modal-backdrop" @mousedown.self="showExportModal = false" @keydown.esc="showExportModal = false">
+        <div class="modal-panel max-w-md" role="dialog" aria-modal="true" aria-labelledby="export-items-title">
+          <header class="panel-header">
+            <div>
+              <h2 id="export-items-title" class="section-title">Exportar itens</h2>
+              <p class="panel-subtitle">{{ filtered.length }} itens · tier T{{ tier }} · {{ group || 'todos os grupos' }}{{ category ? ` · ${category}` : '' }}</p>
+            </div>
+            <button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Fechar" @click="showExportModal = false">
+              <AppIcon name="x" />
             </button>
+          </header>
+          <div class="grid gap-2 p-5">
             <button
-              @click="showCategorySelector = false"
-              class="px-4 py-2 bg-slate-700 text-slate-300 rounded-lg font-semibold hover:bg-slate-600 transition-colors"
+              v-for="f in FORMATS"
+              :key="f.value"
+              type="button"
+              class="inset flex items-center gap-4 p-4 text-left transition-colors hover:border-gold-500/30"
+              :disabled="exporting"
+              @click="exportAs(f.value)"
             >
-              Cancelar
+              <span class="icon-tile"><AppIcon :name="f.icon" :size="17" /></span>
+              <span class="min-w-0 flex-1">
+                <span class="block text-sm font-medium text-slate-100">{{ f.label }}</span>
+                <span class="block text-xs text-slate-500">{{ f.hint }}</span>
+              </span>
+              <AppIcon name="download" :size="16" class="text-slate-500" />
             </button>
           </div>
-        </div>
-
-        <!-- Export Options (hidden when category selector is shown) -->
-        <div v-else class="grid gap-4 mb-6">
-          <!-- Option 1: PDF Filtrado -->
-          <button
-            @click="showCategorySelector = true"
-            class="p-4 rounded-xl border-2 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all text-left group"
-          >
-            <div class="flex items-start gap-3">
-              <div class="p-2 rounded-lg bg-emerald-500/20 text-emerald-300">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm2 10a1 1 0 10-2 0v3a1 1 0 102 0v-3zm2-3a1 1 0 011 1v5a1 1 0 11-2 0v-5a1 1 0 011-1zm4-1a1 1 0 10-2 0v7a1 1 0 102 0V8z" clip-rule="evenodd"/>
-                </svg>
-              </div>
-              <div class="flex-1">
-                <h4 class="font-bold text-slate-50 mb-1">Opção 1: PDF Personalizado</h4>
-                <p class="text-sm text-slate-400">Escolha categorias específicas para exportar (Armas, Armaduras, etc.)</p>
-              </div>
-            </div>
-          </button>
-
-          <!-- Option 2: JSON -->
-          <button
-            @click="exportJSON"
-            class="p-4 rounded-xl border-2 border-green-500/30 bg-green-500/10 hover:bg-green-500/20 hover:border-green-500/50 transition-all text-left group"
-          >
-            <div class="flex items-start gap-3">
-              <div class="p-2 rounded-lg bg-green-500/20 text-green-300">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                </svg>
-              </div>
-              <div class="flex-1">
-                <h4 class="font-bold text-slate-50 mb-1">Opção 2: JSON com todos IDs</h4>
-                <p class="text-sm text-slate-400">Download instantâneo de arquivo JSON com todos os IDs</p>
-              </div>
-            </div>
-          </button>
-
-          <!-- Option 3: PDF Otimizado -->
-          <button
-            @click="exportOptimizedPDF"
-            class="p-4 rounded-xl border-2 border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 hover:border-blue-500/50 transition-all text-left group"
-          >
-            <div class="flex items-start gap-3">
-              <div class="p-2 rounded-lg bg-blue-500/20 text-blue-300">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm1 8a1 1 0 100 2h6a1 1 0 100-2H7zm0 4a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
-                </svg>
-              </div>
-              <div class="flex-1">
-                <h4 class="font-bold text-slate-50 mb-1">Opção 3: PDF Otimizado</h4>
-                <p class="text-sm text-slate-400">PDF com itens T4-T6 mais comuns do mercado</p>
-              </div>
-            </div>
-          </button>
-
-          <!-- Option 4: ZIP Completo -->
-          <button
-            @click="exportZIP"
-            class="p-4 rounded-xl border-2 border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 hover:border-purple-500/50 transition-all text-left group"
-          >
-            <div class="flex items-start gap-3">
-              <div class="p-2 rounded-lg bg-purple-500/20 text-purple-300">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
-                </svg>
-              </div>
-              <div class="flex-1">
-                <h4 class="font-bold text-slate-50 mb-1">Opção 4: ZIP Completo</h4>
-                <p class="text-sm text-slate-400">Arquivo compactado com JSON, README e primeiras 20 imagens (pode demorar)</p>
-              </div>
-            </div>
-          </button>
-        </div>
-
-        <!-- Status Messages -->
-        <div v-if="exportStatus" class="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
-          <p class="text-sm text-blue-300">{{ exportStatus }}</p>
-          <div v-if="exportProgress > 0" class="mt-2 h-2 bg-slate-800 rounded-full overflow-hidden">
-            <div class="h-full bg-blue-500 transition-all duration-300" :style="{ width: exportProgress + '%' }"></div>
-          </div>
+          <p class="px-5 pb-5 text-xs text-slate-500">A exportação usa os filtros aplicados na tela.</p>
         </div>
       </div>
-    </div>
-  </section>
+    </Teleport>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import jsPDF from 'jspdf'
-import JSZip from 'jszip'
-import itemsData from '@/data/albion-items.json'
+import { computed, ref, watch } from 'vue'
+import { RouterLink } from 'vue-router'
+import ItemIcon from '@/components/market/ItemIcon.vue'
+import AppIcon from '@/components/ui/AppIcon.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import type { IconName } from '@/components/ui/icons'
+import { friendlyError } from '@/lib/errors'
+import {
+  CATALOG,
+  ITEM_GROUPS,
+  buildItemId,
+  getItemIconUrl,
+  itemName,
+  normalizeText,
+  type CatalogItem,
+  type ItemGroup,
+} from '@/lib/market'
+import { toast } from '@/lib/toast'
 
-type AlbionItem = {
-  id: string
-  name: string
-  category: string
-  tier: string
-}
+type Format = 'json' | 'csv' | 'pdf'
 
-const items = ref<AlbionItem[]>(itemsData as AlbionItem[])
-const searchQuery = ref('')
-const currentPage = ref(1)
-const itemsPerPage = 20
+const PAGE = 60
+const FORMATS: Array<{ value: Format; label: string; hint: string; icon: IconName }> = [
+  { value: 'json', label: 'JSON', hint: 'IDs, nomes, categorias e tiers para integrações', icon: 'file' },
+  { value: 'csv', label: 'Planilha (CSV)', hint: 'Abre no Excel ou Google Sheets', icon: 'list' },
+  { value: 'pdf', label: 'PDF', hint: 'Referência impressa com IDs por categoria', icon: 'download' },
+]
+// Grupos sem receita de craft na calculadora
+const NOT_CRAFTABLE: ItemGroup[] = ['Artefatos']
 
-// Debug: Watch searchQuery changes
-watch(searchQuery, (newVal) => {
-  console.log('searchQuery changed to:', newVal)
-})
-
+const search = ref('')
+const group = ref<ItemGroup | ''>('')
+const category = ref('')
+const tier = ref(4)
+const view = ref<'grid' | 'list'>('grid')
+const pageSize = ref(PAGE)
 const showExportModal = ref(false)
-const showCategorySelector = ref(false)
-const selectedCategories = ref<string[]>([])
-const exportStatus = ref('')
-const exportProgress = ref(0)
+const exporting = ref(false)
 
-// Debug: Log modal state
-console.log('Items.vue mounted, showExportModal:', showExportModal.value)
-
-const filteredItems = computed(() => {
-  if (!searchQuery.value) return items.value
-  const query = searchQuery.value.toLowerCase()
-  return items.value.filter(item =>
-    item.id.toLowerCase().includes(query) ||
-    item.name.toLowerCase().includes(query)
-  )
+const countByGroup = computed(() => {
+  const counts: Partial<Record<ItemGroup, number>> = {}
+  for (const i of CATALOG) counts[i.group] = (counts[i.group] ?? 0) + 1
+  return counts
 })
 
-const totalPages = computed(() => Math.ceil(filteredItems.value.length / itemsPerPage))
+const categories = computed(() => [...new Set(CATALOG.filter((i) => i.group === group.value).map((i) => i.category))])
 
-const paginatedItems = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return filteredItems.value.slice(start, end)
-})
-
-const availableCategories = computed(() => {
-  return [...new Set(items.value.map(item => item.category))].sort()
-})
-
-function openModal() {
-  console.log('Opening modal')
-  showExportModal.value = true
-}
-
-function closeModal() {
-  console.log('Closing modal')
-  showExportModal.value = false
-  showCategorySelector.value = false
-  selectedCategories.value = []
-  exportStatus.value = ''
-  exportProgress.value = 0
-}
-
-function exportJSON() {
-  try {
-    exportStatus.value = 'Gerando JSON...'
-    exportProgress.value = 50
-
-    const jsonData = {
-      generated: new Date().toISOString(),
-      total: items.value.length,
-      items: items.value
-    }
-
-    const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `albion-items-${new Date().toISOString().split('T')[0]}.json`
-    link.click()
-    URL.revokeObjectURL(url)
-
-    exportProgress.value = 100
-    exportStatus.value = 'JSON baixado com sucesso!'
-
-    setTimeout(() => {
-      closeModal()
-    }, 2000)
-  } catch (e: any) {
-    exportStatus.value = 'Erro: ' + e.message
-    console.error(e)
-  }
-}
-
-function generateFilteredPDF() {
-  try {
-    exportStatus.value = 'Gerando PDF filtrado...'
-    exportProgress.value = 25
-
-    const filteredItems = items.value.filter(item =>
-      selectedCategories.value.includes(item.category)
+const filtered = computed(() => {
+  const needle = normalizeText(search.value)
+  return CATALOG.filter((i) => !group.value || i.group === group.value)
+    .filter((i) => !category.value || i.category === category.value)
+    .filter(
+      (i) =>
+        !needle ||
+        normalizeText(`${i.name} ${Object.values(i.tierNames ?? {}).join(' ')} ${i.baseId} ${i.category}`).includes(needle),
     )
+})
 
-    const doc = new jsPDF()
-    let y = 20
+const paged = computed(() => filtered.value.slice(0, pageSize.value))
+watch([search, group, category], () => (pageSize.value = PAGE))
 
-    doc.setFontSize(16)
-    doc.text('Albion Items - PDF Filtrado', 20, y)
-    y += 10
-
-    doc.setFontSize(10)
-    doc.text(`Categorias: ${selectedCategories.value.join(', ')}`, 20, y)
-    y += 10
-    doc.text(`Total de itens: ${filteredItems.length}`, 20, y)
-    y += 15
-
-    exportProgress.value = 50
-
-    doc.setFontSize(9)
-    filteredItems.forEach((item, index) => {
-      if (y > 270) {
-        doc.addPage()
-        y = 20
-      }
-
-      doc.text(`${item.id} - ${item.name} (${item.tier})`, 20, y)
-      y += 7
-
-      if (index % 20 === 0 && index > 0) {
-        exportProgress.value = 50 + (index / filteredItems.length) * 40
-      }
-    })
-
-    exportProgress.value = 95
-
-    doc.save(`albion-items-filtrado-${new Date().toISOString().split('T')[0]}.pdf`)
-
-    exportProgress.value = 100
-    exportStatus.value = 'PDF filtrado gerado com sucesso!'
-
-    setTimeout(() => {
-      closeModal()
-    }, 2000)
-  } catch (e: any) {
-    exportStatus.value = 'Erro: ' + e.message
-    console.error(e)
-  }
+function setGroup(g: ItemGroup | '') {
+  group.value = g
+  category.value = ''
 }
 
-function exportOptimizedPDF() {
+function tierFor(item: CatalogItem): number {
+  return item.tiers.includes(tier.value) ? tier.value : item.tiers[item.tiers.length - 1] < tier.value ? item.tiers[item.tiers.length - 1] : item.tiers[0]
+}
+
+function idFor(item: CatalogItem): string {
+  return buildItemId(item.baseId, tierFor(item))
+}
+
+function isCraftable(item: CatalogItem): boolean {
+  return !NOT_CRAFTABLE.includes(item.group) && item.category !== 'Recursos Brutos'
+}
+
+async function copy(text: string) {
   try {
-    exportStatus.value = 'Gerando PDF otimizado (T4-T6)...'
-    exportProgress.value = 25
-
-    const optimizedItems = items.value.filter(item =>
-      item.tier === 'T4' || item.tier === 'T5' || item.tier === 'T6'
-    )
-
-    const doc = new jsPDF()
-    let y = 20
-
-    doc.setFontSize(16)
-    doc.text('Albion Items - PDF Otimizado (T4-T6)', 20, y)
-    y += 10
-
-    doc.setFontSize(10)
-    doc.text(`Apenas itens T4, T5 e T6 mais comuns`, 20, y)
-    y += 10
-    doc.text(`Total de itens: ${optimizedItems.length}`, 20, y)
-    y += 15
-
-    exportProgress.value = 50
-
-    doc.setFontSize(9)
-    optimizedItems.forEach((item, index) => {
-      if (y > 270) {
-        doc.addPage()
-        y = 20
-      }
-
-      doc.text(`${item.id} - ${item.name} (${item.tier})`, 20, y)
-      y += 7
-
-      if (index % 20 === 0 && index > 0) {
-        exportProgress.value = 50 + (index / optimizedItems.length) * 40
-      }
-    })
-
-    exportProgress.value = 95
-
-    doc.save(`albion-items-otimizado-${new Date().toISOString().split('T')[0]}.pdf`)
-
-    exportProgress.value = 100
-    exportStatus.value = 'PDF otimizado gerado com sucesso!'
-
-    setTimeout(() => {
-      closeModal()
-    }, 2000)
-  } catch (e: any) {
-    exportStatus.value = 'Erro: ' + e.message
-    console.error(e)
+    await navigator.clipboard.writeText(text)
+    toast('ID copiado', { text, tone: 'info', duration: 1800 })
+  } catch {
+    // Clipboard indisponível
   }
 }
 
-async function exportZIP() {
+// ---------- Exportação ----------
+function rows() {
+  return filtered.value.map((i) => ({
+    id: idFor(i),
+    nome: itemName(i, tierFor(i)),
+    grupo: i.group,
+    categoria: i.category,
+    tiers: `T${i.tiers[0]}-T${i.tiers[i.tiers.length - 1]}`,
+    encantamento_max: i.maxEnchant,
+  }))
+}
+
+function download(content: BlobPart, type: string, ext: string) {
+  const url = URL.createObjectURL(new Blob([content], { type }))
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `albion-itens-${new Date().toISOString().slice(0, 10)}.${ext}`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+async function exportAs(format: Format) {
+  exporting.value = true
   try {
-    exportStatus.value = 'Iniciando geração do ZIP...'
-    exportProgress.value = 5
-
-    const zip = new JSZip()
-
-    exportStatus.value = 'Adicionando JSON ao ZIP...'
-    const jsonData = {
-      generated: new Date().toISOString(),
-      total: items.value.length,
-      items: items.value
+    const data = rows()
+    if (format === 'json') {
+      download(JSON.stringify({ exportadoEm: new Date().toISOString(), total: data.length, itens: data }, null, 2), 'application/json', 'json')
+    } else if (format === 'csv') {
+      const header = Object.keys(data[0]).join(';')
+      const lines = data.map((r) => Object.values(r).map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';'))
+      // BOM para o Excel reconhecer acentos
+      download(`﻿${[header, ...lines].join('\n')}`, 'text/csv;charset=utf-8', 'csv')
+    } else {
+      await exportPDF(data)
     }
-    zip.file('albion-items.json', JSON.stringify(jsonData, null, 2))
-    exportProgress.value = 20
-
-    exportStatus.value = 'Adicionando README...'
-    const readme = `ALBION ITEMS EXPORT\nData: ${new Date().toLocaleString('pt-BR')}\nTotal: ${items.value.length}\n\nCONTEÚDO:\n- albion-items.json: Todos os itens\n- images/: Primeiras 20 imagens\n\nFORMATO JSON:\n- id, name, category, tier\n\nAPI: https://render.albiononline.com/v1/item/{item-id}.png\nSite: https://albiononline.com`
-    zip.file('README.txt', readme)
-    exportProgress.value = 30
-
-    exportStatus.value = 'Baixando imagens (0/20)...'
-    const imageFolder = zip.folder('images')
-    const itemsToDownload = items.value.slice(0, 20)
-
-    for (let i = 0; i < itemsToDownload.length; i++) {
-      const item = itemsToDownload[i]
-      exportStatus.value = `Baixando imagens (${i + 1}/20)...`
-      try {
-        const imageUrl = `https://render.albiononline.com/v1/item/${item.id}.png`
-        const response = await fetch(imageUrl)
-        if (response.ok) {
-          const blob = await response.blob()
-          const arrayBuffer = await blob.arrayBuffer()
-          imageFolder?.file(`${item.id}.png`, arrayBuffer)
-          console.log(`Downloaded: ${item.id}`)
-        } else {
-          console.log(`Failed to download: ${item.id}`)
-        }
-      } catch (err) {
-        console.log(`Error downloading ${item.id}:`, err)
-      }
-      exportProgress.value = 30 + ((i + 1) / 20) * 60
-    }
-
-    exportStatus.value = 'Gerando arquivo ZIP...'
-    exportProgress.value = 95
-    const content = await zip.generateAsync({ type: 'blob' })
-
-    const url = URL.createObjectURL(content)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `albion-items-completo-${new Date().toISOString().split('T')[0]}.zip`
-    link.click()
-    URL.revokeObjectURL(url)
-
-    exportProgress.value = 100
-    exportStatus.value = 'ZIP completo gerado com sucesso!'
-
-    setTimeout(() => {
-      closeModal()
-    }, 2000)
-  } catch (e: any) {
-    exportStatus.value = 'Erro: ' + e.message
-    console.error(e)
+    toast('Exportação concluída', { text: `${data.length} itens` })
+    showExportModal.value = false
+  } catch (e) {
+    toast('Não foi possível exportar', { tone: 'error', text: friendlyError(e) })
+  } finally {
+    exporting.value = false
   }
 }
+
+async function exportPDF(data: ReturnType<typeof rows>) {
+  const { default: jsPDF } = await import('jspdf')
+  const doc = new jsPDF()
+  const margin = 15
+  const pageHeight = doc.internal.pageSize.getHeight()
+  let y = margin
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(18)
+  doc.text('Catálogo de itens · Albion Online', margin, y)
+  y += 8
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(10)
+  doc.setTextColor(110, 110, 110)
+  doc.text(`${data.length} itens · gerado em ${new Date().toLocaleDateString('pt-BR')}`, margin, y)
+  y += 10
+
+  let currentCategory = ''
+  for (const row of [...data].sort((a, b) => a.categoria.localeCompare(b.categoria) || a.nome.localeCompare(b.nome))) {
+    if (y > pageHeight - 18) {
+      doc.addPage()
+      y = margin
+    }
+    if (row.categoria !== currentCategory) {
+      currentCategory = row.categoria
+      y += 3
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(11)
+      doc.setTextColor(120, 95, 30)
+      doc.text(currentCategory, margin, y)
+      y += 6
+    }
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(40, 40, 40)
+    doc.text(row.nome, margin + 2, y)
+    doc.setTextColor(110, 110, 110)
+    doc.text(row.id, margin + 90, y)
+    doc.text(row.tiers, margin + 160, y)
+    y += 5.5
+  }
+  doc.save(`albion-itens-${new Date().toISOString().slice(0, 10)}.pdf`)
+}
+
+// Pré-carrega ícones do tier escolhido para a grade não "piscar" ao trocar
+watch(tier, () => {
+  for (const item of paged.value.slice(0, 24)) new Image().src = getItemIconUrl(idFor(item), 1, 144)
+})
 </script>

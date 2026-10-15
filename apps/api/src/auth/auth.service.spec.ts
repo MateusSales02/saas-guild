@@ -180,6 +180,7 @@ describe('AuthService', () => {
 
       expect(mockUsersRepo.findOne).toHaveBeenCalledWith({
         where: { email: loginDto.email },
+        select: expect.objectContaining({ password_hash: true }),
       });
       expect(bcrypt.compare).toHaveBeenCalledWith(
         loginDto.password,

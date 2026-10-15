@@ -1,17 +1,36 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter, RouterLink } from 'vue-router'
+import { computed, ref } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
+import AppIcon from '@/components/ui/AppIcon.vue'
+import AuthShell from '@/components/ui/AuthShell.vue'
 import { AuthApi } from '@/lib/api'
+import { friendlyError } from '@/lib/errors'
 
 const router = useRouter()
 const email = ref('')
 const password = ref('')
 const nickname = ref('')
+const showPassword = ref(false)
 const loading = ref(false)
 const error = ref('')
 
+/** 0 a 3: tamanho, letras e números/símbolos */
+const strength = computed(() => {
+  const p = password.value
+  if (!p) return 0
+  let score = p.length >= 6 ? 1 : 0
+  if (p.length >= 10) score++
+  if (/[a-zA-Z]/.test(p) && /[\d\W]/.test(p)) score++
+  return score
+})
+const STRENGTH = [
+  { label: 'Muito curta', bar: 'bg-rose-500' },
+  { label: 'Aceitável', bar: 'bg-amber-400' },
+  { label: 'Boa', bar: 'bg-gold-400' },
+  { label: 'Forte', bar: 'bg-emerald-400' },
+]
+
 function goToHome() {
-  console.log('goToHome chamado - navegando para /')
   router.push('/')
 }
 
@@ -22,17 +41,12 @@ async function register() {
     await AuthApi.register(email.value, password.value, nickname.value)
     router.push('/dashboard')
   } catch (e: any) {
-    console.error('🚨 Erro no registro:', e)
-    console.error('📋 Resposta do servidor:', e?.response)
-    console.error('💬 Mensagem:', e?.response?.data)
-
-    // Trata diferentes tipos de erro
     if (e?.response?.status === 400) {
       error.value = e?.response?.data?.message ?? 'E-mail já cadastrado ou dados inválidos'
     } else if (e?.response?.status === 500) {
       error.value = 'Erro no servidor. Por favor, tente novamente em alguns instantes.'
     } else {
-      error.value = e?.response?.data?.message ?? e?.message ?? 'Falha no registro'
+      error.value = friendlyError(e, 'Não foi possível criar a conta.')
     }
   } finally {
     loading.value = false
@@ -41,155 +55,99 @@ async function register() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
-    <!-- Background Effects -->
-    <div class="absolute inset-0 pointer-events-none overflow-hidden">
-      <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-[#C6A95D]/10 rounded-full blur-3xl animate-pulse" />
-      <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s" />
-      <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItaDJWMTh6TTI4IDE4djE2aDJ2LTJoLTJ6bTAgMnYyaDJWMjB6bTAgNnYyaDJ2LTJ6bTAtNnYyaDJ2LTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
-    </div>
+  <AuthShell>
+    <button type="button" class="btn btn-ghost btn-sm -ml-3 mb-8" @click="goToHome">
+      <AppIcon name="arrow-left" :size="15" />
+      Voltar ao Início
+    </button>
 
-    <!-- Register Card -->
-    <div class="relative w-full max-w-md mx-4 animate-fade-in-up">
-      <!-- Back to Home Button -->
-      <button
-        @click="goToHome"
-        type="button"
-        style="cursor: pointer;"
-        class="relative z-10 inline-flex items-center gap-2 text-slate-400 hover:text-[#C6A95D] transition-colors mb-6 group"
-      >
-        <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-        </svg>
-        <span class="font-medium">Voltar ao Início</span>
-      </button>
+    <p class="eyebrow">Comece agora</p>
+    <h1 class="mt-2 font-display text-3xl font-semibold tracking-wide text-slate-50">Fundar sua guilda</h1>
+    <p class="mt-2 text-sm text-slate-400">Crie a conta e organize tudo em poucos minutos.</p>
 
-      <!-- Glow Effect -->
-      <div class="absolute -inset-4 bg-gradient-to-r from-[#C6A95D]/20 via-indigo-500/20 to-[#C6A95D]/20 rounded-3xl blur-3xl opacity-50 pointer-events-none" />
-
-      <!-- Card Content -->
-      <div class="relative bg-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-8 sm:p-10">
-        <!-- Icon -->
-        <div class="flex justify-center mb-6">
-          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-[#C6A95D] to-amber-500 grid place-items-center shadow-lg shadow-[#C6A95D]/30">
-            <svg class="w-10 h-10 text-slate-900" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"/>
-            </svg>
-          </div>
+    <form class="mt-8 space-y-4" @submit.prevent="register">
+      <div>
+        <label for="register-nickname" class="label">Nome da guilda</label>
+        <div class="relative">
+          <AppIcon name="shield" :size="16" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+          <input
+            id="register-nickname"
+            v-model="nickname"
+            type="text"
+            required
+            maxlength="40"
+            placeholder="Ex: Cavaleiros do Apocalipse"
+            class="input !h-11 !pl-10"
+          />
         </div>
-
-        <!-- Title -->
-        <h1 class="text-3xl sm:text-4xl font-black text-center mb-2">
-          <span class="bg-gradient-to-r from-[#C6A95D] via-amber-400 to-[#C6A95D] bg-clip-text text-transparent">
-            Criar Guild
-          </span>
-        </h1>
-        <p class="text-center text-slate-400 mb-8">Comece sua jornada épica agora</p>
-
-        <!-- Form -->
-        <form @submit.prevent="register" class="space-y-5">
-          <!-- Email Input -->
-          <div>
-            <label for="register-email" class="block text-sm font-semibold text-slate-300 mb-2">E-mail</label>
-            <input
-              id="register-email"
-              v-model="email"
-              type="email"
-              required
-              placeholder="seu@email.com"
-              class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
-            />
-          </div>
-
-          <!-- Password Input -->
-          <div>
-            <label for="register-password" class="block text-sm font-semibold text-slate-300 mb-2">Senha</label>
-            <input
-              id="register-password"
-              v-model="password"
-              type="password"
-              required
-              minlength="6"
-              placeholder="Mínimo 6 caracteres"
-              class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
-            />
-          </div>
-
-          <!-- Nickname Input -->
-          <div>
-            <label for="register-nickname" class="block text-sm font-semibold text-slate-300 mb-2">Nome da Guild</label>
-            <input
-              id="register-nickname"
-              v-model="nickname"
-              type="text"
-              required
-              placeholder="Ex: Cavaleiros do Apocalipse"
-              class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 placeholder-slate-500 focus:border-[#C6A95D] focus:ring-2 focus:ring-[#C6A95D]/20 outline-none transition-all"
-            />
-          </div>
-
-          <!-- Error Message -->
-          <div v-if="error" class="flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
-            <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-            </svg>
-            <span>{{ error }}</span>
-          </div>
-
-          <!-- Info Box -->
-          <div class="flex items-start gap-2 p-3 rounded-xl bg-[#C6A95D]/10 border border-[#C6A95D]/30 text-[#C6A95D] text-sm">
-            <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-            </svg>
-            <span>Você será o líder da guild automaticamente</span>
-          </div>
-
-          <!-- Register Button -->
-          <button
-            type="submit"
-            :disabled="loading || !email || !password || !nickname"
-            class="group relative w-full px-6 py-4 rounded-xl bg-gradient-to-r from-[#C6A95D] to-amber-500 text-slate-900 font-bold text-lg shadow-lg shadow-[#C6A95D]/30 hover:shadow-[#C6A95D]/50 hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-          >
-            <span class="relative z-10">{{ loading ? 'Criando Guild...' : 'Criar Guild Agora' }}</span>
-            <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-amber-400 to-[#C6A95D] opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
-          </button>
-
-          <!-- Divider -->
-          <div class="relative my-6">
-            <div class="absolute inset-0 flex items-center">
-              <div class="w-full border-t border-slate-700"></div>
-            </div>
-            <div class="relative flex justify-center text-sm">
-              <span class="px-4 bg-slate-900 text-slate-400">Já tem uma conta?</span>
-            </div>
-          </div>
-
-          <!-- Login Link -->
-          <RouterLink
-            to="/login"
-            class="block w-full px-6 py-4 rounded-xl border-2 border-[#C6A95D]/50 bg-slate-800/30 text-slate-100 font-semibold text-center hover:border-[#C6A95D] hover:bg-slate-800/50 hover:scale-[1.02] transition-all duration-300"
-          >
-            Fazer Login
-          </RouterLink>
-        </form>
       </div>
+
+      <div>
+        <label for="register-email" class="label">E-mail</label>
+        <div class="relative">
+          <AppIcon name="mail" :size="16" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+          <input id="register-email" v-model="email" type="email" required autocomplete="email" placeholder="seu@email.com" class="input !h-11 !pl-10" />
+        </div>
+      </div>
+
+      <div>
+        <label for="register-password" class="label">Senha</label>
+        <div class="relative">
+          <AppIcon name="lock" :size="16" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+          <input
+            id="register-password"
+            v-model="password"
+            :type="showPassword ? 'text' : 'password'"
+            required
+            minlength="6"
+            autocomplete="new-password"
+            placeholder="Mínimo 6 caracteres"
+            class="input !h-11 !pl-10 !pr-11"
+          />
+          <button
+            type="button"
+            class="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 hover:text-slate-200"
+            :aria-label="showPassword ? 'Ocultar senha' : 'Mostrar senha'"
+            @click="showPassword = !showPassword"
+          >
+            <AppIcon :name="showPassword ? 'eye-off' : 'eye'" :size="16" />
+          </button>
+        </div>
+        <div v-if="password" class="mt-2 flex items-center gap-3" aria-live="polite">
+          <div class="flex flex-1 gap-1">
+            <span
+              v-for="i in 3"
+              :key="i"
+              class="h-1 flex-1 rounded-full transition-colors"
+              :class="i <= strength ? STRENGTH[strength].bar : 'bg-white/[0.08]'"
+            />
+          </div>
+          <span class="text-[11px] text-slate-500">{{ STRENGTH[strength].label }}</span>
+        </div>
+      </div>
+
+      <div class="alert alert-info !border-gold-500/25 !bg-gold-500/[0.06] !text-gold-100">
+        <AppIcon name="crown" :size="16" class="mt-0.5 text-gold-300" />
+        <span>Você será o líder da guild automaticamente</span>
+      </div>
+
+      <div v-if="error" role="alert" class="alert alert-error">
+        <AppIcon name="alert" :size="16" class="mt-0.5" />
+        <span>{{ error }}</span>
+      </div>
+
+      <button type="submit" :disabled="loading || !email || !password || !nickname" class="btn btn-primary !h-11 w-full">
+        <span v-if="loading" class="h-4 w-4 animate-spin rounded-full border-2 border-ink-950/40 border-t-ink-950" />
+        {{ loading ? 'Criando Guild...' : 'Criar guilda' }}
+      </button>
+    </form>
+
+    <div class="my-8 flex items-center gap-3 text-xs text-slate-500">
+      <span class="h-px flex-1 bg-white/[0.06]" />
+      Já tem uma conta?
+      <span class="h-px flex-1 bg-white/[0.06]" />
     </div>
-  </div>
+
+    <RouterLink to="/login" class="btn btn-secondary !h-11 w-full">Fazer Login</RouterLink>
+  </AuthShell>
 </template>
-
-<style scoped>
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.8s ease-out;
-}
-</style>

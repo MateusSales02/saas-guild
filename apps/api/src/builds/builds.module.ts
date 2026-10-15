@@ -4,6 +4,7 @@ import { Build } from './build.entity';
 import { BuildClass } from './build-class.entity';
 import { BuildSpec } from './build-spec.entity';
 import { BuildItem } from './build-item.entity';
+import { BuildVote } from './build-vote.entity';
 import { BuildsService } from './builds.service';
 import { BuildsController } from './builds.controller';
 import { BuildClassesController } from './build-classes.controller';
@@ -20,6 +21,7 @@ import { GuildMember } from '../guilds/guild-member.entity';
       BuildClass,
       BuildSpec,
       BuildItem,
+      BuildVote,
       Guild,
       User,
       GuildMember,

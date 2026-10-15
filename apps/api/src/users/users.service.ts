@@ -2,7 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
-import { User } from './user.entity';
+import { User, USER_SELECT_WITH_PASSWORD } from './user.entity';
 
 export type PublicUser = Omit<User, 'password_hash'>;
 
@@ -81,6 +81,9 @@ export class UsersService {
 
   // (opcional) buscar por e-mail, útil no AuthService
   async findByEmail(email: string): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { email } });
+    return this.usersRepository.findOne({
+      where: { email },
+      select: USER_SELECT_WITH_PASSWORD,
+    });
   }
 }

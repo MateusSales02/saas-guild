@@ -19,6 +19,9 @@ vi.mock('@/lib/api', () => ({
   },
 }))
 
+// RouterLink sem roteador real: renderiza só o conteúdo
+const MOUNT_OPTIONS = { global: { stubs: { RouterLink: { template: '<a><slot /></a>' } } } }
+
 describe('Overview.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -38,22 +41,22 @@ describe('Overview.vue', () => {
   })
 
   it('should render component', () => {
-    const wrapper = mount(Overview)
+    const wrapper = mount(Overview, MOUNT_OPTIONS)
     expect(wrapper.exists()).toBe(true)
   })
 
   it('should show no guild message when guild is null', async () => {
     auth.guild = null
 
-    const wrapper = mount(Overview)
+    const wrapper = mount(Overview, MOUNT_OPTIONS)
     await wrapper.vm.$nextTick()
     await new Promise((resolve) => setTimeout(resolve, 100))
 
-    expect(wrapper.text()).toContain('Nenhuma Guilda Encontrada')
+    expect(wrapper.text()).toContain('Nenhuma guilda encontrada')
   })
 
-  it('should display dashboard title', () => {
-    const wrapper = mount(Overview)
-    expect(wrapper.text()).toContain('Dashboard')
+  it('should display overview title', () => {
+    const wrapper = mount(Overview, MOUNT_OPTIONS)
+    expect(wrapper.text()).toContain('Visão geral')
   })
 })

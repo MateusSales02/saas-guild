@@ -1,9 +1,13 @@
 import {
+  ArrayMaxSize,
   IsArray,
   IsBoolean,
+  IsIn,
   IsInt,
+  IsObject,
   IsOptional,
   IsString,
+  Matches,
   MaxLength,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -59,4 +63,38 @@ export class CreateBuildDto {
   @IsInt()
   @Type(() => Number)
   price?: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(60)
+  category?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10)
+  @IsString({ each: true })
+  @MaxLength(30, { each: true })
+  tags?: string[];
+
+  @IsOptional()
+  @IsObject()
+  loadout?: Record<string, unknown>;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(15)
+  author_name?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(5)
+  @Matches(/^[\w-]{6,20}$/, {
+    each: true,
+    message: 'ID de vídeo do YouTube inválido',
+  })
+  videos?: string[];
+
+  @IsOptional()
+  @IsIn(['draft', 'published'])
+  status?: string;
 }

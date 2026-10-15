@@ -9,8 +9,12 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { JwtPayload } from '../auth/jwt.strategy';
 import { BuildsService } from './builds.service';
 import { CreateBuildDto } from './dto/create-build.dto';
 import { UpdateBuildDto } from './dto/update-build.dto';
@@ -29,6 +33,21 @@ export class BuildsController {
   @Get('deleted/list')
   findDeleted() {
     return this.buildsService.findDeleted();
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('votes/mine')
+  myVotes(@CurrentUser() user: JwtPayload) {
+    return this.buildsService.votedBuildIds(user.sub);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post(':id/vote')
+  vote(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.buildsService.toggleVote(id, user.sub);
   }
 
   @Get(':id')
