@@ -165,6 +165,7 @@ const sections = computed<Array<{ title: string; links: NavLink[] }>>(() => [
       { icon: 'swords', label: 'Raids', to: { name: 'raids' } },
       { icon: 'calendar', label: 'Eventos', to: { name: 'events' } },
       { icon: 'coins', label: 'Tesouraria', to: { name: 'treasury' } },
+      { icon: 'wallet', label: 'Compras e lucros', to: { name: 'operations' } },
     ],
   },
   {

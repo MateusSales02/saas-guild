@@ -18,6 +18,7 @@ Oferecer uma solução centralizada que permita a líderes e membros de clãs or
 - 👥 **Gestão de Membros:** Cadastro, edição e controle de cargos (Líder, Oficial, Membro)
 - 📅 **Eventos Recorrentes:** Agendamento, confirmação de presença (RSVP) e eventos que se repetem automaticamente (diário, semanal, mensal)
 - 💰 **Controle Financeiro:** Registro de entradas/saídas, visualização de saldo, histórico diário e soft delete
+- 📦 **Compras e Lucros:** Operações de flip, craft, refino, transporte e coleta com movimentos parciais (compras, gastos extras e vendas em lotes), taxa do mercado em % descontada de cada venda, lucro esperado × realizado, ROI, taxa de acerto, gráfico mensal, integração opcional com a tesouraria e exportação CSV
 - 🧠 **Gerenciamento de Builds:** Armazenamento e compartilhamento de builds de personagens com 309+ itens do Albion Online
 - 📊 **Dashboard Dinâmico:** Visão geral com KPIs e gráficos em tempo real
 - 📤 **Exportação de Dados:** Histórico financeiro, membros e eventos em CSV e PDF
@@ -149,7 +150,7 @@ saas-guild/
 │   │   │   ├── auth/          # Autenticação e autorização
 │   │   │   ├── guilds/        # Guildas e membros
 │   │   │   ├── events/        # Eventos e participantes
-│   │   │   ├── finance/       # Transações financeiras
+│   │   │   ├── finance/       # Tesouraria e operações de compra/venda (lucros)
 │   │   │   ├── builds/        # Sistema de builds
 │   │   │   ├── audit/         # Logs de auditoria
 │   │   │   ├── export/        # Exportação de dados

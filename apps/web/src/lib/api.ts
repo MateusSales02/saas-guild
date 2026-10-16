@@ -158,6 +158,134 @@ export const FinanceApi = {
   },
 }
 
+export type OperationCategory = 'flip' | 'craft' | 'refine' | 'transport' | 'gathering' | 'other'
+export type OperationStatus = 'open' | 'sold' | 'cancelled'
+export type EntryKind = 'purchase' | 'fee' | 'sale'
+
+export type OperationEntry = {
+  id: number
+  kind: EntryKind
+  /** valor bruto da venda */
+  amount: number
+  /** taxa do mercado descontada (só vendas) */
+  tax: number
+  quantity: number | null
+  note: string | null
+  occurred_at: string
+  tx_id: number | null
+  created_by_name: string | null
+}
+
+export type FinanceOperation = {
+  id: number
+  title: string
+  category: OperationCategory
+  quantity: number
+  cost: number
+  fees: number
+  /** taxa do mercado em % */
+  fee_rate: number
+  market_tax: number
+  expected_revenue: number
+  actual_revenue: number | null
+  status: OperationStatus
+  purchased_at: string
+  sold_at: string | null
+  note: string | null
+  created_by_name: string | null
+  sold_quantity: number
+  entries?: OperationEntry[]
+  total_cost: number
+  received: number
+  balance: number
+  expected_net: number
+  expected_profit: number
+  actual_profit: number | null
+  variance: number | null
+}
+
+export type OperationsSummary = {
+  counts: { total: number; open: number; sold: number; cancelled: number }
+  invested: number
+  openCapital: number
+  openReceived: number
+  openExpectedProfit: number
+  expectedProfit: number
+  closedExpectedProfit: number
+  realizedRevenue: number
+  realizedProfit: number
+  accuracy: number | null
+  roi: number | null
+  winRate: number | null
+  byCategory: Array<{
+    category: OperationCategory
+    count: number
+    invested: number
+    expectedProfit: number
+    realizedProfit: number
+  }>
+  monthly: Array<{ month: string; expectedProfit: number; realizedProfit: number; count: number }>
+}
+
+export type OperationPayload = {
+  guildId: number
+  title: string
+  category?: OperationCategory
+  quantity?: number
+  cost: number
+  feeRate?: number
+  expectedRevenue: number
+  purchasedAt?: string
+  note?: string
+  syncTreasury?: boolean
+}
+
+export type OperationUpdate = Partial<
+  Pick<
+    OperationPayload,
+    'title' | 'category' | 'quantity' | 'expectedRevenue' | 'feeRate' | 'purchasedAt' | 'note'
+  >
+>
+
+export type EntryPayload = {
+  kind: EntryKind
+  amount: number
+  quantity?: number
+  note?: string
+  occurredAt?: string
+  syncTreasury?: boolean
+}
+
+export const OperationsApi = {
+  listByGuild(guildId: number): Promise<FinanceOperation[]> {
+    return api.get('/finance-operations', { params: { guildId } }).then((r) => r.data)
+  },
+  summary(guildId: number): Promise<OperationsSummary> {
+    return api.get('/finance-operations/summary', { params: { guildId } }).then((r) => r.data)
+  },
+  create(payload: OperationPayload): Promise<FinanceOperation> {
+    return api.post('/finance-operations', payload).then((r) => r.data)
+  },
+  update(id: number, payload: OperationUpdate): Promise<FinanceOperation> {
+    return api.patch(`/finance-operations/${id}`, payload).then((r) => r.data)
+  },
+  addEntry(id: number, payload: EntryPayload): Promise<FinanceOperation> {
+    return api.post(`/finance-operations/${id}/entries`, payload).then((r) => r.data)
+  },
+  removeEntry(id: number, entryId: number): Promise<FinanceOperation> {
+    return api.delete(`/finance-operations/${id}/entries/${entryId}`).then((r) => r.data)
+  },
+  close(id: number, result: 'sold' | 'cancelled'): Promise<FinanceOperation> {
+    return api.post(`/finance-operations/${id}/close`, { result }).then((r) => r.data)
+  },
+  reopen(id: number): Promise<FinanceOperation> {
+    return api.post(`/finance-operations/${id}/reopen`).then((r) => r.data)
+  },
+  remove(id: number) {
+    return api.delete(`/finance-operations/${id}`).then((r) => r.data)
+  },
+}
+
 export const BuildClassesApi = {
   list() {
     return api.get('/build-classes').then((r) => r.data)
